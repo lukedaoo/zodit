@@ -3,6 +3,9 @@
 /* Custom CSS Variables for Theme - Dark Mode Default */
 :root {
     /* Primary Colors - Based on accent #B03060 */
+    --font-sans: "Comic Neue", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --font-serif: "Comic Neue", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+    --font-mono: "Comic Neue", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     --color-primary-50: #fdf2f8;
     --color-primary-100: #fce7f3;
     --color-primary-200: #fbcfe8;
@@ -79,8 +82,21 @@
 
     /* Custom Properties */
     --radius: 0.5rem;
-    --font-sans: ui-sans-serif, system-ui, sans-serif;
-    --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+    /* --font-sans: ui-sans-serif, system-ui, sans-serif; */
+    /* --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace; */
+}
+
+@layer utilities {
+    .font-comic-neue {
+        font-family: 'Comic Neue', cursive;
+    }
+}
+
+/* Set defaults */
+@layer base {
+    body {
+        font-family: 'Comic Neue', cursive;
+    }
 }
 
 /* Light Theme Override */
