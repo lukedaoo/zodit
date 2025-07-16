@@ -24,8 +24,8 @@ const GroupLists = ({
                 key={group.id}
                 group={group}
                 onUpdateName={(name) => onUpdateGroupName(group.id, name)}
-                onDelete={() => onDeleteGroup(group.id)}
                 onUpdateTaskTitle={(taskId, title) => onUpdateTaskTitle(group.id, taskId, title)}
+                onDelete={() => onDeleteGroup(group.id)}
                 onDeleteTask={(taskId) => onDeleteTask(group.id, taskId)}
                 onAddTask={() => onAddTask(group.id)}
             />

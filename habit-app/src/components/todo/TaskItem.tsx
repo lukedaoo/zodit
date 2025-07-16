@@ -1,142 +1,238 @@
-import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-
-interface Task {
-    title: string;
-    description?: string;
-    startTime?: string;
-    startDate?: string;
-    endDate?: string;
-}
+import { textToTask } from './taskUtils';
+import { useState, useEffect, useRef } from 'react';
+import type { Task } from './types';
 
 interface Props {
-    value: string;
-    onChange: (newValue: string) => void;
+    task: Task;
     onDelete: () => void;
     isEditing: boolean;
     onSubmit: (task: Task) => void;
+    onDoubleClick: () => void;
 }
 
-const parseTaskInput = (input: string): Task => {
-    const parts = input.split('/');
-    const task: Partial<Task> = {};
+const DeleteButton = ({ onDelete, className = "" }: { onDelete: () => void; className?: string }) => (
+    <button
+        onClick={onDelete}
+        className={`hover:text-red-500 transition-colors ${className}`}
+    >
+        <X size={18} />
+    </button>
+);
 
-    for (const part of parts) {
-        const [key, ...rest] = part.split(':');
-        const value = rest.join(':').trim();
+const TaskHeader = ({ title, onDelete }: { title: string; onDelete: () => void }) => (
+    <div className="flex justify-between items-start gap-2">
+        <h4 className="font-semibold text-lg break-words">{title}</h4>
+        <DeleteButton onDelete={onDelete} className="text-red-500 hover:text-red-700 shrink-0" />
+    </div>
+);
 
-        switch (key.trim().toLowerCase()) {
-            case 'header':
-                task.title = value;
-                break;
-            case 'desc':
-                task.description = value;
-                break;
-            case 'starttime':
-                task.startTime = value;
-                break;
-            case 'startdate':
-                task.startDate = value;
-                break;
-            case 'enddate':
-                task.endDate = value;
-                break;
-        }
-    }
+const TaskDescription = ({ description }: { description?: string }) => {
+    if (!description) return null;
 
-    if (!task.title) {
-        throw new Error('Missing required field: header');
-    }
-
-    return task as Task;
+    return (
+        <p className="text-sm text-muted-foreground leading-snug">
+            {description}
+        </p>
+    );
 };
 
-const TaskItem = ({ value, onChange, onDelete, isEditing, onSubmit }: Props) => {
-    const [parsed, setParsed] = useState<Task | null>(null);
+const Badge = ({ children, variant = "primary" }:
+    { children: React.ReactNode; variant?: "primary" | "success" | "warning" }) => (
+    <span className={`badge badge-${variant}`}>
+        {children}
+    </span>
+);
+
+const TaskMetadata = ({ startTime, startDate, endDate }: {
+    startTime?: string;
+    startDate?: string;
+    endDate?: string;
+}) => {
+    const hasMetadata = startTime || startDate || endDate;
+
+    if (!hasMetadata) return null;
+
+    return (
+        <div className="text-xs flex flex-wrap gap-2 justify-end">
+            {startTime && (
+                <Badge variant="primary">@{startTime}PM</Badge>
+            )}
+            {startDate && (
+                <Badge variant="success">Start: {startDate}</Badge>
+            )}
+            {endDate && (
+                <Badge variant="warning">End: {endDate}</Badge>
+            )}
+        </div>
+    );
+};
+
+const TaskInput = ({
+    inputValue,
+    onInputChange,
+    onKeyDown,
+    onDelete,
+    inputRef
+}: {
+    inputValue: string;
+    onInputChange: (value: string) => void;
+    onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+    onDelete: () => void;
+    inputRef: React.RefObject<HTMLInputElement>;
+}) => (
+    <div className="relative">
+        <input
+            ref={inputRef}
+            type="text"
+            value={inputValue}
+            onChange={(e) => onInputChange(e.target.value.replace(/^\s+/, ''))}
+            onKeyDown={onKeyDown}
+            placeholder='title:Math 270/desc:.../startTime:...'
+            autoFocus
+            className="w-full p-4 rounded-lg border-2 bg-transparent focus:outline-none focus:ring-2"
+            style={{
+                borderColor: 'var(--color-primary-500)',
+                color: 'var(--color-foreground)',
+                backgroundColor: 'var(--color-background)',
+                ['--tw-ring-color' as any]: 'var(--color-primary-500)',
+            }}
+        />
+        <DeleteButton
+            onDelete={onDelete}
+            className="absolute right-4 top-1/2 transform -translate-y-1/2"
+        />
+    </div>
+);
+
+// Task Display Component
+const TaskDisplay = ({
+    task,
+    onDelete,
+    onDoubleClick
+}: {
+    task: Task;
+    onDelete: () => void;
+    onDoubleClick: () => void;
+}) => {
+    const parsed = textToTask(task.title);
+
+    return (
+        <div
+            className="p-4 rounded-lg border-2 relative space-y-2 cursor-pointer hover:bg-accent/10"
+            style={{
+                borderColor: 'var(--color-primary-500)',
+                backgroundColor: 'var(--color-background)',
+                color: 'var(--color-foreground)',
+            }}
+            onDoubleClick={onDoubleClick}
+        >
+            <TaskHeader title={parsed.title} onDelete={onDelete} />
+            <TaskDescription description={parsed.description} />
+            <TaskMetadata
+                startTime={parsed.startTime}
+                startDate={parsed.startDate}
+                endDate={parsed.endDate}
+            />
+        </div>
+    );
+};
+
+// Custom Hook for Task Editing Logic
+const useTaskEditing = (
+    task: Task,
+    onSubmit: (task: Task) => void,
+    isEditing: boolean
+) => {
+    const [inputValue, setInputValue] = useState(task.title);
+    const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        if (!isEditing && value) {
-            try {
-                const task = parseTaskInput(value);
-                setParsed(task);
-            } catch (err) {
-                console.error(err);
-            }
+        if (isEditing && inputRef.current) {
+            inputRef.current.focus();
         }
-    }, [isEditing, value]);
+    }, [isEditing]);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             try {
-                const task = parseTaskInput(value);
-                setParsed(task);
-                onSubmit(task);
+                const parsed = textToTask(inputValue.trim());
+                onSubmit(parsed);
             } catch (err) {
-                alert('Invalid format. Must include at least "header:..."');
+                console.log(err);
             }
+            return;
+        }
+
+        if (e.key === 'Tab') {
+            try {
+                e.preventDefault();
+                const input = inputRef.current;
+                if (!input) return;
+
+                const pairs = inputValue.trim().split(';').filter(pair => pair.trim() !== '');
+
+                let currentIndex = parseInt(input.dataset.index || '-1');
+                currentIndex = (currentIndex + 1) % pairs.length;
+                input.dataset.index = currentIndex.toString();
+
+                const currentPair = pairs[currentIndex];
+                // currentPair contains the ignorecased word: "date"
+                // then show small calendar below it
+                const valuePart = currentPair.split(':')[1] || '';
+
+                const startPos = inputValue.indexOf(currentPair) + currentPair.indexOf(':') + 1;
+                const endPos = startPos + valuePart.length;
+
+                input.setSelectionRange(startPos, endPos);
+                input.focus();
+            } catch (err) {
+                console.error(err);
+            }
+            return;
         }
     };
 
+    return {
+        inputValue,
+        setInputValue,
+        inputRef,
+        handleKeyDown
+    };
+};
+
+const TaskItem = ({
+    task,
+    onDelete,
+    isEditing,
+    onSubmit,
+    onDoubleClick
+}: Props) => {
+    const { inputValue, setInputValue, inputRef, handleKeyDown } = useTaskEditing(
+        task,
+        onSubmit,
+        isEditing
+    );
+
     if (isEditing) {
         return (
-            <div className="relative">
-                <input
-                    type="text"
-                    value={value}
-                    onChange={(e) => onChange(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    placeholder='header:Math 270/desc:.../startTime:...'
-                    className="w-full p-4 rounded-lg border-2 bg-transparent focus:outline-none focus:ring-2"
-                    style={{
-                        borderColor: 'var(--color-primary-500)',
-                        color: 'var(--color-foreground)',
-                        backgroundColor: 'var(--color-background)',
-                        ['--tw-ring-color' as any]: 'var(--color-primary-500)',
-                    }}
-                />
-                <button
-                    onClick={onDelete}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 hover:text-red-500 transition-colors"
-                    style={{ color: 'var(--color-foreground)' }}
-                >
-                    <X size={18} />
-                </button>
-            </div>
+            <TaskInput
+                inputValue={inputValue}
+                onInputChange={setInputValue}
+                onKeyDown={handleKeyDown}
+                onDelete={onDelete}
+                inputRef={inputRef}
+            />
         );
     }
 
-    if (parsed) {
-        return (
-            <div
-                className="p-4 rounded-lg border-2 relative space-y-2"
-                style={{
-                    borderColor: 'var(--color-primary-500)',
-                    backgroundColor: 'var(--color-background)',
-                    color: 'var(--color-foreground)',
-                }}
-            >
-                <div className="flex justify-between items-start">
-                    <h4 className="font-semibold text-lg">{parsed.title}</h4>
-                    <button
-                        onClick={onDelete}
-                        className="text-red-500 hover:text-red-700 transition-colors"
-                    >
-                        <X size={18} />
-                    </button>
-                </div>
-                {parsed.description && (
-                    <p className="text-sm text-muted-foreground">{parsed.description}</p>
-                )}
-                <div className="text-xs flex flex-wrap gap-3 text-muted-foreground">
-                    {parsed.startTime && <span>{parsed.startTime}</span>}
-                    {parsed.startDate && <span>{parsed.startDate}</span>}
-                    {parsed.endDate && <span>{parsed.endDate}</span>}
-                </div>
-            </div>
-        );
-    }
-
-    return null;
+    return (
+        <TaskDisplay
+            task={task}
+            onDelete={onDelete}
+            onDoubleClick={onDoubleClick}
+        />
+    );
 };
 
 export default TaskItem;

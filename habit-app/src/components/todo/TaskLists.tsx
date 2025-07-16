@@ -2,6 +2,7 @@ import { useState } from 'react';
 import TaskItem from './TaskItem';
 import AddTaskButton from './AddTaskButton';
 import type { Task } from './types';
+import { taskToText } from './taskUtils';
 
 interface Props {
     tasks: Task[];
@@ -19,34 +20,21 @@ const TaskLists = ({ tasks, groupId, onUpdateTitle, onDelete, onAdd }: Props) =>
             {tasks.map((task) => (
                 <TaskItem
                     key={`${groupId}/${task.id}`}
-                    value={task.title}
-                    onChange={(newTitle) => onUpdateTitle(task.id, newTitle)}
+                    task={task}
+                    isEditing={editingId === task.id || task.title === ''}
                     onDelete={() => onDelete(task.id)}
-                    isEditing={editingId === task.id || task.title.trim() === ''}
                     onSubmit={(parsed) => {
-                        const composed = [
-                            `header:${parsed.title}`,
-                            parsed.description ? `desc:${parsed.description}` : null,
-                            parsed.startTime ? `startTime:${parsed.startTime}` : null,
-                            parsed.startDate ? `startDate:${parsed.startDate}` : null,
-                            parsed.endDate ? `endDate:${parsed.endDate}` : null,
-                        ]
-                            .filter(Boolean)
-                            .join('/');
-
+                        const composed = taskToText(parsed, '');
                         onUpdateTitle(task.id, composed);
                         setEditingId(null);
                     }}
+                    onDoubleClick={() => setEditingId(task.id)}
                 />
             ))}
 
             <AddTaskButton
                 onClick={() => {
                     onAdd();
-                    const newTask = tasks[tasks.length - 1];
-                    if (newTask) {
-                        setEditingId(newTask.id);
-                    }
                 }}
             />
         </div>

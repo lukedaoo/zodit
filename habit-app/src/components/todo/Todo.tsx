@@ -3,20 +3,33 @@ import AddGroupButton from './AddGroupButton';
 import GroupLists from './GroupLists';
 import type { Group } from './types';
 
+
+
 const Todo: React.FC = () => {
+    const generateId = () => {
+        return "id#" + Math.random().toString(16).slice(2)
+    }
     const [groups, setGroups] = useState<Group[]>([
         {
             id: '1',
             name: 'Group 1',
             tasks: [
-                { id: '1', title: 'Task 1', completed: true },
-                { id: '2', title: 'Task 2', completed: false }
+                {
+                    id: generateId(),
+                    title: 'Task 1',
+                    completed: false
+                },
+                {
+                    id: generateId(),
+                    title: 'Task 2',
+                    completed: false
+                }
             ]
         },
         {
             id: '2',
             name: 'Group 2',
-            tasks: [{ id: '3', title: 'Task 3', completed: false }]
+            tasks: []
         }
     ]);
 
@@ -30,7 +43,6 @@ const Todo: React.FC = () => {
     };
 
     const updateGroupName = (groupId: string, newName: string) => {
-        console.log('updateGroupName', groupId, newName);
         setGroups(groups.map((g) => (g.id === groupId ? { ...g, name: newName } : g)));
     };
 
@@ -44,8 +56,8 @@ const Todo: React.FC = () => {
                 ? {
                     ...group,
                     tasks: [...group.tasks, {
-                        id: Date.now().toString(),
-                        title: `Task ${group.tasks.length + 1}`,
+                        id: generateId(),
+                        title: '',
                         completed: false
                     }]
                 }
@@ -91,8 +103,8 @@ const Todo: React.FC = () => {
                 <GroupLists
                     groups={groups}
                     onUpdateGroupName={updateGroupName}
-                    onDeleteGroup={deleteGroup}
                     onUpdateTaskTitle={updateTaskTitle}
+                    onDeleteGroup={deleteGroup}
                     onDeleteTask={deleteTask}
                     onAddTask={addTask}
                 />
