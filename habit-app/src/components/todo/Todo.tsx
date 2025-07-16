@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import AddGroupButton from './AddGroupButton';
+import { AddGroupButton } from './AddButtonComponents';
 import GroupLists from './GroupLists';
 import type { Group } from './types';
 

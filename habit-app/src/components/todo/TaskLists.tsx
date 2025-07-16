@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import TaskItem from './TaskItem';
-import AddTaskButton from './AddTaskButton';
+import { AddTaskButton } from './AddButtonComponents.tsx';
 import type { Task } from './types';
 import { taskToText } from './taskUtils';
 
