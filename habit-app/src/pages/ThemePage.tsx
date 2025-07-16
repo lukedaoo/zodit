@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import './App.css';
+import '../App.css';
 
-const Theme: React.FC = () => {
+const ThemePage: React.FC = () => {
     const [theme, setTheme] = useState<'dark' | 'light'>('dark');
     const [inputValue, setInputValue] = useState('');
 
@@ -235,4 +235,4 @@ const Theme: React.FC = () => {
     );
 };
 
-export default Theme;
+export default ThemePage;

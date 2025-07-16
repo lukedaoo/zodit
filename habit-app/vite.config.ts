@@ -9,7 +9,7 @@ export default defineConfig({
         rollupOptions: {
             input: {
                 main: "./index.html",
-                isolated: "./todo-app-index.html",
+                todo_app: "./todo-app-index.html",
             },
         },
         outDir: 'dist', // Output directory for all builds
