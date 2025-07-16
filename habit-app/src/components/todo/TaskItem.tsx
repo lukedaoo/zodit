@@ -79,7 +79,7 @@ const TaskInput = ({
     onInputChange: (value: string) => void;
     onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
     onDelete: () => void;
-    inputRef: React.RefObject<HTMLInputElement>;
+    inputRef: React.RefObject<HTMLInputElement | null>;
 }) => (
     <div className="relative">
         <input
@@ -89,7 +89,6 @@ const TaskInput = ({
             onChange={(e) => onInputChange(e.target.value.replace(/^\s+/, ''))}
             onKeyDown={onKeyDown}
             placeholder='title:Math 270/desc:.../startTime:...'
-            autoFocus
             className="w-full p-4 rounded-lg border-2 bg-transparent focus:outline-none focus:ring-2"
             style={{
                 borderColor: 'var(--color-primary-500)',
