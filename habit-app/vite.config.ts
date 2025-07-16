@@ -7,6 +7,7 @@ export default defineConfig({
     plugins: [react(), tailwindcss()],
     build: {
         rollupOptions: {
+            external: ['**/*.test.ts'],
             input: {
                 main: "./index.html",
                 todo_app: "./todo-app-index.html",

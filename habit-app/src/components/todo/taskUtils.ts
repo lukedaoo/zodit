@@ -1,6 +1,21 @@
 import type { Task } from './types';
+import { textToObject, objectToText } from '../../template/textTemplateProcessor.ts'
 
-const DEFAULT_TEMPLATE = "title:{title};desc:{description};startTime:{startTime};startDate:{startDate};endDate:{endDate}";
+
+export const taskToText = (task: any): string => {
+    return objectToText<Task>(task);
+};
+
+export const textToTask = (input: string, config: any): Partial<Task> => {
+    const fallback = (obj: Partial<Task>, input: string) => {
+        obj.title = input;
+        return obj;
+    }
+    let task = textToObject<Task>(input, config, undefined, fallback);
+    return task;
+};
+
+/* const DEFAULT_TEMPLATE = "title:{title};desc:{description};startTime:{startTime};startDate:{startDate};endDate:{endDate}";
 
 export const taskToText = (task: Task, template: string = ""): string => {
     const finalTemplate = template || DEFAULT_TEMPLATE;
@@ -45,4 +60,4 @@ export const textToTask = (input: string): Task => {
     }
     return _task as Task;
 };
-
+*/

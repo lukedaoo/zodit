@@ -2,12 +2,14 @@ import { X } from 'lucide-react';
 import { textToTask } from './taskUtils';
 import { useState, useEffect, useRef } from 'react';
 import type { Task } from './types';
+import { presets } from './types';
+import { getUserSeparator } from '../../template/textTemplateProcessor';
 
 interface Props {
     task: Task;
     onDelete: () => void;
     isEditing: boolean;
-    onSubmit: (task: Task) => void;
+    onSubmit: (task: Partial<Task>) => void;
     onDoubleClick: () => void;
 }
 
@@ -114,7 +116,7 @@ const TaskDisplay = ({
     onDelete: () => void;
     onDoubleClick: () => void;
 }) => {
-    const parsed = textToTask(task.title);
+    const parsed = textToTask(task.title, presets.scheduled);
 
     return (
         <div
@@ -126,7 +128,7 @@ const TaskDisplay = ({
             }}
             onDoubleClick={onDoubleClick}
         >
-            <TaskHeader title={parsed.title} onDelete={onDelete} />
+            <TaskHeader title={parsed.title + ""} onDelete={onDelete} />
             <TaskDescription description={parsed.description} />
             <TaskMetadata
                 startTime={parsed.startTime}
@@ -140,7 +142,7 @@ const TaskDisplay = ({
 // Custom Hook for Task Editing Logic
 const useTaskEditing = (
     task: Task,
-    onSubmit: (task: Task) => void,
+    onSubmit: (task: any) => void,
     isEditing: boolean
 ) => {
     const [inputValue, setInputValue] = useState(task.title);
@@ -155,7 +157,7 @@ const useTaskEditing = (
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             try {
-                const parsed = textToTask(inputValue.trim());
+                const parsed = textToTask(inputValue.trim(), presets.scheduled);
                 onSubmit(parsed);
             } catch (err) {
                 console.log(err);
@@ -169,7 +171,9 @@ const useTaskEditing = (
                 const input = inputRef.current;
                 if (!input) return;
 
-                const pairs = inputValue.trim().split(';').filter(pair => pair.trim() !== '');
+                const seperator = getUserSeparator() ?? ";";
+
+                const pairs = inputValue.trim().split(seperator).filter(pair => pair.trim() !== '');
 
                 let currentIndex = parseInt(input.dataset.index || '-1');
                 currentIndex = (currentIndex + 1) % pairs.length;

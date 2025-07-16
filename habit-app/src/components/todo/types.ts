@@ -13,3 +13,16 @@ export interface Group {
     name: string;
     tasks: Task[];
 }
+
+export const presets = {
+    basic: { include: ['title', 'description', 'completed'] as (keyof Task)[] },
+
+    scheduled: {
+        include: ['title', 'description', 'startTime', 'startDate', 'endDate'] as (keyof Task)[],
+        order: ['title', 'description', 'startDate', 'startTime', 'endDate'] as (keyof Task)[]
+    },
+
+    full: { exclude: ['id'] as (keyof Task)[] },
+
+    complete: { include: [] as (keyof Task)[], exclude: [] as (keyof Task)[] }
+};

@@ -4,7 +4,6 @@ import GroupLists from './GroupLists';
 import type { Group } from './types';
 
 
-
 const Todo: React.FC = () => {
     const generateId = () => {
         return "id#" + Math.random().toString(16).slice(2)
