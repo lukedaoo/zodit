@@ -4,9 +4,13 @@ import { X } from 'lucide-react';
 import type { Task } from './types';
 import { presets, DEFAULT_TASK } from './types';
 import { textToTask, taskToText } from './taskUtils';
-import { getUserSeparator } from '../../template/textTemplateProcessor';
+import { getUserSeparator } from '../../lib/template/textTemplateProcessor';
 import { USE_TEMPLATE_WHEN_ADDING_TASK } from '../../user-prefs/const';
 import { useUserSettings } from '../../hooks/useUserSettings';
+
+import { formatDate, formatTime } from '../../common/utils';
+
+import { DEFAULT_ALIASES, resolveAlias } from '../../lib/alias/timeAliasResolver';
 
 interface Props {
     task: Task;
@@ -49,25 +53,34 @@ const Badge = ({ children, variant = "primary" }:
     </span>
 );
 
-const TaskMetadata = ({ startTime, startDate, endDate }: {
+const TaskMetadata = ({
+    startTime,
+    startDate,
+    endDate,
+    aliases = DEFAULT_ALIASES
+}: {
     startTime?: string;
     startDate?: string;
     endDate?: string;
+    aliases?: any;
 }) => {
-    const hasMetadata = startTime || startDate || endDate;
+    const resolvedStartTime = startTime ? resolveAlias(startTime, aliases) : undefined;
+    const resolvedStartDate = startDate ? resolveAlias(startDate, aliases) : undefined;
+    const resolvedEndDate = endDate ? resolveAlias(endDate, aliases) : undefined;
 
+    const hasMetadata = resolvedStartTime || resolvedStartDate || resolvedEndDate;
     if (!hasMetadata) return null;
 
     return (
         <div className="text-xs flex flex-wrap gap-2 justify-end">
-            {startTime && (
-                <Badge variant="primary">@{startTime}PM</Badge>
+            {resolvedStartTime && (
+                <Badge variant="primary">@ {formatTime(resolvedStartTime)}</Badge>
             )}
-            {startDate && (
-                <Badge variant="success">Start: {startDate}</Badge>
+            {resolvedStartDate && (
+                <Badge variant="success">Start: {formatDate(resolvedStartDate)}</Badge>
             )}
-            {endDate && (
-                <Badge variant="warning">End: {endDate}</Badge>
+            {resolvedEndDate && (
+                <Badge variant="warning">End: {formatDate(resolvedEndDate)}</Badge>
             )}
         </div>
     );
@@ -100,12 +113,10 @@ const TaskInput = ({
                 className="w-full p-4 rounded-lg border-2 bg-transparent focus:outline-none focus:ring-2"
                 style={{
                     borderColor: 'var(--color-primary-500)',
-                    color: 'var(--color-text-muted)', // Muted color when not focused
+                    color: 'var(--color-text-muted)',
                     backgroundColor: 'var(--color-background)',
                     ['--tw-ring-color' as any]: 'var(--color-primary-500)',
                 }}
-            // onFocus={(e) => e.target.style.color = 'var(--color-foreground)'}
-            // onBlur={(e) => e.target.style.color = 'var(--color-text-muted)'}
             />
             <DeleteButton
                 onDelete={onDelete}
@@ -171,7 +182,6 @@ const useTaskEditing = (
             } catch (err) {
                 console.log(err);
             }
-            return;
         }
 
         if (e.key === 'Tab') {

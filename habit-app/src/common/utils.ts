@@ -1,0 +1,72 @@
+export const formatDate = (dateString?: string): string => {
+    if (!dateString) return '';
+
+    const timeDateMatch = dateString.match(/^(\d{2}:\d{2})\s(\d{4}-\d{2}-\d{2})$/);
+    const parseDate = (input: string): Date => {
+        if (/^\d+$/.test(input)) return new Date(parseInt(input, 10));
+        return new Date(input);
+    };
+
+    const format = (date: Date): string =>
+        date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            timeZone: 'UTC',
+        });
+
+    if (timeDateMatch) {
+        const [, time, datePart] = timeDateMatch;
+        const date = parseDate(datePart);
+        return isNaN(date.getTime()) ? dateString : `${time} ${format(date)}`;
+    }
+
+    const date = parseDate(dateString);
+    if (isNaN(date.getTime())) return dateString;
+
+    const utcMidnight = new Date(Date.UTC(
+        date.getUTCFullYear(),
+        date.getUTCMonth(),
+        date.getUTCDate()
+    ));
+
+    return format(utcMidnight);
+};
+
+export const formatTime = (timeString?: string): string => {
+    if (!timeString) return '';
+
+    const normalized = timeString.replace(/(\d)([aApP][mM])$/, '$1 $2').trim();
+
+    const date = new Date();
+    const parsed = Date.parse(`1970-01-01T${normalized}`);
+
+    if (!isNaN(parsed)) {
+        date.setTime(parsed);
+        return date.toLocaleTimeString(undefined, {
+            hour: 'numeric',
+            minute: '2-digit',
+        });
+    }
+
+    const regex = /^(\d{1,2}):(\d{2})\s*([aApP][mM])?$/;
+    const match = normalized.match(regex);
+
+    if (!match) return timeString;
+
+    let hour = parseInt(match[1], 10);
+    const minute = parseInt(match[2], 10);
+    const ampm = match[3]?.toLowerCase();
+
+    if (isNaN(hour) || isNaN(minute)) return timeString;
+
+    if (ampm === 'pm' && hour < 12) hour += 12;
+    if (ampm === 'am' && hour === 12) hour = 0;
+
+    date.setHours(hour, minute, 0);
+
+    return date.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+    });
+};

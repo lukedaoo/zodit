@@ -1,5 +1,5 @@
-import { userPref } from '../user-prefs/localUserPref';
-import { SEPARATOR_PREF_KEY } from '../user-prefs/const';
+import { userPref } from '../../user-prefs/localUserPref';
+import { SEPARATOR_PREF_KEY } from '../../user-prefs/const';
 
 interface FieldConfig<T> {
     exclude?: (keyof T)[];
