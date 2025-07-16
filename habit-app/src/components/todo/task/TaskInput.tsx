@@ -1,5 +1,5 @@
 import { DeleteButton, TASK_STYLES } from './TaskUIComponents';
-import { taskToText } from '../taskUtils';
+import { taskToText } from './taskUtils';
 import { presets, DEFAULT_TASK } from '../types';
 
 interface TaskInputProps {

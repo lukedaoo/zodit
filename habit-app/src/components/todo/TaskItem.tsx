@@ -1,7 +1,7 @@
 import { TaskInput } from './task/TaskInput';
 import { TaskDisplay } from './task/TaskDisplay';
 import { useTaskEditing } from './task/useTaskEditing';
-import { taskToText } from './taskUtils';
+import { taskToText } from './task/taskUtils';
 import { presets, DEFAULT_TASK } from './types';
 import { USE_TEMPLATE_WHEN_ADDING_TASK } from '../../user-prefs/const';
 import { useUserSettings } from '../../hooks/useUserSettings';

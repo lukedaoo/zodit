@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { textToTask } from '../taskUtils';
+import { textToTask } from './taskUtils';
 import { presets } from '../types';
 import { getUserSeparator } from '../../../lib/template/textTemplateProcessor';
 import type { Task } from '../types';
@@ -48,10 +48,16 @@ export const useTaskEditing = (
 
             input.setSelectionRange(startPos, endPos);
             input.focus();
+
+            const charWidth = 8;
+            const inputWidth = input.clientWidth;
+            const scrollPosition = Math.max(0, (startPos * charWidth) - (inputWidth / 2));
+            input.scrollLeft = scrollPosition;
         } catch (err) {
             console.error('Error handling tab navigation:', err);
         }
     };
+
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         switch (e.key) {

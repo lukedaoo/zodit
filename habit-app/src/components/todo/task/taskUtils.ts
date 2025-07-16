@@ -1,6 +1,5 @@
-import type { Task } from './types';
-import { textToObject, objectToText } from '../../lib/template/textTemplateProcessor.ts'
-
+import type { Task } from '../types';
+import { textToObject, objectToText } from '../../../lib/template/textTemplateProcessor.ts'
 
 export const taskToText = (task: any, config?: any): string => {
     return objectToText<Task>(task, config);

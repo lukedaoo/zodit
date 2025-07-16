@@ -2,7 +2,7 @@ import { useState } from 'react';
 import TaskItem from './TaskItem';
 import { AddTaskButton } from './AddButtonComponents.tsx';
 import type { Task } from './types';
-import { taskToText } from './taskUtils';
+import { taskToText } from './task/taskUtils';
 
 interface Props {
     tasks: Task[];

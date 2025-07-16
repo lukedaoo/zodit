@@ -1,6 +1,6 @@
 import { TaskHeader, TaskDescription, TASK_STYLES } from './TaskUIComponents';
 import { TaskMetadata } from './TaskMetadata';
-import { textToTask } from '../taskUtils';
+import { textToTask } from './taskUtils';
 import { presets } from '../types';
 import type { Task } from '../types';
 
