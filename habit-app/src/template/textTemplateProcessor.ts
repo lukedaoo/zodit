@@ -1,7 +1,5 @@
 import { userPref } from '../user-prefs/localUserPref';
-
-const DEFAULT_SEPARATOR = ';';
-const SEPARATOR_PREF_KEY = 'template_separator';
+import { SEPARATOR_PREF_KEY } from '../user-prefs/const';
 
 interface FieldConfig<T> {
     exclude?: (keyof T)[];
@@ -61,7 +59,7 @@ export const textToObject = <T>(
     separator?: string,
     fallback?: (obj: Partial<T>, input: string) => Partial<T>
 ): Partial<T> => {
-    const finalSeparator = separator ?? getUserSeparator() ?? DEFAULT_SEPARATOR;
+    const finalSeparator = separator ?? getUserSeparator() ?? SEPARATOR_PREF_KEY.defaultValue;
     const parts = input?.split(finalSeparator) ?? [];
     const obj: Partial<T> = {};
 
@@ -101,13 +99,13 @@ export const createCustomTemplate = <T>(
 }
 
 export const getUserSeparator = () => {
-    return userPref.get(SEPARATOR_PREF_KEY, DEFAULT_SEPARATOR);
+    return userPref.get(SEPARATOR_PREF_KEY.key, SEPARATOR_PREF_KEY.defaultValue);
 };
 
 export const setUserSeparator = (separator: string) => {
-    userPref.set(SEPARATOR_PREF_KEY, separator);
+    userPref.set(SEPARATOR_PREF_KEY.key, separator);
 };
 
 export const resetUserSeparator = () => {
-    userPref.remove(SEPARATOR_PREF_KEY);
+    userPref.remove(SEPARATOR_PREF_KEY.key);
 };

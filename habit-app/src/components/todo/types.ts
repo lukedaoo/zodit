@@ -26,3 +26,13 @@ export const presets = {
 
     complete: { include: [] as (keyof Task)[], exclude: [] as (keyof Task)[] }
 };
+
+export const DEFAULT_TASK = {
+    id: '',
+    title: '',
+    completed: false,
+    description: '',
+    startTime: '',
+    startDate: '',
+    endDate: ''
+};

@@ -1,9 +1,12 @@
-import { X } from 'lucide-react';
-import { textToTask } from './taskUtils';
 import { useState, useEffect, useRef } from 'react';
+import { X } from 'lucide-react';
+
 import type { Task } from './types';
-import { presets } from './types';
+import { presets, DEFAULT_TASK } from './types';
+import { textToTask, taskToText } from './taskUtils';
 import { getUserSeparator } from '../../template/textTemplateProcessor';
+import { USE_TEMPLATE_WHEN_ADDING_TASK } from '../../user-prefs/const';
+import { useUserSettings } from '../../hooks/useUserSettings';
 
 interface Props {
     task: Task;
@@ -82,29 +85,35 @@ const TaskInput = ({
     onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
     onDelete: () => void;
     inputRef: React.RefObject<HTMLInputElement | null>;
-}) => (
-    <div className="relative">
-        <input
-            ref={inputRef}
-            type="text"
-            value={inputValue}
-            onChange={(e) => onInputChange(e.target.value.replace(/^\s+/, ''))}
-            onKeyDown={onKeyDown}
-            placeholder='title:Math 270/desc:.../startTime:...'
-            className="w-full p-4 rounded-lg border-2 bg-transparent focus:outline-none focus:ring-2"
-            style={{
-                borderColor: 'var(--color-primary-500)',
-                color: 'var(--color-foreground)',
-                backgroundColor: 'var(--color-background)',
-                ['--tw-ring-color' as any]: 'var(--color-primary-500)',
-            }}
-        />
-        <DeleteButton
-            onDelete={onDelete}
-            className="absolute right-4 top-1/2 transform -translate-y-1/2"
-        />
-    </div>
-);
+}) => {
+    const placeholder = taskToText(DEFAULT_TASK, presets.scheduled);
+
+    return (
+        <div className="relative">
+            <input
+                ref={inputRef}
+                type="text"
+                value={inputValue}
+                onChange={(e) => onInputChange(e.target.value.replace(/^\s+/, ''))}
+                onKeyDown={onKeyDown}
+                placeholder={placeholder}
+                className="w-full p-4 rounded-lg border-2 bg-transparent focus:outline-none focus:ring-2"
+                style={{
+                    borderColor: 'var(--color-primary-500)',
+                    color: 'var(--color-text-muted)', // Muted color when not focused
+                    backgroundColor: 'var(--color-background)',
+                    ['--tw-ring-color' as any]: 'var(--color-primary-500)',
+                }}
+            // onFocus={(e) => e.target.style.color = 'var(--color-foreground)'}
+            // onBlur={(e) => e.target.style.color = 'var(--color-text-muted)'}
+            />
+            <DeleteButton
+                onDelete={onDelete}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2"
+            />
+        </div>
+    );
+}
 
 // Task Display Component
 const TaskDisplay = ({
@@ -169,6 +178,7 @@ const useTaskEditing = (
             try {
                 e.preventDefault();
                 const input = inputRef.current;
+
                 if (!input) return;
 
                 const seperator = getUserSeparator() ?? ";";
@@ -180,8 +190,6 @@ const useTaskEditing = (
                 input.dataset.index = currentIndex.toString();
 
                 const currentPair = pairs[currentIndex];
-                // currentPair contains the ignorecased word: "date"
-                // then show small calendar below it
                 const valuePart = currentPair.split(':')[1] || '';
 
                 const startPos = inputValue.indexOf(currentPair) + currentPair.indexOf(':') + 1;
@@ -217,7 +225,13 @@ const TaskItem = ({
         isEditing
     );
 
+    const { get } = useUserSettings();
+    const useTemplate = get<boolean>(USE_TEMPLATE_WHEN_ADDING_TASK);
+
     if (isEditing) {
+        if (inputValue.length === 0 && useTemplate) {
+            setInputValue(taskToText(DEFAULT_TASK, presets.scheduled));
+        }
         return (
             <TaskInput
                 inputValue={inputValue}
