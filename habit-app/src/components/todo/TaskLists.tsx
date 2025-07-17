@@ -1,19 +1,24 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import TaskItem from './TaskItem';
 import { AddTaskButton } from './AddButtonComponents.tsx';
 import type { Task } from './types';
-import { taskToText } from './task/taskUtils';
+// import { taskToText } from './task/taskUtils';
 
 interface Props {
     tasks: Task[];
     groupId: string;
-    onUpdateTitle: (taskId: string, newTitle: string) => void;
+    onUpdate: (taskId: string, updates: Partial<any>) => void;
     onDelete: (taskId: string) => void;
     onAdd: () => void;
 }
 
-const TaskLists = ({ tasks, groupId, onUpdateTitle, onDelete, onAdd }: Props) => {
+const TaskLists = ({ tasks, groupId, onUpdate, onDelete, onAdd }: Props) => {
     const [editingId, setEditingId] = useState<string | null>(null);
+    // const [hasEditedIds, setHasEditedIds] = useState<Set<string>>(new Set());
+
+    useEffect(() => {
+        console.log('Effect running, tasks:', tasks);
+    }, [tasks]);
 
     return (
         <div className="ml-8 space-y-3">
@@ -21,11 +26,11 @@ const TaskLists = ({ tasks, groupId, onUpdateTitle, onDelete, onAdd }: Props) =>
                 <TaskItem
                     key={`${groupId}/${task.id}`}
                     task={task}
-                    isEditing={editingId === task.id || task.title === ''}
+                    isEditing={editingId === task.id}
                     onDelete={() => onDelete(task.id)}
                     onSubmit={(parsed) => {
-                        const composed = taskToText(parsed);
-                        onUpdateTitle(task.id, composed);
+                        parsed.id = task.id;
+                        onUpdate(parsed.id, parsed);
                         setEditingId(null);
                     }}
                     onDoubleClick={() => setEditingId(task.id)}

@@ -12,6 +12,7 @@ interface BadgeProps {
 
 interface TaskHeaderProps {
     title: string;
+    isEmptyTask: boolean;
     onDelete: () => void;
 }
 
@@ -43,10 +44,26 @@ export const Badge = ({ children, variant = "primary" }: BadgeProps) => (
     </span>
 );
 
-export const TaskHeader = ({ title, onDelete }: TaskHeaderProps) => (
-    <div className="flex justify-between items-start gap-2">
-        <h4 className="font-semibold text-lg break-words">{title}</h4>
-        <DeleteButton onDelete={onDelete} className="text-red-500 hover:text-red-700 shrink-0" />
+export const TaskHeader = ({ title, isEmptyTask, onDelete }: TaskHeaderProps) => (
+    <div className="flex flex-col gap-1">
+        <div className="flex justify-between items-start gap-2">
+            <h4
+                className={`font-semibold text-lg break-words ${isEmptyTask ? 'italic text-gray-500' : ''
+                    }`}
+            >
+                {isEmptyTask ? 'Double click to update task' : title}
+            </h4>
+            <DeleteButton
+                onDelete={onDelete}
+                className="text-red-500 hover:text-red-700 shrink-0"
+            />
+        </div>
+
+        {isEmptyTask && (
+            <div className="text-center text-sm text-muted-foreground">
+                To move canvas, hold left click and drag
+            </div>
+        )}
     </div>
 );
 

@@ -12,18 +12,7 @@ const Todo: React.FC = () => {
         {
             id: '1',
             name: 'Group 1',
-            tasks: [
-                {
-                    id: generateId(),
-                    title: 'Task 1',
-                    completed: false
-                },
-                {
-                    id: generateId(),
-                    title: 'Task 2',
-                    completed: false
-                }
-            ]
+            tasks: []
         },
         {
             id: '2',
@@ -50,31 +39,43 @@ const Todo: React.FC = () => {
     };
 
     const addTask = (groupId: string) => {
-        setGroups(groups.map((group) =>
-            group.id === groupId
-                ? {
-                    ...group,
-                    tasks: [...group.tasks, {
-                        id: generateId(),
-                        title: '',
-                        completed: false
-                    }]
-                }
-                : group
-        ));
+        for (let i = 0; i < groups.length; i++) {
+            if (groups[i].id === groupId) {
+                groups[i].tasks.push({
+                    id: generateId(),
+                    title: '',
+                    completed: false
+                });
+            }
+        }
+        setGroups([...groups]);
     };
 
-    const updateTaskTitle = (groupId: string, taskId: string, newTitle: string) => {
-        setGroups(groups.map((group) =>
-            group.id === groupId
-                ? {
-                    ...group,
-                    tasks: group.tasks.map((task) =>
-                        task.id === taskId ? { ...task, title: newTitle } : task
-                    )
+    const updateTask = (groupId: string, taskId: string, updates: Partial<any>) => {
+        const newGroups = [];
+
+        for (const group of groups) {
+            if (group.id === groupId) {
+                const updatedTasks = [];
+
+                for (const task of group.tasks) {
+                    if (task.id === taskId) {
+                        updatedTasks.push({ ...task, ...updates });
+                    } else {
+                        updatedTasks.push(task);
+                    }
                 }
-                : group
-        ));
+
+                newGroups.push({
+                    ...group,
+                    tasks: updatedTasks
+                });
+            } else {
+                newGroups.push(group);
+            }
+        }
+
+        setGroups(newGroups);
     };
 
     const deleteTask = (groupId: string, taskId: string) => {
@@ -102,7 +103,7 @@ const Todo: React.FC = () => {
                 <GroupLists
                     groups={groups}
                     onUpdateGroupName={updateGroupName}
-                    onUpdateTaskTitle={updateTaskTitle}
+                    onUpdateTask={updateTask}
                     onDeleteGroup={deleteGroup}
                     onDeleteTask={deleteTask}
                     onAddTask={addTask}

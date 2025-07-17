@@ -33,6 +33,7 @@ const TaskItem = ({
 
     const { get } = useUserSettings();
     const useTemplate = get<boolean>(USE_TEMPLATE_WHEN_ADDING_TASK);
+    console.log(isEditing, inputValue, useTemplate);
     if (isEditing) {
         if (inputValue.length === 0 && useTemplate) {
             setInputValue(taskToText(DEFAULT_TASK, presets.scheduled));

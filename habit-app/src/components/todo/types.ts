@@ -36,3 +36,18 @@ export const DEFAULT_TASK = {
     startDate: '',
     endDate: ''
 };
+
+export const isEmpty = (task: Task, config: any): boolean => {
+    const keysToCheck = config.include ?? (Object.keys(task) as (keyof Task)[]);
+
+    return !keysToCheck.some((key: keyof Task) => {
+        const value = task[key];
+        if (typeof value === 'string') {
+            return value.trim() !== '';
+        }
+        if (typeof value === 'boolean') {
+            return value === true;
+        }
+        return value != null;
+    });
+};

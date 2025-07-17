@@ -48,9 +48,13 @@ export const objectToText = <T>(
 
     return fields.map(field => {
         const value = (obj as any)[field];
-        const displayValue = value !== undefined && value !== null ? String(value) : '';
+        const displayValue = value !== undefined && value !== null ? String(value).trim() : '';
+        if (displayValue === '\n') {
+            return null;
+        }
+
         return `${String(field)}:${displayValue}`;
-    }).join(finalSeparator);
+    }).filter(Boolean).join(finalSeparator);
 }
 
 export const textToObject = <T>(
@@ -66,13 +70,13 @@ export const textToObject = <T>(
     for (const part of parts) {
         const [rawKey, ...rest] = part.split(':');
         let key = rawKey.trim();
-        const value = rest.join(':');
+        const value = rest.join(':').trim();
 
         if (config.aliases && config.aliases[key]) {
             key = config.aliases[key] as string;
         }
 
-        if (value !== undefined && value !== '') {
+        if (value !== undefined && value !== '' && value !== '\n') {
             let v = value.toLowerCase();
             if (v == "true") {
                 (obj as any)[key] = true;

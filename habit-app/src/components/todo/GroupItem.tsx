@@ -6,7 +6,7 @@ interface Props {
     group: Group;
     onDelete: () => void;
     onUpdateName: (newName: string) => void;
-    onUpdateTaskTitle: (taskId: string, newTitle: string) => void;
+    onUpdateTask: (taskId: string, task: Partial<any>) => void;
     onDeleteTask: (taskId: string) => void;
     onAddTask: () => void;
 }
@@ -15,7 +15,7 @@ const GroupItem = ({
     group,
     onDelete,
     onUpdateName,
-    onUpdateTaskTitle,
+    onUpdateTask,
     onDeleteTask,
     onAddTask
 }: Props) => {
@@ -46,7 +46,7 @@ const GroupItem = ({
             <TaskLists
                 tasks={group.tasks}
                 groupId={group.id}
-                onUpdateTitle={onUpdateTaskTitle}
+                onUpdate={onUpdateTask}
                 onDelete={onDeleteTask}
                 onAdd={onAddTask}
             />

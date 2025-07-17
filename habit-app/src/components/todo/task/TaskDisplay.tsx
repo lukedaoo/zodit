@@ -1,8 +1,7 @@
 import { TaskHeader, TaskDescription, TASK_STYLES } from './TaskUIComponents';
 import { TaskMetadata } from './TaskMetadata';
-import { textToTask } from './taskUtils';
-import { presets } from '../types';
 import type { Task } from '../types';
+import { isEmpty, presets } from '../types';
 
 interface TaskDisplayProps {
     task: Task;
@@ -15,7 +14,8 @@ export const TaskDisplay = ({
     onDelete,
     onDoubleClick
 }: TaskDisplayProps) => {
-    const parsed = textToTask(task.title, presets.scheduled);
+    const parsed = task;
+    const isEmptyTask = isEmpty(parsed, presets.scheduled);
 
     return (
         <div
@@ -27,7 +27,7 @@ export const TaskDisplay = ({
             }}
             onDoubleClick={onDoubleClick}
         >
-            <TaskHeader title={parsed.title + ""} onDelete={onDelete} />
+            <TaskHeader title={parsed.title + ""} isEmptyTask={isEmptyTask} onDelete={onDelete} />
             <TaskDescription description={parsed.description} />
             <TaskMetadata
                 startTime={parsed.startTime}

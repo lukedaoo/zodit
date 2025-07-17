@@ -32,7 +32,8 @@ export const useTaskEditing = (
     //
     const handleSubmit = (value: string) => {
         try {
-            const parsed = textToTask(value.trim(), presets.scheduled);
+            let config = presets.scheduled;
+            const parsed = textToTask(value.trim(), config);
             onSubmit(parsed);
         } catch (err) {
             console.error('Error parsing task:', err);

@@ -16,7 +16,10 @@ export const DEFAULT_ALIASES: TimeAlias[] = [
     { id: '7', alias: 'noon', value: '12:00', type: 'time', description: 'Noon' },
 ];
 
-export const resolveAlias = (input: string, aliases: TimeAlias[]): string => {
+export const resolveAlias = (input: string, aliases: TimeAlias[]): string | undefined => {
+    if (!input || input.trim().length === 0) {
+        return undefined;
+    }
     const alias = aliases.find(a => a.alias.toLowerCase() === input.trim().toLowerCase());
     if (!alias) return input;
 
