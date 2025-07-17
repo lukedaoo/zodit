@@ -49,7 +49,7 @@ export const TaskInput = ({
                 contentEditable
                 onInput={handleInput}
                 onKeyDown={onKeyDown}
-                className="w-full p-4 rounded-lg border-2 bg-transparent focus:outline-none focus:ring-2 whitespace-pre-wrap break-words"
+                className="w-full p-4 rounded-lg border-1 bg-transparent focus:outline-none focus:ring-2 whitespace-pre-wrap break-words"
                 style={{
                     borderColor: TASK_STYLES.border,
                     color: TASK_STYLES.textMuted,

@@ -28,7 +28,7 @@ export const TaskInput = ({
                 onChange={(e) => onInputChange(e.target.value.replace(/^\s+/, ''))}
                 onKeyDown={onKeyDown}
                 placeholder={placeholder}
-                className="w-full p-4 rounded-lg border-2 bg-transparent focus:outline-none focus:ring-2"
+                className="w-full p-4 rounded-lg border-1 bg-transparent focus:outline-none focus:ring-2"
                 style={{
                     borderColor: TASK_STYLES.border,
                     color: TASK_STYLES.textMuted,

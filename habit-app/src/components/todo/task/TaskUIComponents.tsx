@@ -11,7 +11,7 @@ interface BadgeProps {
 }
 
 interface TaskHeaderProps {
-    title: string;
+    header: string;
     isEmptyTask: boolean;
     onDelete: () => void;
 }
@@ -25,7 +25,7 @@ export const TASK_STYLES = {
     background: 'var(--color-background)',
     text: 'var(--color-foreground)',
     textMuted: 'var(--color-text-muted)',
-    ring: 'var(--color-primary-500)',
+    ring: 'var(--color-ring)',
 } as const;
 
 export const DeleteButton = ({ onDelete, className = "" }: DeleteButtonProps) => (
@@ -44,14 +44,14 @@ export const Badge = ({ children, variant = "primary" }: BadgeProps) => (
     </span>
 );
 
-export const TaskHeader = ({ title, isEmptyTask, onDelete }: TaskHeaderProps) => (
+export const TaskHeader = ({ header, isEmptyTask, onDelete }: TaskHeaderProps) => (
     <div className="flex flex-col gap-1">
         <div className="flex justify-between items-start gap-2">
             <h4
-                className={`font-semibold text-lg break-words ${isEmptyTask ? 'italic text-gray-500' : ''
+                className={`font-semibold text-sm break-words ${isEmptyTask ? 'italic text-gray-500' : ''
                     }`}
             >
-                {isEmptyTask ? 'Double click to update task' : title}
+                {isEmptyTask ? 'Double click to update task' : header}
             </h4>
             <DeleteButton
                 onDelete={onDelete}

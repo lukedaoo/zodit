@@ -8,18 +8,7 @@ const Todo: React.FC = () => {
     const generateId = () => {
         return "id#" + Math.random().toString(16).slice(2)
     }
-    const [groups, setGroups] = useState<Group[]>([
-        {
-            id: '1',
-            name: 'Group 1',
-            tasks: []
-        },
-        {
-            id: '2',
-            name: 'Group 2',
-            tasks: []
-        }
-    ]);
+    const [groups, setGroups] = useState<Group[]>([]);
 
     const addGroup = () => {
         const newGroup: Group = {

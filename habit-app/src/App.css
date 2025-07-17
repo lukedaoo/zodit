@@ -2,20 +2,20 @@
 
 /* Custom CSS Variables for Theme - Dark Mode Default */
 :root {
-    /* Primary Colors - Based on accent #B03060 */
+    /* Primary Colors - Based on improved accent #FF6B9D */
     --font-sans: "Comic Neue", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     --font-serif: "Comic Neue", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
     --font-mono: "Comic Neue", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    --color-primary-50: #fdf2f8;
-    --color-primary-100: #fce7f3;
-    --color-primary-200: #fbcfe8;
-    --color-primary-300: #f9a8d4;
-    --color-primary-400: #f472b6;
-    --color-primary-500: #B03060;
-    --color-primary-600: #9d2b54;
-    --color-primary-700: #8a2649;
-    --color-primary-800: #77213d;
-    --color-primary-900: #641c32;
+    --color-primary-50: #e0ddff;
+    --color-primary-100: #b5a6ff;
+    --color-primary-200: #6c54c2;
+    --color-primary-300: #7b52f0;
+    --color-primary-400: #6850be;
+    --color-primary-500: #54419b;
+    --color-primary-600: #463485;
+    --color-primary-700: #3c2976;
+    --color-primary-800: #322067;
+    --color-primary-900: #261c4b;
 
     /* Secondary Colors - Complementary to primary */
     --color-secondary-50: #f8f9fa;
@@ -29,17 +29,17 @@
     --color-secondary-800: #212529;
     --color-secondary-900: #1a1a1a;
 
-    /* Accent Colors - Main accent */
-    --color-accent-50: #fdf2f8;
-    --color-accent-100: #fce7f3;
-    --color-accent-200: #fbcfe8;
-    --color-accent-300: #f9a8d4;
-    --color-accent-400: #f472b6;
-    --color-accent-500: #B03060;
-    --color-accent-600: #9d2b54;
-    --color-accent-700: #8a2649;
-    --color-accent-800: #77213d;
-    --color-accent-900: #641c32;
+    /* Accent Colors - Updated to use provided purple palette */
+    --color-accent-50: #faf5ff;
+    --color-accent-100: #f3e8ff;
+    --color-accent-200: #e9d5ff;
+    --color-accent-300: #d8b4fe;
+    --color-accent-400: #c084fc;
+    --color-accent-500: #7b52f0;
+    --color-accent-600: #6850be;
+    --color-accent-700: #54419b;
+    --color-accent-800: #463485;
+    --color-accent-900: #322067;
 
     /* Neutral Colors - Dark theme friendly */
     --color-neutral-50: #fafafa;
@@ -75,15 +75,13 @@
     --color-popover: #2a2a2a;
     --color-popover-foreground: #e0e0e0;
 
-    /* Border Colors */
-    --color-border: #404040;
-    --color-input: #404040;
-    --color-ring: #B03060;
+    /* Border Colors - Updated to purple */
+    --color-border: #7b52f0;
+    --color-input: #7b52f0;
+    --color-ring: #7b52f0;
 
     /* Custom Properties */
     --radius: 0.5rem;
-    /* --font-sans: ui-sans-serif, system-ui, sans-serif; */
-    /* --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace; */
 }
 
 @layer utilities {
@@ -109,8 +107,8 @@
     --color-card-foreground: #1a1a1a;
     --color-popover: #ffffff;
     --color-popover-foreground: #1a1a1a;
-    --color-border: #e2e8f0;
-    --color-input: #e2e8f0;
+    --color-border: #b5a6ff;
+    --color-input: #b5a6ff;
 }
 
 /* Base Styles */
@@ -201,7 +199,7 @@
     }
 
     .btn-primary {
-        background-color: #B03060;
+        background-color: #7b52f0;
         color: #ffffff;
     }
 
@@ -219,7 +217,8 @@
     }
 
     .btn-accent {
-        background-color: #B03060;
+        background-color: #7b52f0;
+        /* Updated to --violet-9 */
         color: #ffffff;
     }
 
@@ -368,7 +367,7 @@
     }
 
     .badge-primary {
-        background-color: #B03060;
+        background-color: #7b52f0;
         color: #ffffff;
     }
 
@@ -405,7 +404,7 @@
 
     /* Text utilities */
     .text-primary {
-        color: #B03060;
+        color: #7b52f0;
     }
 
     .text-secondary {
@@ -413,7 +412,7 @@
     }
 
     .text-accent {
-        color: #B03060;
+        color: #7b52f0;
     }
 
     .text-success {
@@ -430,7 +429,7 @@
 
     /* Background utilities */
     .bg-primary {
-        background-color: #B03060;
+        background-color: #7b52f0;
     }
 
     .bg-secondary {
@@ -438,7 +437,7 @@
     }
 
     .bg-accent {
-        background-color: #B03060;
+        background-color: #7b52f0;
     }
 
     .bg-success {
@@ -455,7 +454,7 @@
 
     /* Border utilities */
     .border-primary {
-        border-color: #B03060;
+        border-color: #7b52f0;
     }
 
     .border-secondary {
@@ -463,12 +462,12 @@
     }
 
     .border-accent {
-        border-color: #B03060;
+        border-color: #7b52f0;
     }
 
     /* Focus utilities */
     .focus-primary:focus {
-        --color-ring: #B03060;
+        --color-ring: #7b52f0;
     }
 
     .focus-secondary:focus {
@@ -476,7 +475,7 @@
     }
 
     .focus-accent:focus {
-        --color-ring: #B03060;
+        --color-ring: #7b52f0;
     }
 }
 

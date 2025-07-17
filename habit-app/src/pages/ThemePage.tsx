@@ -112,7 +112,7 @@ const ThemePage: React.FC = () => {
                             id="password"
                             type="password"
                             placeholder="Enter your password"
-                            className="input focus-accent"
+                            className="input"
                         />
                     </div>
                 </div>
