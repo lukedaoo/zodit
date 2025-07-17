@@ -27,7 +27,7 @@ export const TaskInput = ({
         const pairs = text.split(';').filter(Boolean);
         return pairs.map(pair => {
             const [key, val = ''] = pair.split(':');
-            return `<span class="badge badge-outline">${key.trim()}:${val.trim()}</span>`;
+            return `<span class="badge badge-outline"><span class="task-key">${key.trim()}</span>:<span class="task-value">${val.trim()}</span></span>`;
         }).join('<span class="task-separator">;</span>');
     };
 

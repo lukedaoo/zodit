@@ -72,45 +72,83 @@ export const useTaskEditing = (
 
                 // --- Branch 2: contentEditable <div>
             } else if (input instanceof HTMLDivElement && input.isContentEditable) {
-                const fullText = input.textContent || '';
-                const pairIndex = fullText.indexOf(currentPair);
-                const caretPos = pairIndex + currentPair.indexOf(':') + 1;
-
-                const range = document.createRange();
-                const selection = window.getSelection();
-                if (!selection) return;
-
-                let charIndex = 0;
-                let caretNode: Text | null = null;
-                let caretOffset = 0;
-
-                const walker = document.createTreeWalker(input, NodeFilter.SHOW_TEXT, null);
-                while (walker.nextNode()) {
-                    const node = walker.currentNode as Text;
-                    const len = node.textContent?.length || 0;
-
-                    if (charIndex + len >= caretPos) {
-                        caretNode = node;
-                        caretOffset = caretPos - charIndex;
-                        break;
+                e.preventDefault();
+                const walker = document.createTreeWalker(input, NodeFilter.SHOW_ELEMENT, {
+                    acceptNode: (node) => {
+                        if (
+                            node.nodeType === Node.ELEMENT_NODE &&
+                            (node as HTMLElement).classList.contains('badge')
+                        ) return NodeFilter.FILTER_ACCEPT;
+                        return NodeFilter.FILTER_SKIP;
                     }
+                });
 
-                    charIndex += len;
+                const valuePositions: { node: Text, startOffset: number, endOffset: number }[] = [];
+
+                while (walker.nextNode()) {
+                    const badge = walker.currentNode as HTMLElement;
+                    const children = Array.from(badge.childNodes);
+                    for (let i = 0; i < children.length; i++) {
+                        const node = children[i];
+
+                        if (node.nodeType === Node.TEXT_NODE && node.textContent?.includes(':')) {
+                            const text = node.textContent;
+                            const colonIndex = text.indexOf(':');
+                            if (colonIndex !== -1 && colonIndex + 1 < text.length) {
+                                valuePositions.push({
+                                    node: node as Text,
+                                    startOffset: colonIndex + 1,
+                                    endOffset: text.length
+                                });
+                            }
+                        } else if (
+                            node.nodeType === Node.ELEMENT_NODE &&
+                            (node as HTMLElement).classList.contains('task-key')
+                        ) {
+                            const next = node.nextSibling;
+                            if (next?.nodeType === Node.TEXT_NODE) {
+                                const text = next.textContent || '';
+                                if (text.startsWith(':')) {
+                                    valuePositions.push({
+                                        node: next as Text,
+                                        startOffset: 1,
+                                        endOffset: text.length
+                                    });
+                                }
+                            }
+                        }
+                    }
                 }
 
-                if (caretNode) {
-                    range.setStart(caretNode, caretOffset);
-                    range.setEnd(caretNode, caretOffset);
-                    selection.removeAllRanges();
-                    selection.addRange(range);
+                const selection = window.getSelection();
+                if (!selection || valuePositions.length === 0) return;
 
-                    setTimeout(() => {
-                        const selRect = range.getBoundingClientRect();
-                        const containerRect = input.getBoundingClientRect();
-                        const scrollLeft = input.scrollLeft + (selRect.left - containerRect.left) - input.clientWidth / 2;
-                        input.scrollLeft = scrollLeft;
-                    }, 0);
+                const currentRange = selection.getRangeAt(0);
+                const caretNode = currentRange.startContainer;
+                const caretOffset = currentRange.startOffset;
+
+                let nextPos = 0;
+                for (let i = 0; i < valuePositions.length; i++) {
+                    const pos = valuePositions[i];
+                    if (pos.node === caretNode && caretOffset >= pos.startOffset) {
+                        nextPos = (i + 1) % valuePositions.length;
+                    }
                 }
+
+                const target = valuePositions[nextPos];
+                const range = document.createRange();
+                range.setStart(target.node, target.startOffset);
+                range.setEnd(target.node, target.endOffset);
+                selection.removeAllRanges();
+                selection.addRange(range);
+                input.focus();
+
+                setTimeout(() => {
+                    const rect = range.getBoundingClientRect();
+                    const containerRect = input.getBoundingClientRect();
+                    const scrollLeft = input.scrollLeft + (rect.left - containerRect.left) - input.clientWidth / 2;
+                    input.scrollLeft = scrollLeft;
+                }, 0);
             }
         } catch (err) {
             console.error('Error handling tab navigation:', err);

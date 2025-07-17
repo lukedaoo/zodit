@@ -480,9 +480,25 @@
     }
 }
 
+.task-key {
+    color: #f39c12;
+    font-weight: bold;
+}
+
+.task-value {
+    color: inherit;
+}
+
 .task-separator {
     margin: 0 4px;
     color: #a0aec0;
+}
+
+.badge-outline,
+.task-separator,
+.task-key,
+.task-value {
+    font-size: 1rem;
 }
 
 /* Optional placeholder support */

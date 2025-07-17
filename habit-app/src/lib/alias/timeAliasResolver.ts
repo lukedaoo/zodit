@@ -17,7 +17,7 @@ export const DEFAULT_ALIASES: TimeAlias[] = [
 ];
 
 export const resolveAlias = (input: string, aliases: TimeAlias[]): string => {
-    const alias = aliases.find(a => a.alias.toLowerCase() === input.toLowerCase());
+    const alias = aliases.find(a => a.alias.toLowerCase() === input.trim().toLowerCase());
     if (!alias) return input;
 
     switch (alias.value) {
