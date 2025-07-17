@@ -19,17 +19,6 @@ export const useTaskEditing = (
         }
     }, [isEditing]);
 
-    // useEffect(() => {
-    //     console.log('Effect running, inputValue:', inputValue, 'useTemplate:', useTemplate);
-    //     const setTemplate = inputValue.trim().length === 0 && useTemplate;
-    //     if (setTemplate) {
-    //         const defaultText = taskToText(DEFAULT_TASK, presets.scheduled);
-    //         console.log('Setting default text:', defaultText);
-    //         // setJustInitialized(true);
-    //         setInputValue(defaultText);
-    //     }
-    // }, [inputValue, useTemplate]);
-    //
     const handleSubmit = (value: string) => {
         try {
             let config = presets.scheduled;

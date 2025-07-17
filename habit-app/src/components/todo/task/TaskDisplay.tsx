@@ -1,4 +1,4 @@
-import { TaskHeader, TaskDescription, TASK_STYLES } from './TaskUIComponents';
+import { TaskHeader, TASK_STYLES } from './TaskUIComponents';
 import { TaskMetadata } from './TaskMetadata';
 import type { Task } from '../types';
 import { isEmpty, presets } from '../types';
