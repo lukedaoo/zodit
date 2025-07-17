@@ -1,16 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { textToTask } from './taskUtils';
-import { getUserSeparator } from '../../../lib/template/textTemplateProcessor';
-import type { Task } from '../types';
 import { presets } from '../types';
 
-
 export const useTaskEditing = (
-    task: Task,
     onSubmit: (task: any) => void,
     isEditing: boolean
 ) => {
-    const [inputValue, setInputValue] = useState(task.title);
+    const [inputValue, setInputValue] = useState('');
     const inputRef = useRef<HTMLInputElement | HTMLDivElement>(null);
 
     useEffect(() => {
@@ -29,121 +25,71 @@ export const useTaskEditing = (
         }
     };
 
-    const handleTabNavigation = (e: React.KeyboardEvent<HTMLInputElement | HTMLDivElement>) => {
+    const handleTabNavigation = (e: React.KeyboardEvent<HTMLDivElement>) => {
         try {
             e.preventDefault();
-            const input = inputRef.current;
-            if (!input) return;
 
-            const separator = getUserSeparator() ?? ";";
-            const pairs = inputValue.trim().split(separator).filter(pair => pair.trim() !== '');
+            const divRef = inputRef.current as HTMLDivElement | null;
+            if (!divRef || !(divRef instanceof HTMLDivElement)) return;
 
-            let currentIndex = parseInt(input.dataset.index || '-1', 10);
-            currentIndex = (currentIndex + 1) % pairs.length;
-            input.dataset.index = currentIndex.toString();
+            const badgeSpans = divRef.querySelectorAll('.badge');
+            if (badgeSpans.length === 0) return;
 
-            const currentPair = pairs[currentIndex].trim();
-            const valuePart = currentPair.split(':')[1] || '';
+            const selection = window.getSelection();
+            if (!selection) return;
 
-            console.log('Current index:', currentIndex, 'Current pair:', currentPair, 'Value part:', valuePart);
-
-            // --- Branch 1: Plain <input type="text">
-            if (input instanceof HTMLInputElement) {
-                const startPos = inputValue.indexOf(currentPair) + currentPair.indexOf(':') + 1;
-                const endPos = startPos + valuePart.length;
-
-                input.setSelectionRange(startPos, endPos);
-                input.focus();
-
-                const charWidth = 8;
-                const inputWidth = input.clientWidth;
-                const scrollPosition = Math.max(0, (startPos * charWidth) - (inputWidth / 2));
-                input.scrollLeft = scrollPosition;
-
-                // --- Branch 2: contentEditable <div>
-            } else if (input instanceof HTMLDivElement && input.isContentEditable) {
-                e.preventDefault();
-                const walker = document.createTreeWalker(input, NodeFilter.SHOW_ELEMENT, {
-                    acceptNode: (node) => {
-                        if (
-                            node.nodeType === Node.ELEMENT_NODE &&
-                            (node as HTMLElement).classList.contains('badge')
-                        ) return NodeFilter.FILTER_ACCEPT;
-                        return NodeFilter.FILTER_SKIP;
-                    }
-                });
-
-                const valuePositions: { node: Text, startOffset: number, endOffset: number }[] = [];
-
-                while (walker.nextNode()) {
-                    const badge = walker.currentNode as HTMLElement;
-                    const children = Array.from(badge.childNodes);
-                    for (let i = 0; i < children.length; i++) {
-                        const node = children[i];
-
-                        if (node.nodeType === Node.TEXT_NODE && node.textContent?.includes(':')) {
-                            const text = node.textContent;
-                            const colonIndex = text.indexOf(':');
-                            if (colonIndex !== -1 && colonIndex + 1 < text.length) {
-                                valuePositions.push({
-                                    node: node as Text,
-                                    startOffset: colonIndex + 1,
-                                    endOffset: text.length
-                                });
-                            }
-                        } else if (
-                            node.nodeType === Node.ELEMENT_NODE &&
-                            (node as HTMLElement).classList.contains('task-key')
-                        ) {
-                            const next = node.nextSibling;
-                            if (next?.nodeType === Node.TEXT_NODE) {
-                                const text = next.textContent || '';
-                                if (text.startsWith(':')) {
-                                    valuePositions.push({
-                                        node: next as Text,
-                                        startOffset: 1,
-                                        endOffset: text.length
-                                    });
-                                }
-                            }
-                        }
-                    }
+            let currentIndex = -1;
+            badgeSpans.forEach((badge, index) => {
+                if (selection.containsNode(badge, true)) {
+                    currentIndex = index;
                 }
+            });
 
-                const selection = window.getSelection();
-                if (!selection || valuePositions.length === 0) return;
-
-                const currentRange = selection.getRangeAt(0);
-                const caretNode = currentRange.startContainer;
-                const caretOffset = currentRange.startOffset;
-
-                let nextPos = 0;
-                for (let i = 0; i < valuePositions.length; i++) {
-                    const pos = valuePositions[i];
-                    if (pos.node === caretNode && caretOffset >= pos.startOffset) {
-                        nextPos = (i + 1) % valuePositions.length;
-                    }
-                }
-
-                const target = valuePositions[nextPos];
-                const range = document.createRange();
-                range.setStart(target.node, target.startOffset);
-                range.setEnd(target.node, target.endOffset);
-                selection.removeAllRanges();
-                selection.addRange(range);
-                input.focus();
-
-                setTimeout(() => {
-                    const rect = range.getBoundingClientRect();
-                    const containerRect = input.getBoundingClientRect();
-                    const scrollLeft = input.scrollLeft + (rect.left - containerRect.left) - input.clientWidth / 2;
-                    input.scrollLeft = scrollLeft;
-                }, 0);
+            let nextIndex;
+            if (e.shiftKey) {
+                nextIndex = currentIndex > 0 ? currentIndex - 1 : badgeSpans.length - 1;
+            } else {
+                nextIndex = currentIndex < badgeSpans.length - 1 ? currentIndex + 1 : 0;
             }
+
+            const nextBadge = badgeSpans[nextIndex] as HTMLElement;
+            if (!nextBadge) return;
+            const valueSpan = nextBadge.querySelector('.task-value');
+            const range = document.createRange();
+            selection.removeAllRanges();
+
+            if (valueSpan) {
+                range.selectNodeContents(valueSpan);
+                selection.addRange(range);
+            } else {
+                const keySpan = nextBadge.querySelector('.task-key');
+                if (keySpan && keySpan.nextSibling) {
+                    const colonNode = keySpan.nextSibling;
+                    if (colonNode.nodeType === Node.TEXT_NODE && colonNode.textContent?.includes(':')) {
+                        range.setStart(colonNode, 1);
+                        range.setEnd(colonNode, 1);
+                        selection.addRange(range);
+                    }
+                }
+            }
+
+            divRef.focus();
+
+            // Scroll to make the selected area visible
+            setTimeout(() => {
+                const target = valueSpan || nextBadge;
+                const rect = target.getBoundingClientRect();
+                const containerRect = divRef.getBoundingClientRect();
+                const scrollLeft =
+                    divRef.scrollLeft +
+                    (rect.left - containerRect.left) -
+                    divRef.clientWidth / 2;
+                divRef.scrollLeft = Math.max(0, scrollLeft);
+            }, 0);
         } catch (err) {
             console.error('Error handling tab navigation:', err);
         }
-    };
+    }
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
         switch (e.key) {

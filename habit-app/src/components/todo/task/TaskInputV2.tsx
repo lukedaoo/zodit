@@ -1,9 +1,14 @@
 import { useEffect, useRef } from 'react';
 import { DeleteButton, TASK_STYLES } from './TaskUIComponents';
-import { presets, DEFAULT_TASK } from '../types';
+import { presets, isEmpty, DEFAULT_TASK } from '../types';
+import type { Task } from '../types';
 import { taskToText } from './taskUtils';
 
+import { USE_TEMPLATE_WHEN_ADDING_TASK } from '../../../user-prefs/const';
+import { useUserSettings } from '../../../hooks/useUserSettings';
+
 interface TaskInputProps {
+    task: Task;
     inputValue: string;
     onInputChange: (value: string) => void;
     onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void;
@@ -12,30 +17,63 @@ interface TaskInputProps {
 }
 
 export const TaskInput = ({
+    task,
     inputValue,
     onInputChange,
     onKeyDown,
     onDelete,
     inputRef
 }: TaskInputProps) => {
+    const { get } = useUserSettings();
+    const useTemplate = get<boolean>(USE_TEMPLATE_WHEN_ADDING_TASK);
+
+    const getTextValue = (_task: Task): string => {
+        const isEmptyTask = isEmpty(_task, presets.scheduled);
+
+        let text;
+        if (isEmptyTask && useTemplate) {
+            text = taskToText(DEFAULT_TASK, presets.scheduled);
+        } else {
+            text = taskToText(_task, presets.scheduled);
+        }
+        return text;
+    }
+
     const internalRef = useRef<HTMLDivElement>(null);
     const divRef = inputRef ?? internalRef;
 
     const placeholder = taskToText(DEFAULT_TASK, presets.scheduled);
 
-    const renderStyledHTML = (text: string) => {
+    const renderStyledHTML = (task: Task): string => {
+        const text = getTextValue(task);
         const pairs = text.split(';').filter(Boolean);
-        return pairs.map(pair => {
-            const [key, val = ''] = pair.split(':');
-            return `<span class="badge badge-outline"><span class="task-key">${key.trim()}</span>:<span class="task-value">${val.trim()}</span></span>`;
-        }).join('<span class="task-separator">;</span>');
-    };
+        return pairs
+            .map(pair => {
+                const trimmedPair = pair.trim();
+                if (!trimmedPair) return '';
 
+                const [key, val] = trimmedPair.split(':');
+                if (key?.trim()) {
+                    const keySpan = `<span class="task-key">${key.trim()}</span>`;
+                    const valueSpan = val?.trim() ? `<span class="task-value">${val.trim()}</span>` : '';
+                    return `<span class="badge badge-outline">${keySpan}:${valueSpan}</span>`;
+                }
+                return '';
+            })
+            .filter(Boolean)
+            .join('<span class="task-separator">;</span>');
+    }
     useEffect(() => {
+        console.log("onchange input", inputValue);
         if (divRef.current && document.activeElement !== divRef.current) {
-            divRef.current.innerHTML = renderStyledHTML(inputValue);
+            divRef.current.innerHTML = renderStyledHTML(task);
+            inputValue = getTextValue(task);
         }
-    }, [inputValue]);
+        if (inputValue.trim().length === 0 && divRef.current) {
+            divRef.current.innerHTML = '';
+            divRef.current?.setAttribute('data-placeholder', placeholder);
+        }
+    }, [task, placeholder]);
 
     const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
         const text = e.currentTarget.innerText;

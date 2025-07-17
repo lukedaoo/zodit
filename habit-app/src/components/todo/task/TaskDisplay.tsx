@@ -16,12 +16,12 @@ export const TaskDisplay = ({
 }: TaskDisplayProps) => {
     const parsed = task;
     const isEmptyTask = isEmpty(parsed, presets.scheduled);
-    const header = (() => {
-        if (parsed.title && parsed.description) {
-            return `${parsed.title} - ${parsed.description}`;
+    const header = (_task: Task): string => {
+        if (_task.title && _task.description) {
+            return `${_task.title} - ${_task.description}`;
         }
-        return parsed.title || parsed.description || '';
-    })();
+        return _task.title || _task.description || '';
+    };
 
     // <TaskDescription description={parsed.description} />
 
@@ -33,9 +33,8 @@ export const TaskDisplay = ({
                 backgroundColor: TASK_STYLES.background,
                 color: TASK_STYLES.text,
             }}
-            onDoubleClick={onDoubleClick}
-        >
-            <TaskHeader header={header} isEmptyTask={isEmptyTask} onDelete={onDelete} />
+            onDoubleClick={onDoubleClick}>
+            <TaskHeader header={header(parsed)} isEmptyTask={isEmptyTask} onDelete={onDelete} />
             <TaskMetadata
                 startTime={parsed.startTime}
                 startDate={parsed.startDate}
