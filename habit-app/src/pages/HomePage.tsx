@@ -1,6 +1,6 @@
 import React from 'react';
 import '../App.css';
-import Todo from '../components/todo/Todo';
+import Todo from '@components/todo/Todo';
 
 const HomePage: React.FC = () => {
     return (

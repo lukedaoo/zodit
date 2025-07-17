@@ -2,14 +2,14 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import {
     SEPARATOR_PREF_KEY,
     USE_TEMPLATE_WHEN_ADDING_TASK
-} from './user-prefs/const';
+} from '@user-prefs/const';
 import {
     useUserSettings
-} from './hooks/useUserSettings';
+} from '@hooks/useUserSettings';
 
-import HomePage from './pages/HomePage';
-import ThemePage from './pages/ThemePage';
-import TodoPage from './pages/TodoPage';
+import HomePage from '@pages/HomePage';
+import ThemePage from '@pages/ThemePage';
+import TodoPage from '@pages/TodoPage';
 
 const App: React.FC = () => {
 

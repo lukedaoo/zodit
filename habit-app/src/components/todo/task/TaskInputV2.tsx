@@ -4,8 +4,8 @@ import { presets, isEmpty, DEFAULT_TASK } from '../types';
 import type { Task } from '../types';
 import { taskToText } from './taskUtils';
 
-import { USE_TEMPLATE_WHEN_ADDING_TASK } from '../../../user-prefs/const';
-import { useUserSettings } from '../../../hooks/useUserSettings';
+import { USE_TEMPLATE_WHEN_ADDING_TASK } from '@user-prefs/const';
+import { useUserSettings } from '@hooks/useUserSettings';
 
 interface TaskInputProps {
     task: Task;

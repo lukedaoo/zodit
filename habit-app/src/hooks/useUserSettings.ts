@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
-import { userPref } from '../user-prefs/localUserPref';
-import type { ConstPref } from '../user-prefs/const';
+import { userPref } from '@user-prefs/localUserPref';
+import type { ConstPref } from '@user-prefs/const';
 
 export const useUserSettings = () => {
     const get = useCallback(<T = any>(pref: ConstPref): T => {

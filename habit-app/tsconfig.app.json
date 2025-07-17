@@ -21,7 +21,17 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    /* alias */
+    "baseUrl": ".", // Required for "paths" to work
+    "paths": {
+      "@common/*": ["src/common/*"],
+      "@components/*": ["src/components/*"],
+      "@hooks/*": ["src/hooks/*"],
+      "@lib/*": ["src/lib/*"],
+      "@pages/*": ["src/pages/*"],
+      "@user-prefs/*": ["src/user-prefs/*"]
+    }
   },
   "include": ["src"]
 }

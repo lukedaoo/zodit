@@ -1,6 +1,6 @@
 import { Badge } from './TaskUIComponents';
-import { formatDate, formatTime } from '../../../common/utils';
-import { DEFAULT_ALIASES, resolveAlias } from '../../../lib/alias/timeAliasResolver';
+import { formatDate, formatTime } from '@common/utils';
+import { DEFAULT_ALIASES, resolveAlias } from '@lib/alias/timeAliasResolver';
 
 interface TaskMetadataProps {
     startTime?: string;
