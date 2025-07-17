@@ -479,3 +479,15 @@
         --color-ring: #B03060;
     }
 }
+
+.task-separator {
+    margin: 0 4px;
+    color: #a0aec0;
+}
+
+/* Optional placeholder support */
+[contenteditable][data-placeholder]:empty::before {
+    content: attr(data-placeholder);
+    color: #a0aec0;
+    pointer-events: none;
+}

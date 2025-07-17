@@ -1,11 +1,13 @@
-import { TaskInput } from './task/TaskInput';
+// import { TaskInput } from './task/TaskInput';
+import { TaskInput } from './task/TaskInputV2';
 import { TaskDisplay } from './task/TaskDisplay';
 import { useTaskEditing } from './task/useTaskEditing';
-import { taskToText } from './task/taskUtils';
+import type { Task } from './types';
+
 import { presets, DEFAULT_TASK } from './types';
+import { taskToText } from './task/taskUtils';
 import { USE_TEMPLATE_WHEN_ADDING_TASK } from '../../user-prefs/const';
 import { useUserSettings } from '../../hooks/useUserSettings';
-import type { Task } from './types';
 
 interface TaskItemProps {
     task: Task;
@@ -28,9 +30,9 @@ const TaskItem = ({
         isEditing
     );
 
+
     const { get } = useUserSettings();
     const useTemplate = get<boolean>(USE_TEMPLATE_WHEN_ADDING_TASK);
-
     if (isEditing) {
         if (inputValue.length === 0 && useTemplate) {
             setInputValue(taskToText(DEFAULT_TASK, presets.scheduled));
