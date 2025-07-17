@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import TaskItem from './TaskItem';
 import { AddTaskButton } from './AddButtonComponents.tsx';
 import type { Task } from './types';
-// import { taskToText } from './task/taskUtils';
 
 interface Props {
     tasks: Task[];
@@ -12,9 +11,16 @@ interface Props {
     onAdd: () => void;
 }
 
+const COLLAPSE_THRESHOLD = 5;
+
 const TaskLists = ({ tasks, groupId, onUpdate, onDelete, onAdd }: Props) => {
     const [editingId, setEditingId] = useState<string | null>(null);
-    // const [hasEditedIds, setHasEditedIds] = useState<Set<string>>(new Set());
+    const [collapsed, setCollapsed] = useState(true);
+
+    const shouldCollapse = tasks.length > COLLAPSE_THRESHOLD;
+    const visibleTasks = collapsed && shouldCollapse
+        ? tasks.slice(0, COLLAPSE_THRESHOLD)
+        : tasks;
 
     useEffect(() => {
         console.log('Effect running, tasks:', tasks);
@@ -22,7 +28,7 @@ const TaskLists = ({ tasks, groupId, onUpdate, onDelete, onAdd }: Props) => {
 
     return (
         <div className="ml-8 space-y-3">
-            {tasks.map((task) => (
+            {visibleTasks.map((task) => (
                 <TaskItem
                     key={`${groupId}/${task.id}`}
                     task={task}
@@ -37,11 +43,16 @@ const TaskLists = ({ tasks, groupId, onUpdate, onDelete, onAdd }: Props) => {
                 />
             ))}
 
-            <AddTaskButton
-                onClick={() => {
-                    onAdd();
-                }}
-            />
+            {shouldCollapse && (
+                <button
+                    className="text-sm text-blue-500 hover:underline"
+                    onClick={() => setCollapsed(!collapsed)}
+                >
+                    {collapsed ? `Show All (${tasks.length})` : 'Show Less'}
+                </button>
+            )}
+
+            <AddTaskButton onClick={onAdd} />
         </div>
     );
 };
