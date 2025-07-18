@@ -127,7 +127,7 @@ export const TaskModal = ({ task, isOpen, onClose, onSave, onDelete }: TaskModal
 
                     {/* Task Title */}
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-primary">Task Title</label>
+                        <label className="text-sm font-medium">Task Title</label>
                         <input
                             type="text"
                             value={formData.title}
@@ -139,7 +139,7 @@ export const TaskModal = ({ task, isOpen, onClose, onSave, onDelete }: TaskModal
 
                     {/* Description */}
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-primary">Description</label>
+                        <label className="text-sm font-medium">Description</label>
                         <textarea
                             value={formData.description || ''}
                             onChange={(e) => handleInputChange('description', e.target.value)}
@@ -151,7 +151,7 @@ export const TaskModal = ({ task, isOpen, onClose, onSave, onDelete }: TaskModal
                     {/* Date and Time Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-primary">Start Date</label>
+                            <label className="text-sm font-medium">Start Date</label>
                             <input
                                 type="date"
                                 value={formData.startDate || ''}
@@ -160,7 +160,7 @@ export const TaskModal = ({ task, isOpen, onClose, onSave, onDelete }: TaskModal
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-primary">End Date</label>
+                            <label className="text-sm font-medium">End Date</label>
                             <input
                                 type="date"
                                 value={formData.endDate || ''}
@@ -169,7 +169,7 @@ export const TaskModal = ({ task, isOpen, onClose, onSave, onDelete }: TaskModal
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-primary">Start Time</label>
+                            <label className="text-sm font-medium">Start Time</label>
                             <input
                                 type="time"
                                 value={formData.startTime || ''}
@@ -180,9 +180,10 @@ export const TaskModal = ({ task, isOpen, onClose, onSave, onDelete }: TaskModal
                     </div>
 
                     {/* Task Summary Card */}
-                    <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-                        <h4 className="font-semibold text-gray-800">Task Summary</h4>
-                        <div className="text-sm text-gray-600">
+                    <div className="bg-[#2A2D3A]-50 rounded-lg p-4 space-y-2 border"
+                    >
+                        <h4 className="font-semibold">Task Summary</h4>
+                        <div className="text-sm">
                             <p><strong>Duration:</strong> {
                                 formData.startDate && formData.endDate
                                     ? `${formData.startDate} to ${formData.endDate}`

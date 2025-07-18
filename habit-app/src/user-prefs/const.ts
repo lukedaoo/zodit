@@ -12,3 +12,8 @@ export const USE_TEMPLATE_WHEN_ADDING_TASK: ConstPref = {
     key: 'user_pref_use_template_when_adding_task',
     defaultValue: false
 }
+
+export const USER_THEME = {
+    key: 'user_theme',
+    defaultValue: 'dark'
+}

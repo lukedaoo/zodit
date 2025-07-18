@@ -1,4 +1,4 @@
-import { X, Wrench } from 'lucide-react';
+import { X, Settings2 } from 'lucide-react';
 
 interface DeleteButtonProps {
     onDelete: () => void;
@@ -50,7 +50,7 @@ export const ExpandButton = ({ onExpand, className = "" }: ExpandButtonProps) =>
         className={`hover:text-red-500 transition-colors ${className}`}
         aria-label="More detail task"
     >
-        <Wrench size={18} />
+        <Settings2 size={18} />
     </button>
 )
 
@@ -73,7 +73,7 @@ export const TaskHeader = ({ header, isEmptyTask, onDelete, onExpand }: TaskHead
             <div className="flex items-center gap-2 shrink-0">
                 <ExpandButton
                     onExpand={onExpand}
-                    className="text-violet-500 hover:text-violet-700"
+                    className="hover:text-green-700"
                 />
                 <DeleteButton
                     onDelete={onDelete}

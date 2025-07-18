@@ -19,7 +19,7 @@ export const presets = {
 
     scheduled: {
         include: ['title', 'description', 'startTime', 'startDate', 'endDate'] as (keyof Task)[],
-        order: ['title', 'description', 'startDate', 'startTime', 'endDate'] as (keyof Task)[]
+        order: ['title', 'description', 'startDate', 'startTime', 'endDate'] as (keyof Task)[],
     },
 
     full: { exclude: ['id'] as (keyof Task)[] },

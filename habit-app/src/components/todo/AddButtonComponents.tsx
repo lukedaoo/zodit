@@ -3,7 +3,8 @@ import { Plus } from 'lucide-react';
 export const AddGroupButton = ({ onClick }: { onClick: () => void }) => (
     <button
         onClick={onClick}
-        className="w-full mb-6 p-4 focus:border-primary-500 focus:border-3 focus:outline-none rounded-lg border-1 hover:text-white transition-colors duration-200 flex items-center justify-center gap-2"
+        className="w-full mb-6 p-4 focus:border-primary-500 focus:border-1 focus:outline-none 
+        rounded-lg border-1 hover:text-white transition-colors duration-200 flex items-center justify-center gap-2"
         onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = 'var(--color-primary-500)';
             e.currentTarget.style.color = 'white';
@@ -21,7 +22,9 @@ export const AddGroupButton = ({ onClick }: { onClick: () => void }) => (
 export const AddTaskButton = ({ onClick }: { onClick: () => void }) => (
     <button
         onClick={onClick}
-        className="w-full mb-6 p-4 border-dashed focus:border-primary-500 focus:border-2 focus:outline-none rounded-lg border-1 hover:text-white transition-colors duration-200 flex items-center justify-center gap-2"
+        className="w-full mb-6 p-4 border-dashed focus:border-primary-500 focus:border-1 
+        focus:outline-none rounded-lg border-1 hover:text-white transition-colors duration-200 
+        flex items-center justify-center gap-2"
         onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = 'var(--color-primary-500)';
             e.currentTarget.style.color = 'white';
