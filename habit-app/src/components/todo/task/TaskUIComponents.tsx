@@ -1,7 +1,12 @@
-import { X } from 'lucide-react';
+import { X, Wrench } from 'lucide-react';
 
 interface DeleteButtonProps {
     onDelete: () => void;
+    className?: string;
+}
+
+interface ExpandButtonProps {
+    onExpand: () => void;
     className?: string;
 }
 
@@ -13,6 +18,7 @@ interface BadgeProps {
 interface TaskHeaderProps {
     header: string;
     isEmptyTask: boolean;
+    onExpand: () => void;
     onDelete: () => void;
 }
 
@@ -38,13 +44,24 @@ export const DeleteButton = ({ onDelete, className = "" }: DeleteButtonProps) =>
     </button>
 );
 
+export const ExpandButton = ({ onExpand, className = "" }: ExpandButtonProps) => (
+    <button
+        onClick={onExpand}
+        className={`hover:text-red-500 transition-colors ${className}`}
+        aria-label="More detail task"
+    >
+        <Wrench size={18} />
+    </button>
+)
+
 export const Badge = ({ children, variant = "primary" }: BadgeProps) => (
     <span className={`badge badge-${variant}`}>
         {children}
     </span>
 );
 
-export const TaskHeader = ({ header, isEmptyTask, onDelete }: TaskHeaderProps) => (
+export const TaskHeader = ({ header, isEmptyTask, onDelete, onExpand }: TaskHeaderProps) => (
+
     <div className="flex flex-col gap-1">
         <div className="flex justify-between items-start gap-2">
             <h4
@@ -53,10 +70,16 @@ export const TaskHeader = ({ header, isEmptyTask, onDelete }: TaskHeaderProps) =
             >
                 {isEmptyTask ? 'Double click to update task' : header}
             </h4>
-            <DeleteButton
-                onDelete={onDelete}
-                className="text-red-500 hover:text-red-700 shrink-0"
-            />
+            <div className="flex items-center gap-2 shrink-0">
+                <ExpandButton
+                    onExpand={onExpand}
+                    className="text-violet-500 hover:text-violet-700"
+                />
+                <DeleteButton
+                    onDelete={onDelete}
+                    className="text-red-500 hover:text-red-700"
+                />
+            </div>
         </div>
 
         {isEmptyTask && (

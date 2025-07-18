@@ -500,6 +500,18 @@
     font-size: 1rem;
 }
 
+input[type="date"]::-webkit-calendar-picker-indicator {
+    display: none;
+}
+
+input[type="time"]::-webkit-calendar-picker-indicator {
+    display: none;
+}
+
+input[type="date"] {
+    appearance: none;
+}
+
 /* Optional placeholder support */
 [contenteditable][data-placeholder]:empty::before {
     content: attr(data-placeholder);

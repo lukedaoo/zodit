@@ -64,7 +64,6 @@ export const TaskInput = ({
             .join('<span class="task-separator">;</span>');
     }
     useEffect(() => {
-        console.log("onchange input", inputValue);
         if (divRef.current && document.activeElement !== divRef.current) {
             divRef.current.innerHTML = renderStyledHTML(task);
             inputValue = getTextValue(task);

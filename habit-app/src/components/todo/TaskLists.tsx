@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import TaskItem from './TaskItem';
 import { AddTaskButton } from './AddButtonComponents.tsx';
 import type { Task } from './types';
@@ -21,10 +21,6 @@ const TaskLists = ({ tasks, groupId, onUpdate, onDelete, onAdd }: Props) => {
     const visibleTasks = collapsed && shouldCollapse
         ? tasks.slice(0, COLLAPSE_THRESHOLD)
         : tasks;
-
-    useEffect(() => {
-        console.log('Effect running, tasks:', tasks);
-    }, [tasks]);
 
     return (
         <div className="ml-8 space-y-3">

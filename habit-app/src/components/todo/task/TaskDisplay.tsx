@@ -1,7 +1,8 @@
-import { TaskHeader, TaskDescription, TASK_STYLES } from './TaskUIComponents';
+import { useState } from 'react';
+import { TaskDescription, TASK_STYLES } from './TaskUIComponents';
+import { TaskHeaderWithModal } from './TaskHeaderWithModal';
 import { TaskMetadata } from './TaskMetadata';
 import type { Task } from '../types';
-import { isEmpty, presets } from '../types';
 
 interface TaskDisplayProps {
     task: Task;
@@ -14,12 +15,8 @@ export const TaskDisplay = ({
     onDelete,
     onDoubleClick
 }: TaskDisplayProps) => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const parsed = task;
-    const isEmptyTask = isEmpty(parsed, presets.scheduled);
-    const header = (_task: Task): string => {
-        return _task.title || _task.description || '';
-    };
-
 
     return (
         <div
@@ -29,8 +26,15 @@ export const TaskDisplay = ({
                 backgroundColor: TASK_STYLES.background,
                 color: TASK_STYLES.text,
             }}
-            onDoubleClick={onDoubleClick}>
-            <TaskHeader header={header(parsed)} isEmptyTask={isEmptyTask} onDelete={onDelete} />
+            onDoubleClick={() => {
+                if (!isModalOpen) {
+                    onDoubleClick();
+                }
+            }}>
+            <TaskHeaderWithModal task={task}
+                onSave={(updatedTask) => { console.log(updatedTask) }}
+                onModalToggle={setIsModalOpen}
+                onDelete={onDelete} />
             <TaskDescription description={parsed.description} />
             <TaskMetadata
                 startTime={parsed.startTime}
