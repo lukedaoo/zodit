@@ -11,7 +11,7 @@ interface Props {
     onAdd: () => void;
 }
 
-const COLLAPSE_THRESHOLD = 5;
+const COLLAPSE_THRESHOLD = 3;
 
 const TaskLists = ({ tasks, groupId, onUpdate, onDelete, onAdd }: Props) => {
     const [editingId, setEditingId] = useState<string | null>(null);

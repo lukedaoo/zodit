@@ -1,4 +1,4 @@
-import { TaskInput } from './task/TaskInputV2';
+import { TaskInput } from './task/TaskInput';
 import { TaskDisplay } from './task/TaskDisplay';
 import { useTaskEditing } from './task/useTaskEditing';
 import type { Task } from './types';

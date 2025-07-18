@@ -1,4 +1,5 @@
-import { X } from 'lucide-react';
+import { useState } from 'react';
+import { X, ChevronDown, ChevronUp } from 'lucide-react';
 import TaskLists from './TaskLists';
 import type { Group } from './types';
 
@@ -19,6 +20,7 @@ const GroupItem = ({
     onDeleteTask,
     onAddTask
 }: Props) => {
+    const [collapsed, setCollapsed] = useState(false);
     return (
         <div className="space-y-3">
             <div className="relative">
@@ -34,21 +36,30 @@ const GroupItem = ({
                         ['--tw-ring-color' as any]: 'var(--color-primary-500)',
                     }}
                 />
-                <button
-                    onClick={onDelete}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 hover:text-red-500 transition-colors"
-                >
-                    <X size={20} />
-                </button>
+                <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex gap-2 items-center">
+                    <button
+                        onClick={() => setCollapsed(!collapsed)}
+                        className="hover:text-green-500 transition-colors">
+                        {collapsed ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
+                    </button>
+                    <button
+                        onClick={onDelete}
+                        className="hover:text-red-500 transition-colors"
+                    >
+                        <X size={20} />
+                    </button>
+                </div>
             </div>
 
-            <TaskLists
-                tasks={group.tasks}
-                groupId={group.id}
-                onUpdate={onUpdateTask}
-                onDelete={onDeleteTask}
-                onAdd={onAddTask}
-            />
+            {!collapsed && (
+                <TaskLists
+                    tasks={group.tasks}
+                    groupId={group.id}
+                    onUpdate={onUpdateTask}
+                    onDelete={onDeleteTask}
+                    onAdd={onAddTask}
+                />
+            )}
         </div>
     );
 

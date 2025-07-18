@@ -1,4 +1,4 @@
-import { TaskHeader, TASK_STYLES } from './TaskUIComponents';
+import { TaskHeader, TaskDescription, TASK_STYLES } from './TaskUIComponents';
 import { TaskMetadata } from './TaskMetadata';
 import type { Task } from '../types';
 import { isEmpty, presets } from '../types';
@@ -17,13 +17,9 @@ export const TaskDisplay = ({
     const parsed = task;
     const isEmptyTask = isEmpty(parsed, presets.scheduled);
     const header = (_task: Task): string => {
-        if (_task.title && _task.description) {
-            return `${_task.title} - ${_task.description}`;
-        }
         return _task.title || _task.description || '';
     };
 
-    // <TaskDescription description={parsed.description} />
 
     return (
         <div
@@ -35,6 +31,7 @@ export const TaskDisplay = ({
             }}
             onDoubleClick={onDoubleClick}>
             <TaskHeader header={header(parsed)} isEmptyTask={isEmptyTask} onDelete={onDelete} />
+            <TaskDescription description={parsed.description} />
             <TaskMetadata
                 startTime={parsed.startTime}
                 startDate={parsed.startDate}
