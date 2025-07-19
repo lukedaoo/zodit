@@ -4,7 +4,6 @@ import { textToObject, objectToText } from '@lib/template/textTemplateProcessor.
 import { extractFields } from '@lib/field-extractor/fieldExtractor';
 import { resolveAlias, unwrapAlias } from '@lib/alias/timeAliasResolver';
 
-// Convert task object to text representation
 export const taskToText = (task: Partial<Task>, config?: any): string => {
     const resolveValue = (value: any) =>
         value?.alias ? String(value.alias) : JSON.stringify(value);
@@ -12,7 +11,6 @@ export const taskToText = (task: Partial<Task>, config?: any): string => {
     return objectToText<Task>(task as Task, config, undefined, resolveValue);
 };
 
-// Convert text to task object
 export const textToTask = (input: string, config: any): Partial<Task> => {
     const fallback = (obj: Partial<Task>) => {
         obj.title = input;
@@ -22,7 +20,6 @@ export const textToTask = (input: string, config: any): Partial<Task> => {
     return textToObject<Task>(input, config, undefined, fallback);
 };
 
-// Extract and resolve metadata fields from a task
 export const resolveMetadata = (task: Partial<Task>): Partial<Task> => {
     const meta = extractFields(task, ['startTime', 'startDate', 'endDate']);
     const result: Partial<Task> = {};
@@ -35,7 +32,6 @@ export const resolveMetadata = (task: Partial<Task>): Partial<Task> => {
     return result;
 };
 
-// Resolve task with extracted/resolved metadata
 export const resolveTaskWithMetadata = (task: Partial<Task>): Task => {
     const meta = resolveMetadata(task);
 
@@ -48,10 +44,11 @@ export const resolveTaskWithMetadata = (task: Partial<Task>): Task => {
     });
 };
 
-// Prepare task for display by unwrapping alias fields
-export const resolveTaskForDisplay = (task: Task): Task =>
-    unwrapAlias(task, [
+export const resolveTaskForDisplay = (task: Task): Task => {
+    return unwrapAlias(task, [
         { field: 'startTime' },
         { field: 'startDate' },
         { field: 'endDate' },
     ]);
+};
+

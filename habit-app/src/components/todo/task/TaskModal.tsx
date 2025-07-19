@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import type { Task } from '../types';
-import { resolveTaskWithMetadata } from './taskUtils';
 
 interface TaskModalProps {
     task: Task;
@@ -14,7 +13,7 @@ interface TaskModalProps {
 export const TaskModal = ({ task, isOpen, onClose, onSave, onDelete }: TaskModalProps) => {
     if (!isOpen) return null;
 
-    const runningTask = resolveTaskWithMetadata(task);
+    const runningTask = task;
     const [formData, setFormData] = useState<Task>(runningTask);
     const [isAnimating, setIsAnimating] = useState(false);
 

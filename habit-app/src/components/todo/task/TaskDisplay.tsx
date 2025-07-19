@@ -1,6 +1,7 @@
 import { TaskDescription, TASK_STYLES } from './TaskUIComponents';
 import { TaskHeaderWithModal } from './TaskHeaderWithModal';
 import { TaskMetadata } from './TaskMetadata';
+import { resolveTaskForDisplay } from './taskUtils';
 import type { Task } from '../types';
 
 interface TaskDisplayProps {
@@ -14,7 +15,7 @@ export const TaskDisplay = ({
     onDelete,
     onDoubleClick
 }: TaskDisplayProps) => {
-    const parsed = task;
+    const displayTask = resolveTaskForDisplay(task);
     return (
         <div
             className="p-4 rounded-lg border-2 relative space-y-2 cursor-pointer hover:bg-accent/10"
@@ -30,8 +31,8 @@ export const TaskDisplay = ({
                 onSave={(updatedTask) => { console.log(updatedTask); }}
                 onDelete={onDelete}
             />
-            <TaskDescription description={parsed.description} />
-            <TaskMetadata task={parsed} />
+            <TaskDescription description={displayTask.description} />
+            <TaskMetadata task={displayTask} />
         </div >
     );
 };

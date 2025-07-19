@@ -1,6 +1,5 @@
 import { Badge } from './TaskUIComponents';
 import { formatDate, formatTime } from '@common/utils';
-import { resolveTaskWithMetadata, resolveTaskForDisplay } from './taskUtils';
 import type { Task } from '../types';
 
 interface TaskMetadataProps {
@@ -10,22 +9,20 @@ interface TaskMetadataProps {
 export const TaskMetadata = ({
     task
 }: TaskMetadataProps) => {
-    const _task = resolveTaskWithMetadata(task);
-    const displayTask = resolveTaskForDisplay(_task);
-
-    const hasMetadata = displayTask.startTime || displayTask.startDate || displayTask.endDate;
+    if (!task) return null;
+    const hasMetadata = task.startTime || task.startDate || task.endDate;
     if (!hasMetadata) return null;
 
     return (
         <div className="text-xs flex flex-wrap gap-2 justify-end">
-            {displayTask.startTime && (
-                <Badge variant="primary">@ {formatTime(displayTask.startTime)}</Badge>
+            {task.startTime && (
+                <Badge variant="primary">@ {formatTime(task.startTime)}</Badge>
             )}
-            {displayTask.startDate && (
-                <Badge variant="success">Start: {formatDate(displayTask.startDate)}</Badge>
+            {task.startDate && (
+                <Badge variant="success">Start: {formatDate(task.startDate)}</Badge>
             )}
-            {displayTask.endDate && (
-                <Badge variant="warning">End: {formatDate(displayTask.endDate)}</Badge>
+            {task.endDate && (
+                <Badge variant="warning">End: {formatDate(task.endDate)}</Badge>
             )}
         </div>
     );
