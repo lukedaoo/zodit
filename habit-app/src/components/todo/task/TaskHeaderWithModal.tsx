@@ -1,4 +1,4 @@
-import { TaskModal } from './TaskModal';
+// import { TaskModal } from './TaskModal';
 import { TaskHeader } from './TaskUIComponents';
 import type { Task } from '../types';
 import { TYPE_UTILS as tu, presets } from '../types';
@@ -6,11 +6,11 @@ import { useState } from 'react';
 
 export const TaskHeaderWithModal = ({
     task,
-    onSave,
+    // onSave,
     onDelete,
 }: {
     task: Task;
-    onSave: (updated: Task) => void;
+    onSave?: (updated: Task) => void;
     onDelete: () => void;
 }) => {
     const [shouldOpenModal, setShouldOpenModal] = useState(false);
@@ -23,7 +23,7 @@ export const TaskHeaderWithModal = ({
                 onDelete={onDelete}
                 onExpand={() => setShouldOpenModal(!shouldOpenModal)}
             />
-            {shouldOpenModal &&
+            {/** shouldOpenModal &&
                 <TaskModal
                     task={task}
                     isOpen={shouldOpenModal}
@@ -31,7 +31,7 @@ export const TaskHeaderWithModal = ({
                     onSave={onSave}
                     onDelete={onDelete}
                 />
-            }
+           **/}
         </>
     );
 };

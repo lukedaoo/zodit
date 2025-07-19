@@ -28,7 +28,6 @@ export const TaskDisplay = ({
 
             <TaskHeaderWithModal
                 task={task}
-                onSave={(updatedTask) => { console.log(updatedTask); }}
                 onDelete={onDelete}
             />
             <TaskDescription description={displayTask.description} />

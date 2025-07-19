@@ -53,6 +53,7 @@ export const useTaskEditing = (
             }
 
             const nextBadge = badgeSpans[nextIndex] as HTMLElement;
+
             if (!nextBadge) return;
             const valueSpan = nextBadge.querySelector('.task-value');
             const range = document.createRange();
@@ -63,6 +64,7 @@ export const useTaskEditing = (
                 selection.addRange(range);
             } else {
                 const keySpan = nextBadge.querySelector('.task-key');
+
                 if (keySpan && keySpan.nextSibling) {
                     const colonNode = keySpan.nextSibling;
                     if (colonNode.nodeType === Node.TEXT_NODE && colonNode.textContent?.includes(':')) {

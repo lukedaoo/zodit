@@ -60,7 +60,7 @@ export const Badge = ({ children, variant = "primary" }: BadgeProps) => (
     </span>
 );
 
-export const TaskHeader = ({ header, isEmptyTask, onDelete, onExpand }: TaskHeaderProps) => {
+export const TaskHeader = ({ header, isEmptyTask, onDelete }: TaskHeaderProps) => {
     return (
         <div className="flex flex-col gap-1">
             <div className="flex justify-between items-start gap-2">
@@ -71,10 +71,12 @@ export const TaskHeader = ({ header, isEmptyTask, onDelete, onExpand }: TaskHead
                     {isEmptyTask ? 'Double click to update task' : header}
                 </h4>
                 <div className="flex items-center gap-2 shrink-0">
+                    { /**
                     <ExpandButton
                         onExpand={onExpand}
                         className="hover:text-green-700"
                     />
+                    **/}
                     <DeleteButton
                         onDelete={onDelete}
                         className="text-red-500 hover:text-red-700"
