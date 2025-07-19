@@ -57,7 +57,8 @@ export const TaskInput = ({
                 const trimmedPair = pair.trim();
                 if (!trimmedPair) return '';
 
-                const [key, val] = trimmedPair.split(':');
+                const [key, ...rest] = trimmedPair.split(':');
+                const val = rest.join(':');
                 if (key?.trim()) {
                     const keySpan = `<span class="task-key">${key.trim()}</span>`;
                     const valueSpan = val?.trim() ? `<span class="task-value">${val.trim()}</span>` : '';
