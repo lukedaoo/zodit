@@ -1,7 +1,7 @@
 import type { Task } from '../types';
 import { TYPE_UTILS as tu } from '../types';
 import { textToObject, objectToText } from '@lib/template/textTemplateProcessor.ts'
-import { extractMetadata } from '@lib/metadata/metaDataExtractor';
+import { extractFields } from '@lib/field-extractor/fieldExtractor';
 import { resolveAlias } from '@lib/alias/timeAliasResolver';
 
 export const taskToText = (task: any, config?: any): string => {
@@ -17,7 +17,7 @@ export const textToTask = (input: string, config: any): Partial<Task> => {
 };
 
 export const resoleMetadata = (task: Task): any => {
-    const meta = extractMetadata(task, ['startTime', 'startDate', 'endDate']);
+    const meta = extractFields(task, ['startTime', 'startDate', 'endDate']);
     const result: any = {};
 
     for (const [key, value] of Object.entries(meta)) {
