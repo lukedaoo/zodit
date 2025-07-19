@@ -1,4 +1,4 @@
-interface TimeAlias {
+interface Alias {
     id: string;
     alias: string;
     value: string; // Can be a date string, time string, or special value
@@ -6,7 +6,7 @@ interface TimeAlias {
     description?: string;
 }
 
-export const DEFAULT_ALIASES: TimeAlias[] = [
+export const DEFAULT_ALIASES: Alias[] = [
     { id: '1', alias: 'today', value: 'TODAY', type: 'date', description: 'Current date' },
     { id: '2', alias: 'tomorrow', value: 'TOMORROW', type: 'date', description: 'Next day' },
     { id: '3', alias: 'tmr', value: 'TOMORROW', type: 'date', description: 'Next day (short)' },
@@ -16,7 +16,7 @@ export const DEFAULT_ALIASES: TimeAlias[] = [
     { id: '7', alias: 'noon', value: '12:00', type: 'time', description: 'Noon' },
 ];
 
-export const resolveAlias = (input: string, aliases: TimeAlias[]): string | undefined => {
+export const resolveAlias = (input: string, aliases: Alias[] = DEFAULT_ALIASES): any | undefined => {
     if (!input || input.trim().length === 0) {
         return undefined;
     }
@@ -38,7 +38,7 @@ export const resolveAlias = (input: string, aliases: TimeAlias[]): string | unde
             });
         case 'EOD':
             const today = new Date().toISOString().split('T')[0];
-            return '23:59 ' + today;
+            return `23:59 ${today}`;
         default:
             return alias.value;
     }

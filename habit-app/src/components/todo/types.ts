@@ -1,3 +1,4 @@
+// update the metadatas if any
 export interface Task {
     id: string;
     title: string;
@@ -37,7 +38,7 @@ export const DEFAULT_TASK = {
     endDate: ''
 };
 
-export const isEmpty = (task: Task, config: any): boolean => {
+const isEmpty = (task: Task, config: any): boolean => {
     const keysToCheck = config.include ?? (Object.keys(task) as (keyof Task)[]);
 
     return !keysToCheck.some((key: keyof Task) => {
@@ -51,3 +52,16 @@ export const isEmpty = (task: Task, config: any): boolean => {
         return value != null;
     });
 };
+
+const trim = (task: Task): Task => {
+    return Object
+        .fromEntries(Object.entries(task)
+            .filter(([_, value]) => value !== null && value !== undefined)
+        ) as Task;
+};
+
+export const TYPE_UTILS = {
+    isEmpty,
+    trim
+}
+

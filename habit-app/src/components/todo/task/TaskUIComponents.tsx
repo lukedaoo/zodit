@@ -60,35 +60,36 @@ export const Badge = ({ children, variant = "primary" }: BadgeProps) => (
     </span>
 );
 
-export const TaskHeader = ({ header, isEmptyTask, onDelete, onExpand }: TaskHeaderProps) => (
-
-    <div className="flex flex-col gap-1">
-        <div className="flex justify-between items-start gap-2">
-            <h4
-                className={`font-semibold text-sm break-words ${isEmptyTask ? 'italic text-gray-500' : ''
-                    }`}
-            >
-                {isEmptyTask ? 'Double click to update task' : header}
-            </h4>
-            <div className="flex items-center gap-2 shrink-0">
-                <ExpandButton
-                    onExpand={onExpand}
-                    className="hover:text-green-700"
-                />
-                <DeleteButton
-                    onDelete={onDelete}
-                    className="text-red-500 hover:text-red-700"
-                />
+export const TaskHeader = ({ header, isEmptyTask, onDelete, onExpand }: TaskHeaderProps) => {
+    return (
+        <div className="flex flex-col gap-1">
+            <div className="flex justify-between items-start gap-2">
+                <h4
+                    className={`font-semibold text-sm break-words ${isEmptyTask ? 'italic text-gray-500' : ''
+                        }`}
+                >
+                    {isEmptyTask ? 'Double click to update task' : header}
+                </h4>
+                <div className="flex items-center gap-2 shrink-0">
+                    <ExpandButton
+                        onExpand={onExpand}
+                        className="hover:text-green-700"
+                    />
+                    <DeleteButton
+                        onDelete={onDelete}
+                        className="text-red-500 hover:text-red-700"
+                    />
+                </div>
             </div>
+
+            {isEmptyTask && (
+                <div className="text-center text-sm text-muted-foreground">
+                    To move canvas, hold left click and drag
+                </div>
+            )}
         </div>
-
-        {isEmptyTask && (
-            <div className="text-center text-sm text-muted-foreground">
-                To move canvas, hold left click and drag
-            </div>
-        )}
-    </div>
-);
+    );
+}
 
 export const TaskDescription = ({ description }: TaskDescriptionProps) => {
     if (!description) return null;

@@ -1,45 +1,37 @@
-import { useState, useEffect } from 'react';
 import { TaskModal } from './TaskModal';
 import { TaskHeader } from './TaskUIComponents';
 import type { Task } from '../types';
-import { isEmpty, presets } from '../types';
+import { TYPE_UTILS as tu, presets } from '../types';
+import { useState } from 'react';
 
 export const TaskHeaderWithModal = ({
     task,
     onSave,
     onDelete,
-    onModalToggle,
 }: {
     task: Task;
     onSave: (updated: Task) => void;
     onDelete: () => void;
-    onModalToggle?: (isOpen: boolean) => void;
 }) => {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const isEmptyTask = isEmpty(task, presets.scheduled);
-
-    useEffect(() => {
-        if (onModalToggle) {
-            onModalToggle(isModalOpen);
-        }
-    }, [isModalOpen, onModalToggle]);
-
-
+    const [shouldOpenModal, setShouldOpenModal] = useState(false);
+    const isEmptyTask = tu.isEmpty(task, presets.scheduled);
     return (
         <>
             <TaskHeader
                 header={task.title}
                 isEmptyTask={isEmptyTask}
                 onDelete={onDelete}
-                onExpand={() => setIsModalOpen(true)}
+                onExpand={() => setShouldOpenModal(!shouldOpenModal)}
             />
-            <TaskModal
-                task={task}
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onSave={onSave}
-                onDelete={onDelete}
-            />
+            {shouldOpenModal &&
+                <TaskModal
+                    task={task}
+                    isOpen={shouldOpenModal}
+                    onClose={() => setShouldOpenModal(!shouldOpenModal)}
+                    onSave={onSave}
+                    onDelete={onDelete}
+                />
+            }
         </>
     );
 };

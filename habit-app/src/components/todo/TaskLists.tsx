@@ -31,6 +31,7 @@ const TaskLists = ({ tasks, groupId, onUpdate, onDelete, onAdd }: Props) => {
                     isEditing={editingId === task.id}
                     onDelete={() => onDelete(task.id)}
                     onSubmit={(parsed) => {
+                        console.log('onSubmit', parsed);
                         parsed.id = task.id;
                         onUpdate(parsed.id, parsed);
                         setEditingId(null);

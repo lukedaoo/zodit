@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { DeleteButton, TASK_STYLES } from './TaskUIComponents';
-import { presets, isEmpty, DEFAULT_TASK } from '../types';
+import { presets, TYPE_UTILS as tu, DEFAULT_TASK } from '../types';
 import type { Task } from '../types';
 import { taskToText } from './taskUtils';
 
@@ -28,7 +28,7 @@ export const TaskInput = ({
     const useTemplate = get<boolean>(USE_TEMPLATE_WHEN_ADDING_TASK);
 
     const getTextValue = (_task: Task): string => {
-        const isEmptyTask = isEmpty(_task, presets.scheduled);
+        const isEmptyTask = tu.isEmpty(_task, presets.scheduled);
 
         let text;
         if (isEmptyTask && useTemplate) {
@@ -72,7 +72,7 @@ export const TaskInput = ({
             divRef.current.innerHTML = '';
             divRef.current?.setAttribute('data-placeholder', placeholder);
         }
-    }, [task, placeholder]);
+    }, [inputValue]);
 
     const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
         const text = e.currentTarget.innerText;

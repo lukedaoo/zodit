@@ -1,23 +1,21 @@
 import { Badge } from './TaskUIComponents';
 import { formatDate, formatTime } from '@common/utils';
-import { DEFAULT_ALIASES, resolveAlias } from '@lib/alias/timeAliasResolver';
+import { resolveTaskAsTask } from './taskUtils';
+import type { Task } from '../types';
 
 interface TaskMetadataProps {
-    startTime?: string;
-    startDate?: string;
-    endDate?: string;
-    aliases?: any;
+    task: Task;
 }
 
 export const TaskMetadata = ({
-    startTime,
-    startDate,
-    endDate,
-    aliases = DEFAULT_ALIASES
+    task
 }: TaskMetadataProps) => {
-    const resolvedStartTime = startTime ? resolveAlias(startTime, aliases) : undefined;
-    const resolvedStartDate = startDate ? resolveAlias(startDate, aliases) : undefined;
-    const resolvedEndDate = endDate ? resolveAlias(endDate, aliases) : undefined;
+    console.log('original, task', task);
+    const _task = resolveTaskAsTask(task);
+    console.log('showing metadata', _task);
+    const resolvedStartTime = _task.startTime;
+    const resolvedStartDate = _task.startDate;
+    const resolvedEndDate = _task.endDate;
 
     const hasMetadata = resolvedStartTime || resolvedStartDate || resolvedEndDate;
     if (!hasMetadata) return null;

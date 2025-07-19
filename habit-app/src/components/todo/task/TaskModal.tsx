@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import type { Task } from '../types';
+import { resolveTaskAsTask } from './taskUtils';
 
 interface TaskModalProps {
     task: Task;
@@ -11,36 +12,29 @@ interface TaskModalProps {
 }
 
 export const TaskModal = ({ task, isOpen, onClose, onSave, onDelete }: TaskModalProps) => {
-    const [formData, setFormData] = useState<Task>(task);
+    if (!isOpen) return null;
+
+    const runningTask = resolveTaskAsTask(task);
+    console.log('runningTask', runningTask);
+    const [formData, setFormData] = useState<Task>(runningTask);
     const [isAnimating, setIsAnimating] = useState(false);
+
+    const handleEscape = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+            handleClose();
+        }
+    };
 
     useEffect(() => {
         if (isOpen) {
             setIsAnimating(true);
             document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'unset';
-        }
-
-        return () => {
-            document.body.style.overflow = 'unset';
-        };
-    }, [isOpen]);
-
-    useEffect(() => {
-        const handleEscape = (e: KeyboardEvent) => {
-            if (e.key === 'Escape' && isOpen) {
-                handleClose();
-            }
-        };
-
-        if (isOpen) {
             document.addEventListener('keydown', handleEscape);
+            return () => {
+                document.removeEventListener('keydown', handleEscape);
+                document.body.style.overflow = 'unset';
+            };
         }
-
-        return () => {
-            document.removeEventListener('keydown', handleEscape);
-        };
     }, [isOpen]);
 
     const handleClose = () => {
@@ -62,18 +56,18 @@ export const TaskModal = ({ task, isOpen, onClose, onSave, onDelete }: TaskModal
         }));
     };
 
-    if (!isOpen) return null;
-
     return (
         <div
             className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-200 ${isAnimating ? 'bg-black/60 backdrop-blur-sm' : 'bg-black/0'
                 }`}
             onClick={handleClose}
+            onDoubleClick={(e) => e.stopPropagation()}
         >
             <div
                 className={`card w-full max-w-2xl transform transition-all duration-200 ${isAnimating ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
                     } shadow-2xl`}
                 onClick={(e) => e.stopPropagation()}
+                onDoubleClick={(e) => e.stopPropagation()}
             >
                 {/* Card Header */}
                 <div className="card-header">
@@ -205,7 +199,7 @@ export const TaskModal = ({ task, isOpen, onClose, onSave, onDelete }: TaskModal
                                         onDelete();
                                         handleClose();
                                     }}
-                                    className="btn btn-destructive btn-md"
+                                    className="btn btn-destructive btn-md font-semibold"
                                 >
                                     Delete Task
                                 </button>
