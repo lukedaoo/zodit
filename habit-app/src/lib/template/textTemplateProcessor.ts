@@ -41,14 +41,26 @@ export const generateTemplate = <T>(
 export const objectToText = <T>(
     obj: T,
     config: FieldConfig<T> = {},
-    separator?: string
+    separator?: string,
+    valueObjectProcessor?: (value: any) => any
 ): string => {
     const finalSeparator = separator ?? getUserSeparator();
     const fields = getObjectFields(obj, config);
 
     return fields.map(field => {
         const value = (obj as any)[field];
-        const displayValue = value !== undefined && value !== null ? String(value).trim() : '';
+        const notNull = value !== undefined && value !== null;
+        let displayValue;
+        if (notNull && typeof value === 'object') {
+            displayValue = valueObjectProcessor?.(value) ?? value;
+        } else if (notNull) {
+            displayValue = String(value);
+        }
+
+        // if (displayValue == undefined || displayValue === null || displayValue === '\n') {
+        //     return null;
+        // }
+
         if (displayValue === '\n') {
             return null;
         }

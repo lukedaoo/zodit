@@ -41,3 +41,4 @@ export const splitFields = <
         [othersKey]: others,
     } as Record<K1 | K2, any>;
 };
+

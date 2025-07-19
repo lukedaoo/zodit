@@ -16,31 +16,100 @@ export const DEFAULT_ALIASES: Alias[] = [
     { id: '7', alias: 'noon', value: '12:00', type: 'time', description: 'Noon' },
 ];
 
-export const resolveAlias = (input: string, aliases: Alias[] = DEFAULT_ALIASES): any | undefined => {
-    if (!input || input.trim().length === 0) {
-        return undefined;
+export const resolveAlias = (input: string, aliases: Alias[] = DEFAULT_ALIASES): { alias: string; resolved: any; } | string | undefined => {
+    const trimmed = input.trim();
+    if (!trimmed) return undefined;
+
+    const alias = aliases.find(a => a.alias.toLowerCase() === trimmed.toLowerCase());
+    if (!alias) {
+        return trimmed;
     }
-    const alias = aliases.find(a => a.alias.toLowerCase() === input.trim().toLowerCase());
-    if (!alias) return input;
+    let resolved: any;
 
     switch (alias.value) {
         case 'TODAY':
-            return new Date().toISOString().split('T')[0];
-        case 'TOMORROW':
+            resolved = new Date().toISOString().split('T')[0];
+            break;
+        case 'TOMORROW': {
             const tomorrow = new Date();
             tomorrow.setDate(tomorrow.getDate() + 1);
-            return tomorrow.toISOString().split('T')[0];
+            resolved = tomorrow.toISOString().split('T')[0];
+            break;
+        }
         case 'NOW':
-            return new Date().toLocaleTimeString('en-US', {
+            resolved = new Date().toLocaleTimeString('en-US', {
                 hour12: false,
                 hour: '2-digit',
-                minute: '2-digit'
+                minute: '2-digit',
             });
-        case 'EOD':
+            break;
+        case 'EOD': {
             const today = new Date().toISOString().split('T')[0];
-            return `23:59 ${today}`;
+            resolved = { at: '23:59', date: today };
+            break;
+        }
         default:
-            return alias.value;
+            resolved = alias.value;
     }
+
+    return {
+        alias: alias.alias,
+        resolved
+    };
 };
 
+type AliasWrapper<T = any> = {
+    alias: string;
+    resolved: T;
+};
+
+function unwrapField(
+    value: any,
+    objResolver?: (data: any) => any
+): any {
+    if (
+        value &&
+        typeof value === 'object' &&
+        'alias' in value &&
+        'resolved' in value
+    ) {
+        const data = (value as AliasWrapper).resolved;
+
+        if (
+            typeof data === 'string' ||
+            typeof data === 'number' ||
+            typeof data === 'boolean'
+        ) {
+            return data;
+        }
+
+        if (typeof data === 'object' && data !== null) {
+            return objResolver
+                ? objResolver(data)
+                : Object.values(data).join(' ');
+        }
+
+        return data;
+    }
+
+    return value;
+}
+
+export const unwrapAlias = <T extends object>(
+    input: T,
+    fieldsToUnwrap: {
+        field: keyof T;
+        resolver?: (data: any) => any;
+    }[]
+): T => {
+    const result = { ...input };
+
+    for (const { field, resolver } of fieldsToUnwrap) {
+        const value = input[field];
+        if (value && result[field]) {
+            result[field] = unwrapField(value, resolver);
+        }
+    }
+
+    return result;
+};

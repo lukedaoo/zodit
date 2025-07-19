@@ -23,7 +23,7 @@ const TaskItem = ({
         isEditing
     );
 
-    if (isEditing) {
+    if (isEditing && isEditing == true) {
         return (
             <TaskInput
                 task={task}

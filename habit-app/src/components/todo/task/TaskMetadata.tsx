@@ -1,6 +1,6 @@
 import { Badge } from './TaskUIComponents';
 import { formatDate, formatTime } from '@common/utils';
-import { resolveTaskAsTask } from './taskUtils';
+import { resolveTaskWithMetadata, resolveTaskForDisplay } from './taskUtils';
 import type { Task } from '../types';
 
 interface TaskMetadataProps {
@@ -10,26 +10,22 @@ interface TaskMetadataProps {
 export const TaskMetadata = ({
     task
 }: TaskMetadataProps) => {
-    console.log('original, task', task);
-    const _task = resolveTaskAsTask(task);
-    console.log('showing metadata', _task);
-    const resolvedStartTime = _task.startTime;
-    const resolvedStartDate = _task.startDate;
-    const resolvedEndDate = _task.endDate;
+    const _task = resolveTaskWithMetadata(task);
+    const displayTask = resolveTaskForDisplay(_task);
 
-    const hasMetadata = resolvedStartTime || resolvedStartDate || resolvedEndDate;
+    const hasMetadata = displayTask.startTime || displayTask.startDate || displayTask.endDate;
     if (!hasMetadata) return null;
 
     return (
         <div className="text-xs flex flex-wrap gap-2 justify-end">
-            {resolvedStartTime && (
-                <Badge variant="primary">@ {formatTime(resolvedStartTime)}</Badge>
+            {displayTask.startTime && (
+                <Badge variant="primary">@ {formatTime(displayTask.startTime)}</Badge>
             )}
-            {resolvedStartDate && (
-                <Badge variant="success">Start: {formatDate(resolvedStartDate)}</Badge>
+            {displayTask.startDate && (
+                <Badge variant="success">Start: {formatDate(displayTask.startDate)}</Badge>
             )}
-            {resolvedEndDate && (
-                <Badge variant="warning">End: {formatDate(resolvedEndDate)}</Badge>
+            {displayTask.endDate && (
+                <Badge variant="warning">End: {formatDate(displayTask.endDate)}</Badge>
             )}
         </div>
     );

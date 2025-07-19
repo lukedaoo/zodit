@@ -24,21 +24,21 @@ const TaskLists = ({ tasks, groupId, onUpdate, onDelete, onAdd }: Props) => {
 
     return (
         <div className="ml-8 space-y-3">
-            {visibleTasks.map((task) => (
-                <TaskItem
-                    key={`${groupId}/${task.id}`}
-                    task={task}
-                    isEditing={editingId === task.id}
-                    onDelete={() => onDelete(task.id)}
-                    onSubmit={(parsed) => {
-                        console.log('onSubmit', parsed);
-                        parsed.id = task.id;
-                        onUpdate(parsed.id, parsed);
-                        setEditingId(null);
-                    }}
-                    onDoubleClick={() => setEditingId(task.id)}
-                />
-            ))}
+            {visibleTasks
+                .map((task) => (
+                    <TaskItem
+                        key={`${groupId}/${task.id}`}
+                        task={task}
+                        isEditing={editingId === task.id}
+                        onDelete={() => onDelete(task.id)}
+                        onSubmit={(parsed) => {
+                            parsed.id = task.id;
+                            onUpdate(parsed.id, parsed);
+                            setEditingId(null);
+                        }}
+                        onDoubleClick={() => setEditingId(task.id)}
+                    />
+                ))}
 
             {shouldCollapse && (
                 <button

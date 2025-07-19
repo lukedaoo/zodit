@@ -4,7 +4,11 @@ import { presets, TYPE_UTILS as tu, DEFAULT_TASK } from '../types';
 import type { Task } from '../types';
 import { taskToText } from './taskUtils';
 
-import { USE_TEMPLATE_WHEN_ADDING_TASK } from '@user-prefs/const';
+import {
+    USE_TEMPLATE_WHEN_ADDING_TASK,
+    SEPARATOR_PREF_KEY
+} from '@user-prefs/const';
+
 import { useUserSettings } from '@hooks/useUserSettings';
 
 interface TaskInputProps {
@@ -26,6 +30,7 @@ export const TaskInput = ({
 }: TaskInputProps) => {
     const { get } = useUserSettings();
     const useTemplate = get<boolean>(USE_TEMPLATE_WHEN_ADDING_TASK);
+    const separator = get<string>(SEPARATOR_PREF_KEY);
 
     const getTextValue = (_task: Task): string => {
         const isEmptyTask = tu.isEmpty(_task, presets.scheduled);
@@ -46,7 +51,7 @@ export const TaskInput = ({
 
     const renderStyledHTML = (task: Task): string => {
         const text = getTextValue(task);
-        const pairs = text.split(';').filter(Boolean);
+        const pairs = text.split(separator).filter(Boolean);
         return pairs
             .map(pair => {
                 const trimmedPair = pair.trim();
@@ -75,8 +80,9 @@ export const TaskInput = ({
     }, [inputValue]);
 
     const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
-        const text = e.currentTarget.innerText;
-        onInputChange(text);
+        const raw = e.currentTarget.innerText;
+        const flattened = raw.replace(/[\r\n]+/g, ''); // remove newlines characters
+        onInputChange(flattened);
     };
 
     return (

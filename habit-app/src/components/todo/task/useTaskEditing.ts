@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { textToTask } from './taskUtils';
+import { textToTask, resolveTaskWithMetadata } from './taskUtils';
 import { presets } from '../types';
 
 export const useTaskEditing = (
@@ -19,7 +19,7 @@ export const useTaskEditing = (
         try {
             let config = presets.scheduled;
             const parsed = textToTask(value.trim(), config);
-            onSubmit(parsed);
+            onSubmit(resolveTaskWithMetadata(parsed));
         } catch (err) {
             console.error('Error parsing task:', err);
         }
