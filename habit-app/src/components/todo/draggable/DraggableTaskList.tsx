@@ -67,13 +67,12 @@ export const DraggableTaskList = ({
         }
     };
 
-    // Order only visible tasks according to taskOrder
     const orderedTasks = taskOrder
         .map((id) => visibleTasks.find((t) => t.id === id))
         .filter(Boolean) as Task[];
 
     return (
-        <div className="ml-1 space-y-3">
+        <div className="ml-6 space-y-3">
             <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <SortableContext
                     items={orderedTasks.map((task) => task.id)}
@@ -95,19 +94,30 @@ export const DraggableTaskList = ({
                     ))}
                 </SortableContext>
             </DndContext>
-
             {shouldCollapse && (
-                <button
-                    className="text-sm text-blue-500 hover:underline"
-                    onClick={toggle}
-                >
-                    {showAllTasks
-                        ? 'Show Less'
-                        : `Show All (${tasks.length})`}
-                </button>
+                <div className="flex items-center space-x-2">
+                    <div className="w-6"></div>
+                    <div className="flex-1">
+                        <button
+                            className="text-sm text-blue-500 hover:underline"
+                            onClick={toggle}
+                        >
+                            {showAllTasks
+                                ? 'Show Less'
+                                : `Show All (${tasks.length})`}
+                        </button>
+                    </div>
+                </div>
             )}
+            <div className="flex items-center space-x-2">
+                <div className="w-6"></div>
+                <div className="flex-1">
+                    <AddTaskButton onClick={() => {
+                        onAdd();
+                    }} />
+                </div>
+            </div>
 
-            <AddTaskButton onClick={onAdd} />
         </div>
     );
 };

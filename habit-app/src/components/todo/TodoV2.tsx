@@ -1,6 +1,6 @@
 import React from 'react';
 import { AddGroupButton } from './AddButtonComponents';
-import GroupLists from './GroupLists';
+import { DraggableGroupList } from './draggable/DraggableGroupList';
 import { useTodo } from './useTodo';
 
 const Todo: React.FC = () => {
@@ -12,21 +12,24 @@ const Todo: React.FC = () => {
         addTask,
         updateTask,
         deleteTask,
+        reorderTask,
+        reorderGroup
     } = useTodo();
 
     return (
         <div className="min-h-screen p-8 space-y-6">
             <div className="max-w-3xl mx-auto space-y-8">
-
                 <AddGroupButton onClick={addGroup} />
 
-                <GroupLists
+                <DraggableGroupList
                     groups={groups}
                     onUpdateGroupName={updateGroupName}
                     onUpdateTask={updateTask}
                     onDeleteGroup={deleteGroup}
                     onDeleteTask={deleteTask}
                     onAddTask={addTask}
+                    onReorderTask={reorderTask}
+                    onReorderGroup={reorderGroup}
                 />
             </div>
         </div>

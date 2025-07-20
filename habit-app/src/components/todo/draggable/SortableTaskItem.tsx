@@ -1,9 +1,7 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical } from 'lucide-react';
-import { TaskInput } from '../task/TaskInput';
-import { TaskDisplay } from '../task/TaskDisplay';
-import { useTaskEditing } from '../task/useTaskEditing';
+import TaskItem from '../TaskItem';
 import type { Task } from '../types';
 
 interface TaskItemProps {
@@ -21,12 +19,6 @@ export const SortableTaskItem = ({
     onSubmit,
     onDoubleClick
 }: TaskItemProps) => {
-    const { inputValue, setInputValue, inputRef, handleKeyDown } = useTaskEditing(
-        onSubmit,
-        isEditing,
-        task
-    );
-
     const {
         attributes,
         listeners,
@@ -58,23 +50,13 @@ export const SortableTaskItem = ({
                     <GripVertical size={16} />
                 </button>
                 <div className="flex-1">
-                    {isEditing ? (
-                        <TaskInput
-                            task={task}
-                            inputValue={inputValue}
-                            onInputChange={setInputValue}
-                            onKeyDown={handleKeyDown}
-                            onDelete={onDelete}
-                            inputRef={inputRef}
-                        />
-                    ) : (
-                        <TaskDisplay
-                            task={task}
-                            onChangeStatus={(status) => onSubmit({ ...task, completed: status })}
-                            onDelete={onDelete}
-                            onDoubleClick={onDoubleClick}
-                        />
-                    )}
+                    <TaskItem
+                        task={task}
+                        onDelete={onDelete}
+                        isEditing={isEditing}
+                        onSubmit={onSubmit}
+                        onDoubleClick={onDoubleClick}
+                    />
                 </div>
             </div>
         </div>
