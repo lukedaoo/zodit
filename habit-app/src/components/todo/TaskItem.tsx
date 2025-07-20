@@ -18,11 +18,12 @@ const TaskItem = ({
     onSubmit,
     onDoubleClick
 }: TaskItemProps) => {
+
     const { inputValue, setInputValue, inputRef, handleKeyDown } = useTaskEditing(
         onSubmit,
-        isEditing
+        isEditing,
+        task
     );
-
     if (isEditing && isEditing == true) {
         return (
             <TaskInput
@@ -39,6 +40,7 @@ const TaskItem = ({
     return (
         <TaskDisplay
             task={task}
+            onChangeStatus={(status) => onSubmit({ ...task, completed: status })}
             onDelete={onDelete}
             onDoubleClick={onDoubleClick}
         />

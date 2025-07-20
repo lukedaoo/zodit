@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { resolveAlias, unwrapAlias } from './timeAliasResolver';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { resolveAlias, unwrapAlias, validateAlias } from './timeAliasResolver';
 
 describe('resolveAlias', () => {
     it('returns undefined for empty input', () => {
@@ -119,5 +119,385 @@ describe('unwrapAlias', () => {
         const result = unwrapAlias(input, [{ field: 'note' }]);
 
         expect(result.note).toEqual({ text: 'Hi' });
+    });
+});
+
+describe('validateAlias', () => {
+    beforeEach(() => {
+        // Mock Date for consistent testing
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date('2024-07-19T10:30:00Z'));
+    });
+
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
+    describe('alias not found', () => {
+        it('should return face value when alias definition not found', () => {
+            const input = { alias: 'unknown', resolved: 'some-value' };
+            const result = validateAlias(input);
+
+            expect(result).toEqual({
+                isAligned: true,
+                alias: 'unknown',
+                resolved: 'some-value'
+            });
+        });
+
+        it('should return original object values when alias not found', () => {
+            const input = { alias: 'unknown', resolved: { date: '2024-07-19', time: '10:30' } };
+            const result = validateAlias(input);
+
+            expect(result).toEqual({
+                isAligned: true,
+                alias: 'unknown',
+                resolved: { date: '2024-07-19', time: '10:30' }
+            });
+        });
+    });
+
+    describe('static aliases (still valid)', () => {
+        it('should return current resolved value for midnight', () => {
+            const input = { alias: 'midnight', resolved: '00:00' };
+            const result = validateAlias(input);
+
+            expect(result).toEqual({
+                isAligned: true,
+                alias: 'midnight',
+                resolved: '00:00'
+            });
+        });
+
+        it('should return current resolved value for noon', () => {
+            const input = { alias: 'noon', resolved: '12:00' };
+            const result = validateAlias(input);
+
+            expect(result).toEqual({
+                isAligned: true,
+                alias: 'noon',
+                resolved: '12:00'
+            });
+        });
+
+        it('should handle case insensitive aliases', () => {
+            const input = { alias: 'MIDNIGHT', resolved: '00:00' };
+            const result = validateAlias(input);
+
+            expect(result).toEqual({
+                isAligned: true,
+                alias: 'MIDNIGHT',
+                resolved: '00:00'
+            });
+        });
+    });
+
+    describe('static aliases (outdated)', () => {
+        it('should return face value when static alias value is wrong', () => {
+            const input = { alias: 'midnight', resolved: '01:00' };
+            const result = validateAlias(input);
+
+            expect(result).toEqual({
+                isAligned: false,
+                alias: 'midnight',
+                resolved: '01:00'
+            });
+        });
+
+        it('should return face value when noon alias value is wrong', () => {
+            const input = { alias: 'noon', resolved: '11:30' };
+            const result = validateAlias(input);
+
+            expect(result).toEqual({
+                isAligned: false,
+                alias: 'noon',
+                resolved: '11:30'
+            });
+        });
+    });
+
+    describe('TODAY alias', () => {
+        it('should return current resolved value when TODAY is still valid', () => {
+            const input = { alias: 'today', resolved: '2024-07-19' };
+            const result = validateAlias(input);
+
+            expect(result).toEqual({
+                isAligned: true,
+                alias: 'today',
+                resolved: '2024-07-19'
+            });
+        });
+
+        it('should return face value when TODAY is outdated', () => {
+            const input = { alias: 'today', resolved: '2024-07-18' };
+            const result = validateAlias(input);
+
+            expect(result).toEqual({
+                isAligned: false,
+                alias: 'today',
+                resolved: '2024-07-18'
+            });
+        });
+    });
+
+    describe('TOMORROW alias', () => {
+        it('should return current resolved value when TOMORROW is still valid', () => {
+            const input = { alias: 'tomorrow', resolved: '2024-07-20' };
+            const result = validateAlias(input);
+
+            expect(result).toEqual({
+                isAligned: true,
+                alias: 'tomorrow',
+                resolved: '2024-07-20'
+            });
+        });
+
+        it('should return face value when TOMORROW is outdated', () => {
+            const input = { alias: 'tmr', resolved: '2024-07-19' };
+            const result = validateAlias(input);
+
+            expect(result).toEqual({
+                isAligned: false,
+                alias: 'tmr',
+                resolved: '2024-07-19'
+            });
+        });
+    });
+
+    describe('NOW alias', () => {
+        it('should return current resolved value when NOW matches current time', () => {
+            const currentTime = new Date().toLocaleTimeString('en-US', {
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+            });
+            const input = { alias: 'now', resolved: currentTime };
+            const result = validateAlias(input);
+
+            expect(result).toEqual({
+                isAligned: true,
+                alias: 'now',
+                resolved: currentTime
+            });
+        });
+
+        it('should return face value when NOW is outdated', () => {
+            const input = { alias: 'now', resolved: '09:15' };
+            const result = validateAlias(input);
+
+            expect(result).toEqual({
+                isAligned: false,
+                alias: 'now',
+                resolved: '09:15'
+            });
+        });
+    });
+
+    describe('EOD alias', () => {
+        it('should return current resolved value when EOD is still valid', () => {
+            const input = {
+                alias: 'eod',
+                resolved: { at: '23:59', date: '2024-07-19' }
+            };
+            const result = validateAlias(input);
+
+            expect(result).toEqual({
+                isAligned: true,
+                alias: 'eod',
+                resolved: { at: '23:59', date: '2024-07-19' }
+            });
+        });
+
+        it('should return face value when EOD date is outdated', () => {
+            const input = {
+                alias: 'eod',
+                resolved: { at: '23:59', date: '2024-07-18' }
+            };
+            const result = validateAlias(input);
+
+            expect(result).toEqual({
+                isAligned: false,
+                alias: 'eod',
+                resolved: { at: '23:59', date: '2024-07-18' }
+            });
+        });
+
+        it('should return face value when EOD time is different', () => {
+            const input = {
+                alias: 'eod',
+                resolved: { at: '18:00', date: '2024-07-19' }
+            };
+            const result = validateAlias(input);
+
+            expect(result).toEqual({
+                isAligned: false,
+                alias: 'eod',
+                resolved: { at: '18:00', date: '2024-07-19' }
+            });
+        });
+    });
+
+    describe('custom aliases', () => {
+        const customAliases = [
+            { id: '1', alias: 'custom', value: 'CUSTOM_VALUE', type: 'date' as const },
+            { id: '2', alias: 'special', value: 'TODAY', type: 'date' as const }
+        ];
+
+        it('should work with custom static aliases', () => {
+            const input = { alias: 'custom', resolved: 'CUSTOM_VALUE' };
+            const result = validateAlias(input, customAliases);
+
+            expect(result).toEqual({
+                isAligned: true,
+                alias: 'custom',
+                resolved: 'CUSTOM_VALUE'
+            });
+        });
+
+        it('should work with custom aliases that use special values', () => {
+            const input = { alias: 'special', resolved: '2024-07-19' };
+            const result = validateAlias(input, customAliases);
+
+            expect(result).toEqual({
+                isAligned: true,
+                alias: 'special',
+                resolved: '2024-07-19'
+            });
+        });
+
+        it('should work with custom aliases that use special values but not align the date', () => {
+            const input = { alias: 'special', resolved: '2024-07-20' };
+            const result = validateAlias(input, customAliases);
+
+            expect(result).toEqual({
+                isAligned: false,
+                alias: 'special',
+                resolved: '2024-07-20'
+            });
+        });
+
+
+        it('should return face value for unknown custom alias', () => {
+            const input = { alias: 'unknown', resolved: 'some-value' };
+            const result = validateAlias(input, customAliases);
+
+            expect(result).toEqual({
+                isAligned: true,
+                alias: 'unknown',
+                resolved: 'some-value'
+            });
+        });
+    });
+
+    describe('edge cases', () => {
+        it('should handle null resolved values', () => {
+            const input = { alias: 'today', resolved: null };
+            const result = validateAlias(input);
+
+            expect(result).toEqual({
+                isAligned: false,
+                alias: 'today',
+                resolved: null
+            });
+        });
+
+        it('should handle undefined resolved values', () => {
+            const input = { alias: 'today', resolved: undefined };
+            const result = validateAlias(input);
+
+            expect(result).toEqual({
+                isAligned: false,
+                alias: 'today',
+                resolved: undefined
+            });
+        });
+
+        it('should handle number resolved values', () => {
+            const input = { alias: 'today', resolved: 123 };
+            const result = validateAlias(input);
+
+            expect(result).toEqual({
+                isAligned: false,
+                alias: 'today',
+                resolved: 123
+            });
+        });
+
+        it('should handle boolean resolved values', () => {
+            const input = { alias: 'today', resolved: false };
+            const result = validateAlias(input);
+
+            expect(result).toEqual({
+                isAligned: false,
+                alias: 'today',
+                resolved: false
+            });
+        });
+
+        it('should handle empty aliases array', () => {
+            const input = { alias: 'today', resolved: '2024-07-19' };
+            const result = validateAlias(input, []);
+
+            expect(result).toEqual({
+                isAligned: true,
+                alias: 'today',
+                resolved: '2024-07-19'
+            });
+        });
+
+        it('should handle complex nested objects', () => {
+            const complexObject = {
+                nested: {
+                    deep: 'value',
+                    array: [1, 2, 3]
+                }
+            };
+            const input = {
+                alias: 'unknown',
+                resolved: complexObject
+            };
+            const result = validateAlias(input);
+
+            expect(result).toEqual({
+                isAligned: true,
+                alias: 'unknown',
+                resolved: complexObject
+            });
+        });
+    });
+
+    describe('time changes during validation', () => {
+        it('should detect when time has moved forward', () => {
+            // Set initial time
+            vi.setSystemTime(new Date('2024-07-19T10:30:00Z'));
+
+            const input = { alias: 'now', resolved: '10:30' };
+
+            // Move time forward
+            vi.setSystemTime(new Date('2024-07-19T10:31:00Z'));
+
+            const result = validateAlias(input);
+
+            expect(result).toEqual({
+                isAligned: false,
+                alias: 'now',
+                resolved: '10:30' // Should return face value as it's no longer current
+            });
+        });
+
+        it('should detect when date has changed', () => {
+            const input = { alias: 'today', resolved: '2024-07-19' };
+
+            // Move to next day
+            vi.setSystemTime(new Date('2024-07-20T00:00:00Z'));
+
+            const result = validateAlias(input);
+
+            expect(result).toEqual({
+                isAligned: false,
+                alias: 'today',
+                resolved: '2024-07-19' // Should return face value as date has changed
+            });
+        });
     });
 });

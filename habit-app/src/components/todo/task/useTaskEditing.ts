@@ -1,25 +1,36 @@
 import { useState, useEffect, useRef } from 'react';
-import { textToTask, resolveTaskWithMetadata } from './taskUtils';
+import { textToTask, taskToText, resolveTaskWithMetadata } from './taskUtils';
 import { presets } from '../types';
+import type { Task } from '../types';
+
 
 export const useTaskEditing = (
     onSubmit: (task: any) => void,
-    isEditing: boolean
+    isEditing: boolean,
+    task?: Task
 ) => {
     const [inputValue, setInputValue] = useState('');
     const inputRef = useRef<HTMLInputElement | HTMLDivElement>(null);
 
     useEffect(() => {
-        if (isEditing && inputRef.current) {
-            inputRef.current.focus();
+        if (isEditing && task) {
+            setInputValue(taskToText(task as Partial<Task>, presets.scheduled));
+            inputRef.current?.focus();
         }
-    }, [isEditing]);
+    }, [isEditing, task]);
 
     const handleSubmit = (value: string) => {
         try {
             let config = presets.scheduled;
             const parsed = textToTask(value.trim(), config);
-            onSubmit(resolveTaskWithMetadata(parsed));
+            const resolved = resolveTaskWithMetadata(parsed);
+
+            const finalTask = {
+                ...task,
+                ...resolved,
+                completed: resolved.completed ?? task?.completed
+            };
+            onSubmit(finalTask);
         } catch (err) {
             console.error('Error parsing task:', err);
         }

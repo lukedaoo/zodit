@@ -1,26 +1,24 @@
-// import { TaskModal } from './TaskModal';
 import { TaskHeader } from './TaskUIComponents';
 import type { Task } from '../types';
-import { TYPE_UTILS as tu, presets } from '../types';
 import { useState } from 'react';
 
 export const TaskHeaderWithModal = ({
     task,
-    // onSave,
+    onChangeStatus,
     onDelete,
 }: {
     task: Task;
+    onChangeStatus: (value: boolean) => void;
     onSave?: (updated: Task) => void;
     onDelete: () => void;
 }) => {
     const [shouldOpenModal, setShouldOpenModal] = useState(false);
-    const isEmptyTask = tu.isEmpty(task, presets.scheduled);
     return (
         <>
             <TaskHeader
-                header={task.title}
-                isEmptyTask={isEmptyTask}
+                task={task}
                 onDelete={onDelete}
+                onUpdate={onChangeStatus}
                 onExpand={() => setShouldOpenModal(!shouldOpenModal)}
             />
             {/** shouldOpenModal &&

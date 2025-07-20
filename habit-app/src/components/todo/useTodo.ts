@@ -2,14 +2,37 @@ import { useState, useEffect } from 'react';
 import type { Group } from './types';
 
 export const useTodo = () => {
-    const [groups, setGroups] = useState<Group[]>([]);
+
+    const GROUP_DATABASE: Group[] = [];
+    // [
+    //     {
+    //         id: '1',
+    //         name: 'Group 1',
+    //         tasks: [{
+    //             id: '1', title: 'Task 1', completed: false,
+    //             startDate: {
+    //                 alias: 'today',
+    //                 resolved: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString().split('T')[0],
+    //             } as any
+    //         },
+    //         {
+    //             id: '2', title: 'Task 2', completed: false,
+    //             startDate: {
+    //                 alias: 'tmr',
+    //                 resolved: new Date(new Date().setDate(new Date().getDate() + 3)).toISOString().split('T')[0],
+    //             } as any
+    //         }]
+    //     }
+    // ];
+
+    const [groups, setGroups] = useState<Group[]>([...GROUP_DATABASE]);
 
     const generateId = () => {
         return "id#" + Math.random().toString(16).slice(2);
     };
 
     useEffect(() => {
-        console.log('updated groups', groups);
+        console.debug('updated groups', groups);
     }, [groups]);
 
 

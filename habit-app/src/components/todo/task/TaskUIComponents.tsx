@@ -1,4 +1,8 @@
 import { X, Settings2 } from 'lucide-react';
+import type { Task } from '../types';
+import { TYPE_UTILS as tu, presets } from '../types';
+
+import { ToggleSwitch } from '@components/gadget/ToggleSwitch';
 
 interface DeleteButtonProps {
     onDelete: () => void;
@@ -16,10 +20,10 @@ interface BadgeProps {
 }
 
 interface TaskHeaderProps {
-    header: string;
-    isEmptyTask: boolean;
+    task: Task;
     onExpand: () => void;
     onDelete: () => void;
+    onUpdate: (value: boolean) => void;
 }
 
 interface TaskDescriptionProps {
@@ -60,7 +64,13 @@ export const Badge = ({ children, variant = "primary" }: BadgeProps) => (
     </span>
 );
 
-export const TaskHeader = ({ header, isEmptyTask, onDelete }: TaskHeaderProps) => {
+export const TaskHeader = ({ task, onDelete, onUpdate }: TaskHeaderProps) => {
+
+    if (!task) return null;
+
+    const header = task.title;
+    const isEmptyTask = tu.isEmpty(task, presets.scheduled);
+
     return (
         <div className="flex flex-col gap-1">
             <div className="flex justify-between items-start gap-2">
@@ -73,10 +83,18 @@ export const TaskHeader = ({ header, isEmptyTask, onDelete }: TaskHeaderProps) =
                 <div className="flex items-center gap-2 shrink-0">
                     { /**
                     <ExpandButton
-                        onExpand={onExpand}
+                        onExpand={onExpand} // to open the modal
                         className="hover:text-green-700"
                     />
                     **/}
+
+                    <ToggleSwitch
+                        checked={task.completed}
+                        onChange={onUpdate}
+                        disabled={isEmptyTask}
+                        className="ml-2"
+                    />
+
                     <DeleteButton
                         onDelete={onDelete}
                         className="text-red-500 hover:text-red-700"

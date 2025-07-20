@@ -19,8 +19,8 @@ export const presets = {
     basic: { include: ['title', 'description', 'completed'] as (keyof Task)[] },
 
     scheduled: {
-        include: ['title', 'description', 'startTime', 'startDate', 'endDate'] as (keyof Task)[],
-        order: ['title', 'description', 'startDate', 'startTime', 'endDate'] as (keyof Task)[],
+        include: ['title', 'description', 'startTime', 'startDate', 'endDate', 'completed'] as (keyof Task)[],
+        order: ['title', 'description', 'startDate', 'startTime', 'endDate', 'completed'] as (keyof Task)[],
     },
 
     full: { exclude: ['id'] as (keyof Task)[] },
@@ -59,9 +59,8 @@ const trim = (task: Task): Task => {
             .filter(([_, value]) => value !== null && value !== undefined)
         ) as Task;
 };
-
 export const TYPE_UTILS = {
     isEmpty,
-    trim
+    trim,
 }
 

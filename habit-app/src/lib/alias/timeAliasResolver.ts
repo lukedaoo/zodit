@@ -58,6 +58,66 @@ export const resolveAlias = (input: string, aliases: Alias[] = DEFAULT_ALIASES):
     };
 };
 
+const deepEqual = (a: any, b: any): boolean => {
+    if (a === b) return true;
+    if (a == null || b == null) return a === b;
+    if (typeof a !== typeof b) return false;
+
+    if (typeof a === 'object') {
+        const keysA = Object.keys(a);
+        const keysB = Object.keys(b);
+
+        if (keysA.length !== keysB.length) return false;
+
+        return keysA.every(key => deepEqual(a[key], b[key]));
+    }
+
+    return false;
+};
+
+export const validateAlias = (
+    input: { alias: string; resolved: any },
+    aliases: Alias[] = DEFAULT_ALIASES
+): { isAligned: boolean; alias: string; resolved: any; } => {
+    const { alias, resolved } = input;
+
+    const aliasDefinition = aliases.find(a => a.alias.toLowerCase() === alias.toLowerCase());
+
+    if (!aliasDefinition) {
+        return {
+            isAligned: true,
+            alias,
+            resolved: resolved
+        }
+    }
+
+    const currentResult = resolveAlias(alias, aliases);
+
+    // If resolveAlias returns a string, it means the alias wasn't found or returned the input
+    // If it returns an object, extract the resolved value
+    const currentResolution = typeof currentResult === 'object' && currentResult !== null
+        ? currentResult.resolved
+        : currentResult;
+
+    // Compare resolved value with current resolution
+    const isAligned = deepEqual(resolved, currentResolution);
+
+    if (isAligned) {
+        // Still valid - return current resolved value
+        return {
+            isAligned,
+            alias,
+            resolved: currentResolution
+        };
+    } else {
+        return {
+            isAligned,
+            alias,
+            resolved: resolved
+        };
+    }
+};
+
 type AliasWrapper<T = any> = {
     alias: string;
     resolved: T;
