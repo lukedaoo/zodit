@@ -4,6 +4,7 @@ import GroupLists from './GroupLists';
 import { useTodo } from './useTodo';
 
 
+
 const Todo: React.FC = () => {
     const {
         groups,
@@ -13,7 +14,6 @@ const Todo: React.FC = () => {
         addTask,
         updateTask,
         deleteTask,
-        reorderTask
     } = useTodo();
 
     return (
@@ -34,7 +34,6 @@ const Todo: React.FC = () => {
                     onDeleteGroup={deleteGroup}
                     onDeleteTask={deleteTask}
                     onAddTask={addTask}
-                    onReorderTask={reorderTask}
                 />
             </div>
         </div>

@@ -27,7 +27,7 @@ interface Props {
     onReorderTask: (newOrder: string[]) => void;
 }
 
-export const SortableTaskLists = ({
+export const DraggableTaskList = ({
     tasks,
     groupId,
     onUpdate,

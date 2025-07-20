@@ -29,7 +29,7 @@ const TaskLists = ({ tasks, groupId, onUpdate, onDelete, onAdd }: Props) => {
     } = useCollapsibleList(tasks, threshold);
 
     return (
-        <div className="ml-1 space-y-3">
+        <div className="ml-8 space-y-3">
             {visibleTasks
                 .map((task) => (
                     <TaskItem

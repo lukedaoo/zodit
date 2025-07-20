@@ -1,6 +1,6 @@
 import '../App.css';
 import { SwitchTheme } from '@components/gadget/SwitchTheme';
-import Todo from '@components/todo/Todo';
+import Todo from '@components/todo/TodoV1';
 
 const HomePage: React.FC = () => {
 

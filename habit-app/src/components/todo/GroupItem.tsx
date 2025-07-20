@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { X, ChevronDown, ChevronUp } from 'lucide-react';
-import { SortableTaskLists } from './sortable/SortableTaskLists';
 import type { Group } from './types';
+import TaskLists from './TaskLists';
 
 interface Props {
     group: Group;
@@ -10,8 +10,6 @@ interface Props {
     onUpdateTask: (taskId: string, task: Partial<any>) => void;
     onDeleteTask: (taskId: string) => void;
     onAddTask: () => void;
-
-    onReorderTask: (newOrder: string[]) => void;
 }
 
 const GroupItem = ({
@@ -21,7 +19,6 @@ const GroupItem = ({
     onUpdateTask,
     onDeleteTask,
     onAddTask,
-    onReorderTask
 }: Props) => {
     const [collapsed, setCollapsed] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -77,13 +74,12 @@ const GroupItem = ({
             </div>
 
             {!collapsed && (
-                <SortableTaskLists
+                <TaskLists
                     tasks={group.tasks}
                     groupId={group.id}
                     onUpdate={onUpdateTask}
                     onDelete={onDeleteTask}
                     onAdd={onAddTask}
-                    onReorderTask={onReorderTask}
                 />
             )}
         </div>
