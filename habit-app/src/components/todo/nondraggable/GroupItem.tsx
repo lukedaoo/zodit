@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { X, ChevronDown, ChevronUp } from 'lucide-react';
-import type { Group } from './types';
+import type { Group } from '../types';
 import TaskLists from './TaskLists';
 
 interface Props {

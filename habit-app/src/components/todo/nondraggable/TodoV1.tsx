@@ -1,7 +1,7 @@
 import React from 'react';
-import { AddGroupButton } from './AddButtonComponents';
+import { AddGroupButton } from '../AddButtonComponents';
 import GroupLists from './GroupLists';
-import { useTodo } from './useTodo';
+import { useTodo } from '../useTodo';
 
 const Todo: React.FC = () => {
     const {

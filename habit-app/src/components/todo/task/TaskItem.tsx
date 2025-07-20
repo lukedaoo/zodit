@@ -1,7 +1,7 @@
-import { TaskInput } from './task/TaskInput';
-import { TaskDisplay } from './task/TaskDisplay';
-import { useTaskEditing } from './task/useTaskEditing';
-import type { Task } from './types';
+import { TaskInput } from './TaskInput';
+import { TaskDisplay } from './TaskDisplay';
+import { useTaskEditing } from './useTaskEditing';
+import type { Task } from '../types';
 
 interface TaskItemProps {
     task: Task;
@@ -11,7 +11,7 @@ interface TaskItemProps {
     onDoubleClick: () => void;
 }
 
-const TaskItem = ({
+export const TaskItem = ({
     task,
     onDelete,
     isEditing,
@@ -46,5 +46,3 @@ const TaskItem = ({
         />
     );
 };
-
-export default TaskItem;

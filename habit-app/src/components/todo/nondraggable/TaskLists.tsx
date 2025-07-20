@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import TaskItem from './TaskItem';
-import { AddTaskButton } from './AddButtonComponents.tsx';
-import type { Task } from './types';
+import { TaskItem } from '../task/TaskItem';
+import { AddTaskButton } from '../AddButtonComponents.tsx';
+import type { Task } from '../types';
 
 import { TASK_COLLAPSE_THRESHOLD } from '@user-prefs/const';
 import { useCollapsibleList } from '@hooks/useCollapsibleList';

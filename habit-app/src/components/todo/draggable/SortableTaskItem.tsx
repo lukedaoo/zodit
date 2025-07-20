@@ -1,7 +1,7 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical } from 'lucide-react';
-import TaskItem from '../TaskItem';
+import { TaskItem } from '../task/TaskItem';
 import type { Task } from '../types';
 
 interface TaskItemProps {

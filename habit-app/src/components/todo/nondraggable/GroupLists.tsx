@@ -1,4 +1,4 @@
-import type { Group } from './types';
+import type { Group } from '../types';
 import GroupItem from './GroupItem';
 
 import { GROUP_COLLAPSE_THRESHOLD } from '@user-prefs/const';

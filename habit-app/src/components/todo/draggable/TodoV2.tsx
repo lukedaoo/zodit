@@ -1,7 +1,7 @@
 import React from 'react';
-import { AddGroupButton } from './AddButtonComponents';
-import { DraggableGroupList } from './draggable/DraggableGroupList';
-import { useTodo } from './useTodo';
+import { AddGroupButton } from '../AddButtonComponents';
+import { DraggableGroupList } from './DraggableGroupList';
+import { useTodo } from '../useTodo';
 
 const Todo: React.FC = () => {
     const {
