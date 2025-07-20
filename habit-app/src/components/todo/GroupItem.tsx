@@ -21,6 +21,19 @@ const GroupItem = ({
     onAddTask
 }: Props) => {
     const [collapsed, setCollapsed] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+
+    const handleDoubleClick = () => {
+        setIsEditing(true);
+    };
+
+    const handleBlur = () => {
+        setIsEditing(false);
+        if (group.name.length === 0) {
+            onUpdateName('Untitled');
+        }
+    };
+
     return (
         <div className="space-y-3">
             <div className="relative">
@@ -28,7 +41,16 @@ const GroupItem = ({
                     type="text"
                     value={group.name}
                     onChange={(e) => onUpdateName(e.target.value)}
-                    className="w-full p-4 rounded-lg border-1 bg-transparent focus:outline-none focus:ring-2"
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                            setIsEditing(false);
+                        }
+                    }}
+                    onDoubleClick={handleDoubleClick}
+                    onBlur={handleBlur}
+                    className={`w-full p-4 rounded-lg border-1 bg-transparent focus:outline-none ${isEditing ? 'focus:ring-2' : ''
+                        } ${!isEditing ? 'cursor-pointer' : ''}`}
+                    readOnly={!isEditing}
                     style={{
                         borderColor: 'var(--color-primary-500)',
                         color: 'var(--color-foreground)',

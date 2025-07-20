@@ -3,7 +3,7 @@ import type { Group } from './types';
 
 export const useTodo = () => {
 
-    const GROUP_DATABASE: Group[] = [];
+    let GROUP_DATABASE: Group[] = [];
     // [
     //     {
     //         id: '1',
@@ -25,14 +25,14 @@ export const useTodo = () => {
     //     }
     // ];
 
-    const [groups, setGroups] = useState<Group[]>([...GROUP_DATABASE]);
+    const [groups, setGroups] = useState<Group[]>(GROUP_DATABASE);
 
     const generateId = () => {
         return "id#" + Math.random().toString(16).slice(2);
     };
 
     useEffect(() => {
-        console.debug('updated groups', groups);
+        console.log('updated groups', groups);
     }, [groups]);
 
 
@@ -47,7 +47,9 @@ export const useTodo = () => {
     };
 
     const updateGroupName = (groupId: string, newName: string) => {
-        setGroups(groups.map((g) => (g.id === groupId ? { ...g, name: newName } : g)));
+        setGroups((prev) =>
+            prev.map((g) => (g.id === groupId ? { ...g, name: newName } : g))
+        );
     };
 
     const deleteGroup = (groupId: string) => {

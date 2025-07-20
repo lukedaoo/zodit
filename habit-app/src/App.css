@@ -97,18 +97,18 @@
     }
 }
 
-/* Light Theme Override */
+/* Light Theme Override – Fully Grayscale */
 [data-theme="light"] {
-    --color-background: #ffffff;
+    --color-background: #d1d1d1;
     --color-foreground: #1a1a1a;
-    --color-muted: #f8fafc;
-    --color-muted-foreground: #64748b;
-    --color-card: #ffffff;
+    --color-muted: #bfbfbf;
+    --color-muted-foreground: #333333;
+    --color-card: #d9d9d9;
     --color-card-foreground: #1a1a1a;
-    --color-popover: #ffffff;
+    --color-popover: #d9d9d9;
     --color-popover-foreground: #1a1a1a;
-    --color-border: #b5a6ff;
-    --color-input: #b5a6ff;
+    --color-border: #a3a3a3;
+    --color-input: #b3b3b3;
 }
 
 /* Base Styles */

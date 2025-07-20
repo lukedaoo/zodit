@@ -26,7 +26,7 @@ export const ToggleSwitch = ({
     >
         <span
             className={`
-        inline-block h-3 w-3 transform rounded-full bg-white shadow transition-transform
+        inline-block h-3 w-3 transform rounded-full bg-gray-200 shadow transition-transform
         ${checked ? 'translate-x-5' : 'translate-x-1'}
       `}
         />
