@@ -26,13 +26,9 @@ export const useTheme = () => {
         applyTheme(newTheme);
     };
 
-
     useEffect(() => {
-        console.log('useTheme useEffect', theme);
         applyTheme(theme);
     }, [theme]);
-
-
 
     const toggleTheme = () => {
         const newTheme: Theme = theme === 'dark' ? 'light' : 'dark';

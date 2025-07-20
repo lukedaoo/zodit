@@ -32,7 +32,6 @@ export const useTodo = () => {
     };
 
     useEffect(() => {
-        console.log('updated groups', groups);
     }, [groups]);
 
 

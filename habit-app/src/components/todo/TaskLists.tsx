@@ -3,6 +3,10 @@ import TaskItem from './TaskItem';
 import { AddTaskButton } from './AddButtonComponents.tsx';
 import type { Task } from './types';
 
+import { TASK_COLLAPSE_THRESHOLD } from '@user-prefs/const';
+import { useCollapsibleList } from '@hooks/useCollapsibleList';
+import { useUserSettings } from '@hooks/useUserSettings';
+
 interface Props {
     tasks: Task[];
     groupId: string;
@@ -11,16 +15,18 @@ interface Props {
     onAdd: () => void;
 }
 
-const COLLAPSE_THRESHOLD = 3;
-
 const TaskLists = ({ tasks, groupId, onUpdate, onDelete, onAdd }: Props) => {
     const [editingId, setEditingId] = useState<string | null>(null);
-    const [collapsed, setCollapsed] = useState(true);
 
-    const shouldCollapse = tasks.length > COLLAPSE_THRESHOLD;
-    const visibleTasks = collapsed && shouldCollapse
-        ? tasks.slice(0, COLLAPSE_THRESHOLD)
-        : tasks;
+    const { get } = useUserSettings();
+    const threshold = get(TASK_COLLAPSE_THRESHOLD);
+
+    const {
+        visibleItems: visibleTasks,
+        expanded: showAllTasks,
+        shouldCollapse,
+        toggle
+    } = useCollapsibleList(tasks, threshold);
 
     return (
         <div className="ml-8 space-y-3">
@@ -43,9 +49,11 @@ const TaskLists = ({ tasks, groupId, onUpdate, onDelete, onAdd }: Props) => {
             {shouldCollapse && (
                 <button
                     className="text-sm text-blue-500 hover:underline"
-                    onClick={() => setCollapsed(!collapsed)}
+                    onClick={toggle}
                 >
-                    {collapsed ? `Show All (${tasks.length})` : 'Show Less'}
+                    {showAllTasks
+                        ? 'Show Less'
+                        : `Show All (${tasks.length})`}
                 </button>
             )}
 

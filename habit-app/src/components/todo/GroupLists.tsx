@@ -1,6 +1,9 @@
-import { useState } from 'react';
 import type { Group } from './types';
 import GroupItem from './GroupItem';
+
+import { GROUP_COLLAPSE_THRESHOLD } from '@user-prefs/const';
+import { useCollapsibleList } from '@hooks/useCollapsibleList';
+import { useUserSettings } from '@hooks/useUserSettings';
 
 interface Props {
     groups: Group[];
@@ -11,8 +14,6 @@ interface Props {
     onAddTask: (groupId: string) => void;
 }
 
-const GROUP_COLLAPSE_THRESHOLD = 3;
-
 const GroupLists = ({
     groups,
     onUpdateGroupName,
@@ -21,12 +22,15 @@ const GroupLists = ({
     onDeleteTask,
     onAddTask
 }: Props) => {
-    const [showAllGroups, setShowAllGroups] = useState(false);
+    const { get } = useUserSettings();
+    const threshold = get(GROUP_COLLAPSE_THRESHOLD);
 
-    const shouldCollapseGroups = groups.length > GROUP_COLLAPSE_THRESHOLD;
-    const visibleGroups = showAllGroups || !shouldCollapseGroups
-        ? groups
-        : groups.slice(0, GROUP_COLLAPSE_THRESHOLD);
+    const {
+        visibleItems: visibleGroups,
+        expanded: showAllGroups,
+        shouldCollapse,
+        toggle
+    } = useCollapsibleList(groups, threshold);
 
     return (
         <div className="space-y-6">
@@ -34,8 +38,6 @@ const GroupLists = ({
                 <GroupItem
                     key={group.id}
                     group={group}
-                    // onToggleCollapse={() => { }}
-                    // isCollapsed={false}
                     onUpdateName={(name) => onUpdateGroupName(group.id, name)}
                     onUpdateTask={(taskId, task) => onUpdateTask(group.id, taskId, task)}
                     onDelete={() => onDeleteGroup(group.id)}
@@ -44,9 +46,9 @@ const GroupLists = ({
                 />
             ))}
 
-            {shouldCollapseGroups && (
+            {shouldCollapse && (
                 <button
-                    onClick={() => setShowAllGroups(!showAllGroups)}
+                    onClick={toggle}
                     className="text-sm text-blue-500 hover:underline mt-2"
                 >
                     {showAllGroups

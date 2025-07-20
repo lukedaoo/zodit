@@ -17,3 +17,13 @@ export const USER_THEME = {
     key: 'user_theme',
     defaultValue: 'dark'
 }
+
+export const GROUP_COLLAPSE_THRESHOLD: ConstPref = {
+    key: 'group_collapse_threshold',
+    defaultValue: 3
+}
+
+export const TASK_COLLAPSE_THRESHOLD: ConstPref = {
+    key: 'task_collapse_threshold',
+    defaultValue: 3
+}

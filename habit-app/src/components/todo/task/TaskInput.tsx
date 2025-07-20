@@ -28,6 +28,7 @@ export const TaskInput = ({
     onDelete,
     inputRef
 }: TaskInputProps) => {
+
     const { get } = useUserSettings();
     const useTemplate = get<boolean>(USE_TEMPLATE_WHEN_ADDING_TASK);
     const separator = get<string>(SEPARATOR_PREF_KEY);
@@ -43,11 +44,9 @@ export const TaskInput = ({
         }
         return text;
     }
-
+    const placeholder = taskToText(DEFAULT_TASK, presets.scheduled);
     const internalRef = useRef<HTMLDivElement>(null);
     const divRef = inputRef ?? internalRef;
-
-    const placeholder = taskToText(DEFAULT_TASK, presets.scheduled);
 
     const renderStyledHTML = (task: Task): string => {
         const text = getTextValue(task);
