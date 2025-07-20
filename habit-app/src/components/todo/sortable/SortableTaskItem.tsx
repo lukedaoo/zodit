@@ -33,12 +33,12 @@ export const SortableTaskItem = ({
         setNodeRef,
         setActivatorNodeRef,
         transform,
-        transition,
-    } = useSortable({ id: task.id });
+    } = useSortable({
+        id: task.id,
+    });
 
     const style = {
         transform: CSS.Transform.toString(transform),
-        transition,
         touchAction: 'manipulation',
     };
 

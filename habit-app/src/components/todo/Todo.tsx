@@ -12,7 +12,8 @@ const Todo: React.FC = () => {
         deleteGroup,
         addTask,
         updateTask,
-        deleteTask
+        deleteTask,
+        reorderTask
     } = useTodo();
 
     return (
@@ -33,6 +34,7 @@ const Todo: React.FC = () => {
                     onDeleteGroup={deleteGroup}
                     onDeleteTask={deleteTask}
                     onAddTask={addTask}
+                    onReorderTask={reorderTask}
                 />
             </div>
         </div>

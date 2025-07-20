@@ -3,6 +3,10 @@ import { SortableTaskItem } from './SortableTaskItem.tsx';
 import { AddTaskButton } from '../AddButtonComponents';
 import type { Task } from '../types';
 
+import { TASK_COLLAPSE_THRESHOLD } from '@user-prefs/const';
+import { useCollapsibleList } from '@hooks/useCollapsibleList';
+import { useUserSettings } from '@hooks/useUserSettings';
+
 import {
     DndContext,
     closestCenter,
@@ -20,6 +24,7 @@ interface Props {
     onUpdate: (taskId: string, updates: Partial<any>) => void;
     onDelete: (taskId: string) => void;
     onAdd: () => void;
+    onReorderTask: (newOrder: string[]) => void;
 }
 
 export const SortableTaskLists = ({
@@ -28,14 +33,25 @@ export const SortableTaskLists = ({
     onUpdate,
     onDelete,
     onAdd,
+    onReorderTask,
 }: Props) => {
     const [editingId, setEditingId] = useState<string | null>(null);
+
+    const { get } = useUserSettings();
+    const threshold = get(TASK_COLLAPSE_THRESHOLD);
+
+    const {
+        visibleItems: visibleTasks,
+        expanded: showAllTasks,
+        shouldCollapse,
+        toggle
+    } = useCollapsibleList(tasks, threshold);
+
     const [taskOrder, setTaskOrder] = useState<string[]>([]);
 
     useEffect(() => {
-        // Reset order whenever tasks change
-        setTaskOrder(tasks.map((t) => t.id));
-    }, [tasks]);
+        setTaskOrder(visibleTasks.map((t) => t.id));
+    }, [visibleTasks]);
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
@@ -47,15 +63,17 @@ export const SortableTaskLists = ({
         if (oldIndex !== -1 && newIndex !== -1) {
             const newOrder = arrayMove(taskOrder, oldIndex, newIndex);
             setTaskOrder(newOrder);
+            onReorderTask(newOrder);
         }
     };
 
+    // Order only visible tasks according to taskOrder
     const orderedTasks = taskOrder
-        .map((id) => tasks.find((t) => t.id === id))
+        .map((id) => visibleTasks.find((t) => t.id === id))
         .filter(Boolean) as Task[];
 
     return (
-        <div className="ml-8 space-y-3">
+        <div className="ml-1 space-y-3">
             <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <SortableContext
                     items={orderedTasks.map((task) => task.id)}
@@ -77,6 +95,17 @@ export const SortableTaskLists = ({
                     ))}
                 </SortableContext>
             </DndContext>
+
+            {shouldCollapse && (
+                <button
+                    className="text-sm text-blue-500 hover:underline"
+                    onClick={toggle}
+                >
+                    {showAllTasks
+                        ? 'Show Less'
+                        : `Show All (${tasks.length})`}
+                </button>
+            )}
 
             <AddTaskButton onClick={onAdd} />
         </div>

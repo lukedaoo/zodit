@@ -32,6 +32,7 @@ export const useTodo = () => {
     };
 
     useEffect(() => {
+        console.log('groups.tasks', groups[0]?.tasks);
     }, [groups]);
 
 
@@ -98,6 +99,21 @@ export const useTodo = () => {
         ));
     };
 
+    const reorderTask = (groupId: string, newOrder: string[]) => {
+        setGroups((prevGroups) =>
+            prevGroups.map((group) => {
+                if (group.id !== groupId) return group;
+
+                const taskMap = new Map(group.tasks.map((task) => [task.id, task]));
+                const reorderedTasks = newOrder.map((id) => taskMap.get(id)).filter(Boolean) as any;
+
+                return {
+                    ...group,
+                    tasks: reorderedTasks,
+                };
+            })
+        );
+    };
     return {
         groups,
         addGroup,
@@ -105,6 +121,7 @@ export const useTodo = () => {
         deleteGroup,
         addTask,
         updateTask,
-        deleteTask
+        deleteTask,
+        reorderTask
     };
 };

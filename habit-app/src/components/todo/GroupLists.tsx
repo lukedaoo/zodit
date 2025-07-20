@@ -12,6 +12,8 @@ interface Props {
     onUpdateTask: (groupId: string, taskId: string, updates: Partial<any>) => void;
     onDeleteTask: (groupId: string, taskId: string) => void;
     onAddTask: (groupId: string) => void;
+
+    onReorderTask: (groupId: string, newOrder: string[]) => void;
 }
 
 const GroupLists = ({
@@ -20,7 +22,8 @@ const GroupLists = ({
     onDeleteGroup,
     onUpdateTask,
     onDeleteTask,
-    onAddTask
+    onAddTask,
+    onReorderTask,
 }: Props) => {
     const { get } = useUserSettings();
     const threshold = get(GROUP_COLLAPSE_THRESHOLD);
@@ -43,6 +46,7 @@ const GroupLists = ({
                     onDelete={() => onDeleteGroup(group.id)}
                     onDeleteTask={(taskId) => onDeleteTask(group.id, taskId)}
                     onAddTask={() => onAddTask(group.id)}
+                    onReorderTask={(newOrder) => onReorderTask(group.id, newOrder)}
                 />
             ))}
 

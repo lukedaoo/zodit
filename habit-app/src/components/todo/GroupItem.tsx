@@ -10,6 +10,8 @@ interface Props {
     onUpdateTask: (taskId: string, task: Partial<any>) => void;
     onDeleteTask: (taskId: string) => void;
     onAddTask: () => void;
+
+    onReorderTask: (newOrder: string[]) => void;
 }
 
 const GroupItem = ({
@@ -18,7 +20,8 @@ const GroupItem = ({
     onUpdateName,
     onUpdateTask,
     onDeleteTask,
-    onAddTask
+    onAddTask,
+    onReorderTask
 }: Props) => {
     const [collapsed, setCollapsed] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -80,6 +83,7 @@ const GroupItem = ({
                     onUpdate={onUpdateTask}
                     onDelete={onDeleteTask}
                     onAdd={onAddTask}
+                    onReorderTask={onReorderTask}
                 />
             )}
         </div>
