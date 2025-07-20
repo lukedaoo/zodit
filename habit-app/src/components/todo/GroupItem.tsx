@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { X, ChevronDown, ChevronUp } from 'lucide-react';
-import TaskLists from './TaskLists';
+import { SortableTaskLists } from './sortable/SortableTaskLists';
 import type { Group } from './types';
 
 interface Props {
@@ -74,7 +74,7 @@ const GroupItem = ({
             </div>
 
             {!collapsed && (
-                <TaskLists
+                <SortableTaskLists
                     tasks={group.tasks}
                     groupId={group.id}
                     onUpdate={onUpdateTask}
