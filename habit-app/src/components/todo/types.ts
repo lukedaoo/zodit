@@ -7,6 +7,8 @@ export interface Task {
     startTime?: string;
     startDate?: string;
     endDate?: string | any;
+
+    createDate?: string;
 }
 
 export interface Group {

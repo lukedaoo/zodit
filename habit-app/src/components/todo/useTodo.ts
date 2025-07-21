@@ -41,7 +41,7 @@ export const useTodo = () => {
     const addGroup = () => {
         const newGroup: Group = {
             id: generateId('group'),
-            name: `Group ${groups.length + 1}`,
+            name: "Untitled",
             tasks: []
         };
         setGroups([...groups, newGroup]);

@@ -104,7 +104,7 @@ export const TaskHeader = ({ task, onDelete, onUpdate }: TaskHeaderProps) => {
 
             {isEmptyTask && (
                 <div className="text-center text-sm text-muted-foreground">
-                    To move canvas, hold left click and drag
+                    To move task, hold left click on the drag indicator button and drag.
                 </div>
             )}
         </div>

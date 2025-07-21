@@ -518,3 +518,66 @@ input[type="date"] {
     color: #a0aec0;
     pointer-events: none;
 }
+
+/*Navbar*/
+.navbar {
+    background-color: var(--color-background);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.nav-item {
+    color: var(--color-muted-foreground);
+    transition: all 0.2s ease;
+}
+
+.nav-item:hover {
+    color: var(--color-foreground);
+}
+
+.nav-item.active {
+    color: var(--color-foreground);
+    border-bottom-color: var(--color-accent-500);
+}
+
+.theme-btn {
+    color: var(--color-muted-foreground);
+    background-color: transparent;
+}
+
+.theme-btn:hover {
+    color: var(--color-foreground);
+    background-color: var(--color-muted);
+}
+
+.user-avatar {
+    background-color: var(--color-accent-500);
+    color: white;
+}
+
+.user-avatar:hover {
+    opacity: 0.9;
+}
+
+.search-btn {
+    color: var(--color-muted-foreground);
+    background-color: transparent;
+}
+
+.search-btn:hover {
+    color: var(--color-foreground);
+    background-color: var(--color-muted);
+}
+
+.user-menu {
+    background-color: var(--color-popover);
+    border: 1px solid var(--color-border);
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.user-menu-item {
+    color: var(--color-foreground);
+}
+
+.user-menu-item:hover {
+    background-color: var(--color-muted);
+}
