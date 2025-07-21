@@ -3,6 +3,8 @@ import { AddGroupButton } from '../AddButtonComponents';
 import { DraggableGroupList } from './DraggableGroupList';
 import { useTodo } from '../useTodo';
 
+import { GreetingNav } from '@components/gadget/GreetingNav';
+
 import { DndContext, DragOverlay, rectIntersection } from '@dnd-kit/core';
 import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
@@ -87,6 +89,7 @@ const Todo: React.FC = () => {
     return (
         <div className="space-y-6">
             <div className="max-w-3xl mx-auto space-y-8">
+                <GreetingNav onChangeDate={(date) => { console.log('date', date); }} />
                 <AddGroupButton onClick={addGroup} />
 
                 <DndContext

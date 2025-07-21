@@ -1,0 +1,172 @@
+/* Mantine DatePicker Dark Theme Override */
+.mantine-DatePicker-root {
+    background-color: var(--color-popover) !important;
+    border-radius: var(--radius) !important;
+}
+
+/* Fix the popover dropdown to fit the box */
+.mantine-Popover-dropdown {
+    background-color: var(--color-popover) !important;
+    border: 2px solid var(--color-border) !important;
+    border-radius: var(--radius) !important;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
+    padding: 8px !important;
+    max-width: 100% !important;
+    width: auto !important;
+    min-width: 250px !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    /* Center the entire dropdown content */
+}
+
+.mantine-DatePicker-presets,
+.mantine-DatePicker-presetsList {
+    display: flex !important;
+    justify-content: center !important;
+    /* Horizontal */
+    align-items: center !important;
+    /* Vertical */
+    gap: 4px !important;
+    margin-bottom: 8px !important;
+    width: 100% !important;
+    min-height: 40px !important;
+    /* Set height to allow vertical centering */
+    text-align: center !important;
+}
+
+.mantine-DatePicker-preset,
+.mantine-DatePicker-presetItem {
+    background-color: var(--color-muted) !important;
+    color: var(--color-foreground) !important;
+    padding: 4px 8px !important;
+    border-radius: var(--radius) !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    /* Prevent text wrapping */
+}
+
+.mantine-DatePicker-preset:hover,
+.mantine-DatePicker-presetItem:hover {
+    background-color: var(--color-primary-500) !important;
+    color: white !important;
+}
+
+/* Center align the calendar content */
+.mantine-DatePicker-month {
+    background-color: var(--color-popover) !important;
+    color: var(--color-foreground) !important;
+    margin: 0 auto !important;
+    text-align: center !important;
+}
+
+/* Center the calendar header */
+.mantine-DatePicker-calendarHeader {
+    background-color: var(--color-popover) !important;
+    color: var(--color-foreground) !important;
+    justify-content: center !important;
+    align-items: center !important;
+    text-align: center !important;
+}
+
+/* Style month and year list items */
+.mantine-DatePicker-monthsListItem,
+.mantine-DatePicker-yearsListItem {
+    background-color: var(--color-popover) !important;
+    color: var(--color-foreground) !important;
+}
+
+.mantine-DatePicker-monthsListItem:hover,
+.mantine-DatePicker-yearsListItem:hover {
+    background-color: var(--color-muted) !important;
+}
+
+/* Style calendar header controls */
+.mantine-DatePicker-calendarHeaderControl {
+    background-color: transparent !important;
+    color: var(--color-foreground) !important;
+    border: none !important;
+}
+
+.mantine-DatePicker-calendarHeaderControl:hover {
+    background-color: var(--color-muted) !important;
+}
+
+/* Style calendar header level */
+.mantine-DatePicker-calendarHeaderLevel {
+    background-color: transparent !important;
+    color: var(--color-foreground) !important;
+    border: none !important;
+}
+
+.mantine-DatePicker-calendarHeaderLevel:hover {
+    background-color: var(--color-muted) !important;
+}
+
+/* Style weekdays and days */
+.mantine-DatePicker-weekday {
+    color: var(--color-muted-foreground) !important;
+    background-color: var(--color-popover) !important;
+}
+
+.mantine-DatePicker-day {
+    background-color: transparent !important;
+    color: var(--color-foreground) !important;
+    border: none !important;
+}
+
+.mantine-DatePicker-day:hover {
+    background-color: var(--color-muted) !important;
+}
+
+.mantine-DatePicker-day[data-selected] {
+    background-color: var(--color-primary-500) !important;
+    color: white !important;
+}
+
+.mantine-DatePicker-day[data-outside] {
+    color: var(--color-muted-foreground) !important;
+    opacity: 0.5;
+}
+
+.mantine-DatePicker-day[data-weekend] {
+    color: var(--color-foreground) !important;
+}
+
+/* Calendar grid center alignment */
+.mantine-DatePicker-monthThead,
+.mantine-DatePicker-monthTbody {
+    text-align: center !important;
+}
+
+/* Center weekday headers and day cells */
+.mantine-DatePicker-weekdaysRow,
+.mantine-DatePicker-monthRow {
+    justify-content: center !important;
+}
+
+/* Style popover arrow */
+.mantine-Popover-arrow {
+    border-color: var(--color-border) !important;
+    background-color: var(--color-popover) !important;
+}
+
+/* Style month and year selection lists */
+.mantine-DatePicker-monthsList,
+.mantine-DatePicker-yearsList {
+    background-color: var(--color-popover) !important;
+}
+
+/* Additional styling for input */
+.mantine-DatePicker-input {
+    background-color: var(--color-background) !important;
+    color: var(--color-foreground) !important;
+    border-color: var(--color-border) !important;
+    width: 100% !important;
+}
+
+.mantine-DatePicker-input:focus {
+    border-color: var(--color-primary-500) !important;
+    box-shadow: 0 0 0 2px rgba(123, 82, 240, 0.2) !important;
+}

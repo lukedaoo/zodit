@@ -43,7 +43,15 @@ export const ScrollButton = () => {
                 right: '20px',
                 transition: 'background-color 0.3s',
             }}
-            className="btn p-3 rounded-full btn-primary"
+            onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--color-primary-500)';
+                e.currentTarget.style.color = 'white';
+            }}
+            onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.color = 'var(--color-foreground)';
+            }}
+            className="btn p-3 rounded-full"
         >
             {isAtBottom ? <ArrowUpFromDot size={20} /> : <ArrowDownToDot size={20} />}
         </button>

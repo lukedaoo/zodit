@@ -1,4 +1,20 @@
+/* Import Tailwind last to override Mantine where needed */
+@layer components {
+    @import '@mantine/core/styles.css';
+    @import '@mantine/dates/styles.css';
+}
+
+/* Tailwind in higher priority */
 @import "tailwindcss";
+
+/* Custom overrides in utilities layer */
+@layer utilities {
+
+    /* Force Tailwind styles on Mantine components */
+    .override-mantine {
+        @apply !bg-blue-500 !text-white !rounded-lg;
+    }
+}
 
 /* Custom CSS Variables for Theme - Dark Mode Default */
 :root {

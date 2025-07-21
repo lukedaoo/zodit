@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
-import { Search, User, LogOut } from 'lucide-react';
+import { useState } from 'react';
+// import { Search, User, LogOut } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { SwitchTheme } from './SwitchTheme';
 
 interface NavbarProps {
-    onLogout?: () => void;
-    userName?: string;
+    // onLogout?: () => void;
+    // userName?: string;
     onNavigate?: (tab: 'dashboard' | 'todo') => void;
     activeTab?: 'dashboard' | 'todo';
 }
 
-export const Navbar = ({ onLogout, userName = 'User', onNavigate, activeTab }: NavbarProps) => {
+export const Navbar = ({ onNavigate, activeTab }: NavbarProps) => {
     const [showUserMenu, setShowUserMenu] = useState(false);
 
     const handleTabClick = (tab: 'dashboard' | 'todo') => {
@@ -18,15 +19,15 @@ export const Navbar = ({ onLogout, userName = 'User', onNavigate, activeTab }: N
         }
     };
 
-    const handleLogout = () => {
-        if (onLogout) {
-            onLogout();
-        } else {
-            alert('Logout functionality would be implemented here');
-        }
-    };
-
-    const userInitial = userName.charAt(0).toUpperCase();
+    // const handleLogout = () => {
+    //     if (onLogout) {
+    //         onLogout();
+    //     } else {
+    //         alert('Logout functionality would be implemented here');
+    //     }
+    // };
+    //
+    // const userInitial = userName.charAt(0).toUpperCase();
 
     return (
         <div className="w-full fixed top-0 left-0 right-0 z-50">
@@ -61,9 +62,10 @@ export const Navbar = ({ onLogout, userName = 'User', onNavigate, activeTab }: N
                     </div>
 
                     {/* Theme Toggle */}
-                    <SwitchTheme onChange={(theme) => console.log('Theme changed to:', theme)} />
+                    <SwitchTheme />
 
                     {/* User Avatar */}
+                    {/* 
                     <div className="relative">
                         <button
                             className="user-avatar w-9 h-9 rounded-full flex items-center justify-center font-semibold text-sm transition-all duration-200 hover:scale-105"
@@ -73,7 +75,6 @@ export const Navbar = ({ onLogout, userName = 'User', onNavigate, activeTab }: N
                             {userInitial}
                         </button>
 
-                        {/* User Dropdown Menu */}
                         {showUserMenu && (
                             <div className="user-menu absolute right-0 mt-2 w-48 rounded-md py-2 z-50">
                                 <div className="px-4 py-2 border-b border-gray-600">
@@ -103,7 +104,6 @@ export const Navbar = ({ onLogout, userName = 'User', onNavigate, activeTab }: N
                         )}
                     </div>
 
-                    {/* Logout Button */}
                     <button
                         className="btn btn-outline btn-sm flex items-center gap-2 hover:scale-105 transition-all duration-200"
                         onClick={handleLogout}
@@ -111,6 +111,7 @@ export const Navbar = ({ onLogout, userName = 'User', onNavigate, activeTab }: N
                         <LogOut className="w-4 h-4" />
                         Logout
                     </button>
+                */}
                 </div>
             </nav>
 

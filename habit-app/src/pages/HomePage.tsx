@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import '../App.css';
 import { TodoV1, TodoV2 } from '@components/todo';
 import { Navbar } from '@components/gadget/NavBar';
 import { ScrollButton } from "@components/gadget/ScrollButton";
@@ -36,8 +35,6 @@ const HomePage: React.FC = () => {
             <Navbar
                 onNavigate={handleNavigation}
                 activeTab={activeTab}
-                userName="User"
-                onLogout={() => console.log('Logging out...')}
             />
             <ScrollButton />
             <div className="p-6 pt-24">

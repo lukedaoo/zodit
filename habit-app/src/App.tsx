@@ -10,6 +10,9 @@ import {
     useUserSettings
 } from '@hooks/useUserSettings';
 
+import { MantineProvider } from '@mantine/core';
+
+import './App.css';
 import HomePage from '@pages/HomePage';
 import ThemePage from '@pages/ThemePage';
 import TodoPage from '@pages/TodoPage';
@@ -25,13 +28,15 @@ const App: React.FC = () => {
     set(TASK_COLLAPSE_THRESHOLD, TASK_COLLAPSE_THRESHOLD.defaultValue);
 
     return (
-        <BrowserRouter>
-            <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/theme" element={<ThemePage />} />
-                <Route path="/to-do" element={<TodoPage />} />
-            </Routes>
-        </BrowserRouter>
+        <MantineProvider>
+            <BrowserRouter>
+                <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/theme" element={<ThemePage />} />
+                    <Route path="/to-do" element={<TodoPage />} />
+                </Routes>
+            </BrowserRouter>
+        </MantineProvider>
     )
 };
 
