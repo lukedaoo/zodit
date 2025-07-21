@@ -10,6 +10,7 @@ interface TaskItemProps {
     isEditing: boolean;
     onSubmit: (task: Partial<Task>) => void;
     onDoubleClick: () => void;
+    groupId: string
 }
 
 export const SortableTaskItem = ({
@@ -17,7 +18,8 @@ export const SortableTaskItem = ({
     onDelete,
     isEditing,
     onSubmit,
-    onDoubleClick
+    onDoubleClick,
+    groupId
 }: TaskItemProps) => {
     const {
         attributes,
@@ -26,7 +28,7 @@ export const SortableTaskItem = ({
         setActivatorNodeRef,
         transform,
     } = useSortable({
-        id: task.id,
+        id: `${groupId}/${task.id}`,
     });
 
     const style = {

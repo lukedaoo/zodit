@@ -8,13 +8,7 @@ import { useCollapsibleList } from '@hooks/useCollapsibleList';
 import { useUserSettings } from '@hooks/useUserSettings';
 
 import {
-    DndContext,
-    closestCenter,
-    type DragEndEvent,
-} from '@dnd-kit/core';
-import {
     SortableContext,
-    arrayMove,
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 
@@ -24,7 +18,6 @@ interface Props {
     onUpdate: (taskId: string, updates: Partial<any>) => void;
     onDelete: (taskId: string) => void;
     onAdd: () => void;
-    onReorderTask: (newOrder: string[]) => void;
 }
 
 export const DraggableTaskList = ({
@@ -33,7 +26,6 @@ export const DraggableTaskList = ({
     onUpdate,
     onDelete,
     onAdd,
-    onReorderTask,
 }: Props) => {
     const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -53,47 +45,32 @@ export const DraggableTaskList = ({
         setTaskOrder(visibleTasks.map((t) => t.id));
     }, [visibleTasks]);
 
-    const handleDragEnd = (event: DragEndEvent) => {
-        const { active, over } = event;
-        if (!over || active.id === over.id) return;
-
-        const oldIndex = taskOrder.indexOf(active.id as string);
-        const newIndex = taskOrder.indexOf(over.id as string);
-
-        if (oldIndex !== -1 && newIndex !== -1) {
-            const newOrder = arrayMove(taskOrder, oldIndex, newIndex);
-            setTaskOrder(newOrder);
-            onReorderTask(newOrder);
-        }
-    };
-
     const orderedTasks = taskOrder
         .map((id) => visibleTasks.find((t) => t.id === id))
         .filter(Boolean) as Task[];
 
     return (
         <div className="ml-6 space-y-3">
-            <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                <SortableContext
-                    items={orderedTasks.map((task) => task.id)}
-                    strategy={verticalListSortingStrategy}
-                >
-                    {orderedTasks.map((task) => (
-                        <SortableTaskItem
-                            key={`${groupId}/${task.id}`}
-                            task={task}
-                            isEditing={editingId === task.id}
-                            onDelete={() => onDelete(task.id)}
-                            onSubmit={(parsed) => {
-                                parsed.id = task.id;
-                                onUpdate(parsed.id, parsed);
-                                setEditingId(null);
-                            }}
-                            onDoubleClick={() => setEditingId(task.id)}
-                        />
-                    ))}
-                </SortableContext>
-            </DndContext>
+            <SortableContext
+                items={orderedTasks.map((task) => `${groupId}/${task.id}`)}
+                strategy={verticalListSortingStrategy}
+            >
+                {orderedTasks.map((task) => (
+                    <SortableTaskItem
+                        key={`${groupId}/${task.id}`}
+                        task={task}
+                        isEditing={editingId === task.id}
+                        onDelete={() => onDelete(task.id)}
+                        onSubmit={(parsed) => {
+                            parsed.id = task.id;
+                            onUpdate(parsed.id, parsed);
+                            setEditingId(null);
+                        }}
+                        onDoubleClick={() => setEditingId(task.id)}
+                        groupId={groupId}
+                    />
+                ))}
+            </SortableContext>
             {shouldCollapse && (
                 <div className="flex items-center space-x-2">
                     <div className="w-6"></div>

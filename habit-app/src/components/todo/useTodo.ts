@@ -27,8 +27,9 @@ export const useTodo = () => {
 
     const [groups, setGroups] = useState<Group[]>(GROUP_DATABASE);
 
-    const generateId = () => {
-        return "id#" + Math.random().toString(16).slice(2);
+    const generateId = (prefix: string) => {
+        return prefix + ":id#" +
+            Math.floor(Math.random() * 8 ** 6).toString(8).padStart(6, '0');
     };
 
     useEffect(() => {
@@ -39,7 +40,7 @@ export const useTodo = () => {
 
     const addGroup = () => {
         const newGroup: Group = {
-            id: Date.now().toString(),
+            id: generateId('group'),
             name: `Group ${groups.length + 1}`,
             tasks: []
         };
@@ -64,7 +65,7 @@ export const useTodo = () => {
                     tasks: [
                         ...group.tasks,
                         {
-                            id: generateId(),
+                            id: generateId('task'),
                             title: '',
                             completed: false
                         }
@@ -124,6 +125,55 @@ export const useTodo = () => {
         });
     };
 
+    const moveTaskBetweenGroups = (
+        sourceGroupId: string,
+        targetGroupId: string,
+        taskId: string,
+        targetTaskId: string | null
+    ) => {
+        setGroups((prevGroups) => {
+            const sourceGroupIndex = prevGroups.findIndex(g => g.id === sourceGroupId);
+            const targetGroupIndex = prevGroups.findIndex(g => g.id === targetGroupId);
+
+            if (sourceGroupIndex === -1 || targetGroupIndex === -1) return prevGroups;
+
+            const sourceGroup = prevGroups[sourceGroupIndex];
+            const targetGroup = prevGroups[targetGroupIndex];
+
+            const taskIndex = sourceGroup.tasks.findIndex(t => t.id === taskId);
+            if (taskIndex === -1) return prevGroups;
+
+            const task = sourceGroup.tasks[taskIndex];
+
+            let targetIndex = targetGroup.tasks.length;
+            if (targetTaskId) {
+                const foundIndex = targetGroup.tasks.findIndex(t => t.id === targetTaskId);
+                if (foundIndex !== -1) targetIndex = foundIndex;
+            }
+
+            const newGroups = [...prevGroups];
+
+            newGroups[sourceGroupIndex] = {
+                ...sourceGroup,
+                tasks: [
+                    ...sourceGroup.tasks.slice(0, taskIndex),
+                    ...sourceGroup.tasks.slice(taskIndex + 1)
+                ]
+            };
+
+            newGroups[targetGroupIndex] = {
+                ...targetGroup,
+                tasks: [
+                    ...targetGroup.tasks.slice(0, targetIndex),
+                    task,
+                    ...targetGroup.tasks.slice(targetIndex)
+                ]
+            };
+
+            return newGroups;
+        });
+    };
+
     return {
         groups,
         addGroup,
@@ -133,6 +183,7 @@ export const useTodo = () => {
         updateTask,
         deleteTask,
         reorderTask,
-        reorderGroup
+        reorderGroup,
+        moveTaskBetweenGroups
     };
 };

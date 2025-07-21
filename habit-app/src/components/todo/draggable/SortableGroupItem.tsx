@@ -12,7 +12,6 @@ interface Props {
     onUpdateTask: (taskId: string, task: Partial<any>) => void;
     onDeleteTask: (taskId: string) => void;
     onAddTask: () => void;
-    onReorderTask: (newOrder: string[]) => void;
 }
 
 export const SortableGroupItem = ({
@@ -22,7 +21,6 @@ export const SortableGroupItem = ({
     onUpdateTask,
     onDeleteTask,
     onAddTask,
-    onReorderTask
 }: Props) => {
     const [collapsed, setCollapsed] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -40,7 +38,6 @@ export const SortableGroupItem = ({
 
     const style = {
         transform: CSS.Transform.toString(transform),
-        transition: transform ? 'none' : 'transform 200ms ease',
         touchAction: 'manipulation',
     };
 
@@ -124,7 +121,6 @@ export const SortableGroupItem = ({
                         onUpdate={onUpdateTask}
                         onDelete={onDeleteTask}
                         onAdd={onAddTask}
-                        onReorderTask={onReorderTask}
                     />
                 )}
             </div>
