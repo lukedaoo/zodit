@@ -60,8 +60,9 @@ export const TaskInput = ({
                 const val = rest.join(':');
                 if (key?.trim()) {
                     const keySpan = `<span class="task-key">${key.trim()}</span>`;
-                    const valueSpan = val?.trim() ? `<span class="task-value">${val.trim()}</span>` : '';
-                    return `<span class="badge badge-outline">${keySpan}:${valueSpan}</span>`;
+                    const valueSpan = val?.trim() ?
+                        `<span class="task-value ${key.trim() === 'completed' ? `completed-${val.trim()}` : ''}">${val.trim()}</span>` : '';
+                    return `<span class="task-badge">${keySpan}:${valueSpan}</span>`;
                 }
                 return '';
             })

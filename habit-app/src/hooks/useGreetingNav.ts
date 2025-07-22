@@ -1,40 +1,43 @@
+// useGreetingDate.ts
 import { useState, useMemo } from 'react';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
+import { convertDate, convertDateFromString, getZonedDayjs, getPeriodOfDayNow } from '@common/utils';
 
-dayjs.extend(utc);
-dayjs.extend(timezone);
-
-const TIME_ZONE = 'America/Los_Angeles';
 const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 
 export const useGreetingDate = () => {
-    const [currentDate, setCurrentDate] = useState<Date>(dayjs().tz(TIME_ZONE).toDate());
+    const [currentDate, setCurrentDate] = useState<Date>(convertDate(new Date()));
 
-    const dateObj = useMemo(() => dayjs(currentDate).tz(TIME_ZONE), [currentDate]);
+    const dateObj = useMemo(() => getZonedDayjs(currentDate), [currentDate]);
     const month = monthNames[dateObj.month()];
     const date = dateObj.date();
     const year = dateObj.year();
 
-    const greeting = useMemo(() => {
-        const hour = dayjs().tz(TIME_ZONE).hour();
-        if (hour >= 17) return 'Good evening';
-        if (hour >= 12) return 'Good afternoon';
-        return 'Good morning';
-    }, []);
+
+    const getGreeting = () => {
+        const periodOfDay = getPeriodOfDayNow();
+        if (periodOfDay === 'morning') return 'Good Morning';
+        if (periodOfDay === 'afternoon') return 'Good Afternoon';
+        return 'Good Evening';
+    };
+
+
+
+    const greeting = useMemo(() => getGreeting(), []);
 
     const goToPreviousDay = () => {
-        setCurrentDate((prev) => dayjs(prev).tz(TIME_ZONE).subtract(1, 'day').toDate());
+        setCurrentDate(prev => getZonedDayjs(prev).subtract(1, 'day').startOf('day').toDate());
     };
 
     const goToNextDay = () => {
-        setCurrentDate((prev) => dayjs(prev).tz(TIME_ZONE).add(1, 'day').toDate());
+        setCurrentDate(prev => getZonedDayjs(prev).add(1, 'day').startOf('day').toDate());
     };
 
     const setDate = (newDate: Date) => {
-        const zoned = dayjs(newDate).tz(TIME_ZONE).startOf('day').toDate();
-        setCurrentDate(zoned);
+        setCurrentDate(convertDate(newDate));
+    };
+
+    const setDateFromString = (newDate: string) => {
+        setCurrentDate(convertDateFromString(newDate));
     };
 
     return {
@@ -46,6 +49,6 @@ export const useGreetingDate = () => {
         goToPreviousDay,
         goToNextDay,
         setDate,
+        setDateFromString
     };
 };
-

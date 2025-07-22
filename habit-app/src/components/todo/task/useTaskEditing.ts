@@ -43,7 +43,7 @@ export const useTaskEditing = (
             const divRef = inputRef.current as HTMLDivElement | null;
             if (!divRef || !(divRef instanceof HTMLDivElement)) return;
 
-            const badgeSpans = divRef.querySelectorAll('.badge');
+            const badgeSpans = divRef.querySelectorAll('.task-badge');
             if (badgeSpans.length === 0) return;
 
             const selection = window.getSelection();

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { Group } from './types';
+import type { Todo, Group } from './types';
 
 export const useTodo = () => {
 
@@ -25,7 +25,35 @@ export const useTodo = () => {
     //     }
     // ];
 
-    const [groups, setGroups] = useState<Group[]>(GROUP_DATABASE);
+    const [todos, setTodos] = useState<Todo[]>([]);
+    const [activeTodoId, setActiveTodoId] = useState<string | null>(null);
+
+    const createTodo = (date: string): Todo => {
+        const newTodo: Todo = {
+            id: generateId('todo'),
+            date,
+            groups: JSON.parse(JSON.stringify(GROUP_DATABASE))
+        };
+
+        setTodos([...todos, newTodo]);
+        return newTodo;
+    }
+
+    const getTodoByDate = (date: string): Todo | undefined => {
+        return todos?.find(t => t.date === date);
+    }
+
+    const loadTodo = (todo: Todo) => {
+        setActiveTodoId(todo.id);
+        setGroups(todo.groups);
+    };
+
+    useEffect(() => {
+        console.log('todos', todos);
+    }, [todos]);
+
+
+    const [groups, setGroups] = useState<Group[]>([]);
 
     const generateId = (prefix: string) => {
         return prefix + ":id#" +
@@ -33,15 +61,21 @@ export const useTodo = () => {
     };
 
     useEffect(() => {
-        console.log('groups.tasks', groups);
-    }, [groups]);
+        if (!activeTodoId) return;
 
-
+        setTodos(prev =>
+            prev.map(todo =>
+                todo.id === activeTodoId
+                    ? { ...todo, groups }
+                    : todo
+            )
+        );
+    }, [groups, activeTodoId]);
 
     const addGroup = () => {
         const newGroup: Group = {
             id: generateId('group'),
-            name: "Untitled",
+            title: 'Untitled',
             tasks: []
         };
         setGroups([...groups, newGroup]);
@@ -49,7 +83,7 @@ export const useTodo = () => {
 
     const updateGroupName = (groupId: string, newName: string) => {
         setGroups((prev) =>
-            prev.map((g) => (g.id === groupId ? { ...g, name: newName } : g))
+            prev.map((g) => (g.id === groupId ? { ...g, title: newName } : g))
         );
     };
 
@@ -175,6 +209,10 @@ export const useTodo = () => {
     };
 
     return {
+        todos,
+        createTodo,
+        getTodoByDate,
+        loadTodo,
         groups,
         addGroup,
         updateGroupName,

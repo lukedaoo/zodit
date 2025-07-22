@@ -1,3 +1,34 @@
+// utils.ts
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+export const TIME_ZONE = 'America/Los_Angeles';
+
+export const convertDate = (newDate: Date) => {
+    return dayjs(newDate).tz(TIME_ZONE).startOf('day').toDate();
+};
+
+export const convertDateFromString = (newDate: string) => {
+    return dayjs.tz(newDate, TIME_ZONE).startOf('day').toDate();
+};
+
+export const getPeriodOfDayNow = () => {
+    const hour = dayjs().tz(TIME_ZONE).hour();
+    if (hour >= 17) return 'everning';
+    if (hour >= 12) return 'afternoon';
+    return 'morning';
+};
+
+export const getZonedDayjs = (date?: Date) => {
+    return dayjs(date).tz(TIME_ZONE);
+};
+
+
+// for display date and time for tasks
 export const formatDate = (dateString?: string): string => {
     if (!dateString) return '';
 

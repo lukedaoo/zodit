@@ -25,7 +25,7 @@ export const GreetingNav = ({ onChangeDate }: Props) => {
         greeting,
         goToPreviousDay,
         goToNextDay,
-        setDate,
+        setDateFromString
     } = useGreetingDate();
 
 
@@ -96,8 +96,7 @@ export const GreetingNav = ({ onChangeDate }: Props) => {
                         value={currentDate}
                         onChange={(newDate) => {
                             if (newDate) {
-                                const parsedDate = new Date(newDate);
-                                setDate(parsedDate);
+                                setDateFromString(newDate);
                                 setOpened(false);
                             }
                         }}

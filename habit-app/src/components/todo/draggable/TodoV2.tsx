@@ -10,6 +10,9 @@ import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-ki
 
 const Todo: React.FC = () => {
     const {
+        createTodo,
+        getTodoByDate,
+        loadTodo,
         groups,
         addGroup,
         updateGroupName,
@@ -89,7 +92,16 @@ const Todo: React.FC = () => {
     return (
         <div className="space-y-6">
             <div className="max-w-3xl mx-auto space-y-8">
-                <GreetingNav onChangeDate={(date) => { console.log('date', date); }} />
+                <GreetingNav onChangeDate={(date) => {
+                    const dateAsString = date.toISOString().split('T')[0];
+                    const existingTodo = getTodoByDate(dateAsString);
+                    if (existingTodo) {
+                        loadTodo(existingTodo);
+                    } else {
+                        const newTodo = createTodo(dateAsString);
+                        loadTodo(newTodo);
+                    }
+                }} />
                 <AddGroupButton onClick={addGroup} />
 
                 <DndContext
@@ -115,9 +127,7 @@ const Todo: React.FC = () => {
                     <DragOverlay>
                         {activeItem && (() => {
                             let displayText = '';
-                            if ('name' in activeItem) {
-                                displayText = activeItem.name;
-                            } else if ('title' in activeItem && activeItem.title) {
+                            if ('title' in activeItem && activeItem.title) {
                                 displayText = activeItem.title;
                             } else {
                                 displayText = activeItem.id;

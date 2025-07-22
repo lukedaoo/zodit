@@ -1,3 +1,13 @@
+export interface Todo {
+    id: string;
+    date: string;
+    groups: Group[];
+}
+export interface Group {
+    id: string;
+    title: string;
+    tasks: Task[];
+}
 // update the metadatas if any
 export interface Task {
     id: string;
@@ -11,11 +21,6 @@ export interface Task {
     createDate?: string;
 }
 
-export interface Group {
-    id: string;
-    name: string;
-    tasks: Task[];
-}
 
 export const presets = {
     basic: { include: ['title', 'description', 'completed'] as (keyof Task)[] },

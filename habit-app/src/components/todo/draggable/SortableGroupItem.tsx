@@ -47,7 +47,7 @@ export const SortableGroupItem = ({
 
     const handleBlur = () => {
         setIsEditing(false);
-        if (group.name.length === 0) {
+        if (group.title.length === 0) {
             onUpdateName('Untitled');
         }
     };
@@ -72,7 +72,7 @@ export const SortableGroupItem = ({
                     <div className="relative w-full">
                         <input
                             type="text"
-                            value={group.name}
+                            value={group.title}
                             onChange={(e) => onUpdateName(e.target.value)}
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
