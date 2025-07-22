@@ -1,8 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { formatDate, formatTime } from './utils';
+import { formatDate, formatTime, getTimezone } from './utils';
 
 describe('formatDate', () => {
     describe('valid inputs', () => {
+        it('should display timezone correctly', () => {
+            console.log(getTimezone());
+        });
         it('should format ISO date string correctly', () => {
             const result = formatDate('2023-12-25T10:30:00Z');
             expect(result).toMatch(/Dec 25, 2023/);
