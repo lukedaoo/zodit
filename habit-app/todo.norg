@@ -2,12 +2,14 @@
 - (x) Add task my writing template: (custom format later) 
       title:Math 270;desc:;startTime:15:30;startDate:07/21/2025;endDate:07/29/2025
 
-- (-) or json file
+- (x) or json file
 
 - ( ) Task detail will be floating card view 
 - (x) fold groups
-- User Pref for collapsing groups/tasks
-- move groups arroud
-- move task aroune
+- (x) User Pref for collapsing groups/tasks
+- (x) move groups arroud
+- (x) move task aroune
 
 - vim mode
+
+- Drag json file to create groups/tasks

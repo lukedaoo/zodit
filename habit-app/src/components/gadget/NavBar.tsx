@@ -6,14 +6,14 @@ import { SwitchTheme } from './SwitchTheme';
 interface NavbarProps {
     // onLogout?: () => void;
     // userName?: string;
-    onNavigate?: (tab: 'dashboard' | 'todo') => void;
-    activeTab?: 'dashboard' | 'todo';
+    onNavigate?: (tab: 'dashboard' | 'todo' | 'notes') => void;
+    activeTab?: 'dashboard' | 'todo' | 'notes';
 }
 
 export const Navbar = ({ onNavigate, activeTab }: NavbarProps) => {
     const [showUserMenu, setShowUserMenu] = useState(false);
 
-    const handleTabClick = (tab: 'dashboard' | 'todo') => {
+    const handleTabClick = (tab: 'dashboard' | 'todo' | 'notes') => {
         if (onNavigate) {
             onNavigate(tab);
         }
@@ -58,6 +58,14 @@ export const Navbar = ({ onNavigate, activeTab }: NavbarProps) => {
                             onClick={() => handleTabClick('todo')}
                         >
                             To Do
+                        </button>
+
+                        <button
+                            className={`nav-item px-4 py-2 rounded-md font-medium text-sm border-b-2 border-transparent ${activeTab === 'notes' ? 'active' : ''
+                                }`}
+                            onClick={() => handleTabClick('notes')}
+                        >
+                            Notes
                         </button>
                     </div>
 

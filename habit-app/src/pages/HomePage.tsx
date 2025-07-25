@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { TodoV1, TodoV2 } from '@components/todo';
+import { Notes } from '@components/notes';
 import { Navbar } from '@components/gadget/NavBar';
 import { ScrollButton } from "@components/gadget/ScrollButton";
 
 const HomePage: React.FC = () => {
     const [version, _] = useState<'v1' | 'v2'>('v2');
-    const [activeTab, setActiveTab] = useState<'dashboard' | 'todo'>('dashboard');
+    const [activeTab, setActiveTab] = useState<'dashboard' | 'todo' | 'notes'>('dashboard');
 
     const TodoComponent = version === 'v1' ? TodoV1 : TodoV2;
 
-    const handleNavigation = (tab: 'dashboard' | 'todo') => {
+    const handleNavigation = (tab: 'dashboard' | 'todo' | 'notes') => {
         setActiveTab(tab);
     };
 
@@ -17,6 +18,8 @@ const HomePage: React.FC = () => {
         switch (activeTab) {
             case 'todo':
                 return <TodoComponent />;
+            case 'notes':
+                return <Notes />;
             case 'dashboard':
             default:
                 return (
