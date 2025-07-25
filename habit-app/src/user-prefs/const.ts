@@ -15,7 +15,7 @@ export const USE_TEMPLATE_WHEN_ADDING_TASK: ConstPref = {
 
 export const USER_THEME = {
     key: 'user_theme',
-    defaultValue: 'dark'
+    defaultValue: 'system'
 }
 
 export const GROUP_COLLAPSE_THRESHOLD: ConstPref = {

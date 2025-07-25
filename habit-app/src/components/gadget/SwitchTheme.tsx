@@ -6,21 +6,28 @@ interface SwitchThemeProps {
 }
 
 export const SwitchTheme = ({ onChange }: SwitchThemeProps) => {
-    const { theme, toggleTheme } = useTheme();
+    const { toggleTheme, isDarkTheme } = useTheme();
 
     const handleClick = () => {
-        toggleTheme();
-        onChange?.(theme === 'dark' ? 'light' : 'dark');
+        const newTheme = toggleTheme();
+        if (newTheme === 'dark' || newTheme === 'light') {
+            onChange?.(newTheme);
+        }
     };
 
     return (
         <div className="flex justify-between items-center">
             <button
                 onClick={handleClick}
-                className="btn btn-outline btn-md border-none bg-transparent active:bg-transparent"
+                className="btn btn-md bg-transparent border-none shadow-none outline-none 
+                focus:ring-0 focus:outline-none active:shadow-none active:outline-none"
             >
-                {theme === 'dark' ? <Sun size={20} className="text-white" /> : <Moon size={20} className="text-black" />}
+                {isDarkTheme() ? (
+                    <Sun size={20} className="text-white" />
+                ) : (
+                    <Moon size={20} className="text-black" />
+                )}
             </button>
-        </div>
+        </div >
     );
 };

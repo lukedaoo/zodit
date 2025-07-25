@@ -118,10 +118,12 @@
 
 .mantine-DatePicker-day:hover {
     background-color: var(--color-muted) !important;
+    border-radius: 100% !important;
 }
 
 .mantine-DatePicker-day[data-selected] {
     background-color: var(--color-primary-500) !important;
+    border-radius: 100% !important;
     color: white !important;
 }
 

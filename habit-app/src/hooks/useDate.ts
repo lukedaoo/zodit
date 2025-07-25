@@ -1,10 +1,9 @@
-// useGreetingDate.ts
 import { useState, useMemo } from 'react';
 import { convertDate, convertDateFromString, getZonedDayjs, getPeriodOfDayNow } from '@common/utils';
 
 const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 
-export const useGreetingDate = () => {
+export const useDate = () => {
     const [currentDate, setCurrentDate] = useState<Date>(convertDate(new Date()));
 
     const dateObj = useMemo(() => getZonedDayjs(currentDate), [currentDate]);
@@ -19,9 +18,6 @@ export const useGreetingDate = () => {
         if (periodOfDay === 'afternoon') return 'Good Afternoon';
         return 'Good Evening';
     };
-
-
-
     const greeting = useMemo(() => getGreeting(), []);
 
     const goToPreviousDay = () => {
