@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
 import { Plus, X, Edit3 } from 'lucide-react';
+import {
+    DndContext,
+    useDraggable,
+} from '@dnd-kit/core';
+import { restrictToParentElement } from '@dnd-kit/modifiers';
+
 
 interface Note {
     id: string;
@@ -32,16 +38,32 @@ const NoteCard: React.FC<NoteCardProps> = ({
     onDelete,
     onUpdateText,
 }) => {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        isDragging,
+    } = useDraggable({ id: note.id });
+
+    const style = {
+        left: `${note.position.x}px`,
+        top: `${note.position.y}px`,
+        transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : 'none',
+        zIndex: isDragging ? 50 : 10,
+    };
+
     return (
         <div
-            style={{
-                left: `${note.position.x}px`,
-                top: `${note.position.y}px`,
-            }}
-            className={`absolute w-48 h-40 p-3 border-2 shadow-lg transition-all duration-200 ${note.color} z-10`}
+            ref={setNodeRef}
+            {...listeners}
+            {...attributes}
+            style={style}
+            className={`absolute w-48 h-40 p-3 border-2 shadow-lg ${note.color} cursor-move will-change-transform`}
         >
-            {/* Note Controls */}
-            <div className="absolute -top-2 -right-2 flex gap-1">
+            {/* Controls */}
+            <div className="absolute -top-2 -right-2 flex gap-1 z-10"
+                onPointerDown={(e) => e.stopPropagation()}>
                 <button
                     onClick={(e) => {
                         e.stopPropagation();
@@ -62,16 +84,14 @@ const NoteCard: React.FC<NoteCardProps> = ({
                 </button>
             </div>
 
-            {/* Note Content */}
+            {/* Content */}
             {isEditing ? (
                 <textarea
                     value={note.text}
                     onChange={(e) => onUpdateText(note.id, e.target.value)}
                     onBlur={() => onEdit(note.id)}
                     onKeyDown={(e) => {
-                        if (e.key === 'Enter' && e.ctrlKey) {
-                            onEdit(note.id);
-                        }
+                        if (e.key === 'Enter' && e.ctrlKey) onEdit(note.id);
                     }}
                     className="w-full h-full bg-transparent border-none outline-none resize-none text-sm font-medium placeholder-current/50"
                     placeholder="Write your note..."
@@ -86,7 +106,7 @@ const NoteCard: React.FC<NoteCardProps> = ({
                 </div>
             )}
 
-            {/* Tape Effect */}
+            {/* Drag handle visual */}
             <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-8 h-4 bg-white/60 border border-gray-200 rounded-sm shadow-sm"></div>
         </div>
     );
@@ -126,58 +146,92 @@ const Notes: React.FC = () => {
                 y: Math.random() * 300 + 100,
             },
         };
-        setNotes([...notes, newNote]);
+        setNotes((prev) => [...prev, newNote]);
         setEditingId(newNote.id);
     };
 
     const deleteNote = (id: string) => {
-        setNotes(notes.filter((note) => note.id !== id));
+        console.log("delete note");
+        setNotes((prev) => prev.filter((n) => n.id !== id));
     };
 
     const updateNoteText = (id: string, text: string) => {
-        setNotes(
-            notes.map((note) => (note.id === id ? { ...note, text } : note))
+        setNotes((prev) =>
+            prev.map((note) => (note.id === id ? { ...note, text } : note))
         );
     };
 
     const handleEdit = (id: string) => {
-        setEditingId(editingId === id ? null : id);
+        setEditingId((prev) => (prev === id ? null : id));
+    };
+
+    const handleDragEnd = (event: any) => {
+        const { active, delta } = event;
+        const id = active.id as string;
+        const note = notes.find((n) => n.id === id);
+        if (!note) return;
+
+        const newX = Math.max(0, note.position.x + delta.x);
+        const newY = Math.max(0, note.position.y + delta.y);
+
+        setNotes((prev) =>
+            prev.map((n) =>
+                n.id === id
+                    ? {
+                        ...n,
+                        position: {
+                            x: newX,
+                            y: newY,
+                        },
+                    }
+                    : n
+            )
+        );
     };
 
     return (
         <div className="fixed inset-0 top-16 w-screen h-screen overflow-hidden" style={{ backgroundColor: 'var(--color-background)', margin: 0, padding: 0 }}>
-            {/* Floating Add Button */}
+            {/* Add Button */}
             <button
                 onClick={addNewNote}
-                className="fixed bottom-6 left-6 w-14 h-14 bg-purple-600 hover:bg-purple-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center z-50 group"
+                onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'var(--color-primary-500)';
+                    e.currentTarget.style.color = 'white';
+                }}
+                onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.color = 'var(--color-foreground)';
+                }}
+                className="fixed bottom-6 left-6 w-11 h-11 btn rounded-full flex items-center justify-center z-50 group"
             >
-                <Plus className="w-6 h-6 group-hover:scale-110 transition-transform duration-200" />
+                <Plus className="w-5 h-5" />
             </button>
 
-            {/* Notes Board */}
-            <div className="relative h-full overflow-hidden">
-                {notes.map((note) => (
-                    <NoteCard
-                        key={note.id}
-                        note={note}
-                        isEditing={editingId === note.id}
-                        onEdit={handleEdit}
-                        onDelete={deleteNote}
-                        onUpdateText={updateNoteText}
-                    />
-                ))}
+            <DndContext onDragEnd={handleDragEnd}
+                modifiers={[restrictToParentElement]}>
+                <div className="relative h-full overflow-hidden">
+                    {notes.map((note) => (
+                        <NoteCard
+                            key={note.id}
+                            note={note}
+                            isEditing={editingId === note.id}
+                            onEdit={handleEdit}
+                            onDelete={deleteNote}
+                            onUpdateText={updateNoteText}
+                        />
+                    ))}
 
-                {/* Empty State */}
-                {notes.length === 0 && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="text-center text-purple-200/70">
-                            <Edit3 className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                            <p className="text-lg mb-2">No notes yet!</p>
-                            <p className="text-sm">Click the floating button to create your first sticky note</p>
+                    {notes.length === 0 && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="text-center text-purple-200/70">
+                                <Edit3 className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                                <p className="text-lg mb-2">No notes yet!</p>
+                                <p className="text-sm">Click the floating button to create your first sticky note</p>
+                            </div>
                         </div>
-                    </div>
-                )}
-            </div>
+                    )}
+                </div>
+            </DndContext>
         </div>
     );
 };
