@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
-import { Plus, X, Edit3, Palette, Maximize2 } from 'lucide-react';
+import { Plus, X, Edit3, Palette } from 'lucide-react';
 import {
     DndContext,
     useDraggable,
 } from '@dnd-kit/core';
 import { restrictToParentElement } from '@dnd-kit/modifiers';
 
+
 interface Note {
     id: string;
     text: string;
     color: string;
     position: { x: number; y: number };
-    size: { width: number; height: number };
-    isResizing: boolean;
 }
 
 const NOTE_COLORS = {
@@ -45,8 +44,6 @@ interface NoteCardProps {
     onDelete: (id: string) => void;
     onUpdateText: (id: string, text: string) => void;
     onChangeColor: (id: string) => void;
-    onToggleResize: (id: string) => void;
-    onUpdateSize: (id: string, newSize: { width: number; height: number }) => void;
 }
 
 const NoteCard: React.FC<NoteCardProps> = ({
@@ -56,8 +53,6 @@ const NoteCard: React.FC<NoteCardProps> = ({
     onDelete,
     onUpdateText,
     onChangeColor,
-    onToggleResize,
-    onUpdateSize,
 }) => {
     const {
         attributes,
@@ -65,73 +60,26 @@ const NoteCard: React.FC<NoteCardProps> = ({
         setNodeRef,
         transform,
         isDragging,
-    } = useDraggable({
-        id: note.id,
-        disabled: note.isResizing
-    });
+    } = useDraggable({ id: note.id });
 
     const style = {
         left: `${note.position.x}px`,
         top: `${note.position.y}px`,
-        width: `${note.size.width}px`,
-        height: `${note.size.height}px`,
-        transform: isDragging && transform
-            ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
-            : 'none',
+        transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : 'none',
         zIndex: isDragging ? 50 : 10,
-    };
-
-    const handleResizeMouseDown = (e: React.MouseEvent) => {
-        e.stopPropagation();
-
-        const startX = e.clientX;
-        const startY = e.clientY;
-        const startWidth = note.size.width;
-        const startHeight = note.size.height;
-
-        const handleMouseMove = (moveEvent: MouseEvent) => {
-            const deltaX = moveEvent.clientX - startX;
-            const deltaY = moveEvent.clientY - startY;
-
-            const newWidth = Math.max(160, startWidth + deltaX);
-            const newHeight = Math.max(120, startHeight + deltaY);
-
-            onUpdateSize(note.id, { width: newWidth, height: newHeight });
-        };
-
-        const handleMouseUp = () => {
-            document.removeEventListener('mousemove', handleMouseMove);
-            document.removeEventListener('mouseup', handleMouseUp);
-        };
-
-        document.addEventListener('mousemove', handleMouseMove);
-        document.addEventListener('mouseup', handleMouseUp);
     };
 
     return (
         <div
             ref={setNodeRef}
-            {...(!note.isResizing ? listeners : {})}
-            {...(!note.isResizing ? attributes : {})}
+            {...listeners}
+            {...attributes}
             style={style}
-            className={`absolute p-3 border-2 shadow-lg ${note.color} ${note.isResizing ? 'cursor-default' : 'cursor-move'} will-change-transform relative`}
+            className={`absolute w-48 h-40 p-3 border-2 shadow-lg ${note.color} cursor-move will-change-transform`}
         >
             {/* Controls */}
             <div className="absolute -top-2 -right-2 flex gap-1 z-10"
                 onPointerDown={(e) => e.stopPropagation()}>
-                <button
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onToggleResize(note.id);
-                    }}
-                    className={`w-6 h-6 rounded-full shadow-md flex items-center justify-center transition-colors ${note.isResizing
-                        ? 'bg-blue-500 hover:bg-blue-600 text-white'
-                        : 'bg-white hover:bg-gray-50 text-gray-600'
-                        }`}
-                    title={note.isResizing ? "Exit resize mode" : "Enter resize mode"}
-                >
-                    <Maximize2 className="w-3 h-3" />
-                </button>
                 <button
                     onClick={(e) => {
                         e.stopPropagation();
@@ -184,18 +132,8 @@ const NoteCard: React.FC<NoteCardProps> = ({
                 </div>
             )}
 
-            {/* Drag handle visual - only show when not resizing */}
-            {!note.isResizing && (
-                <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-8 h-4 bg-white/60 border border-gray-200 rounded-sm shadow-sm"></div>
-            )}
-
-            {/* Resize handle - only show when resizing */}
-            {note.isResizing && (
-                <div
-                    className="absolute -bottom-2 -right-2 w-4 h-4 bg-blue-500 border-2 border-white rounded-full cursor-se-resize shadow-md z-20"
-                    onMouseDown={handleResizeMouseDown}
-                />
-            )}
+            {/* Drag handle visual */}
+            <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-8 h-4 bg-white/60 border border-gray-200 rounded-sm shadow-sm"></div>
         </div>
     );
 };
@@ -208,8 +146,6 @@ const Notes: React.FC = () => {
             id: i.toString(),
             text: 'Remember to call mom',
             color: color,
-            size: { width: 192, height: 160 },
-            isResizing: false,
             position: {
                 x: Math.random() * 400 + 50,
                 y: Math.random() * 300 + 100,
@@ -218,6 +154,7 @@ const Notes: React.FC = () => {
         NOTES.push(note);
     }
     const [notes, setNotes] = useState<Note[]>(NOTES);
+
     const [editingId, setEditingId] = useState<string | null>(null);
 
     const addNewNote = () => {
@@ -226,8 +163,6 @@ const Notes: React.FC = () => {
             id: Date.now().toString(),
             text: 'New note...',
             color: allColors[Math.floor(Math.random() * allColors.length)],
-            size: { width: 192, height: 160 },
-            isResizing: false,
             position: {
                 x: Math.random() * 400 + 50,
                 y: Math.random() * 300 + 100,
@@ -237,33 +172,17 @@ const Notes: React.FC = () => {
         setEditingId(newNote.id);
     };
 
-    const toggleResize = (id: string) => {
-        setNotes(prev =>
-            prev.map(note =>
-                note.id === id
-                    ? { ...note, isResizing: !note.isResizing }
-                    : note
-            )
-        );
-    };
-
-    const updateSize = (id: string, newSize: { width: number; height: number }) => {
-        setNotes(prev =>
-            prev.map(note =>
-                note.id === id
-                    ? { ...note, size: newSize }
-                    : note
-            )
-        );
-    };
-
     const changeNoteColor = (id: string) => {
         setNotes(prev =>
             prev.map(note => {
                 if (note.id === id) {
+                    // Determine current theme
                     const isCurrentlyLight = NOTE_COLORS.light.includes(note.color);
                     const newTheme = isCurrentlyLight ? NOTE_COLORS.dark : NOTE_COLORS.light;
+
+                    // Get a random color from the opposite theme
                     const newColor = newTheme[Math.floor(Math.random() * newTheme.length)];
+
                     return { ...note, color: newColor };
                 }
                 return note;
@@ -311,8 +230,9 @@ const Notes: React.FC = () => {
 
     return (
         <div className="fixed inset-0 top-16 w-screen h-screen overflow-hidden" style={{ backgroundColor: 'var(--color-background)', margin: 0, padding: 0 }}>
-            {/* Add Button */}
+            {/* Control Buttons */}
             <div className="fixed bottom-6 left-6 z-50">
+                {/* Add Button */}
                 <button
                     onClick={addNewNote}
                     onMouseEnter={(e) => {
@@ -330,7 +250,10 @@ const Notes: React.FC = () => {
                 </button>
             </div>
 
-            <DndContext onDragEnd={handleDragEnd} modifiers={[restrictToParentElement]}>
+            {/* Empty state */}
+
+            <DndContext onDragEnd={handleDragEnd}
+                modifiers={[restrictToParentElement]}>
                 <div className="relative h-full overflow-hidden">
                     {notes.map((note) => (
                         <NoteCard
@@ -341,8 +264,6 @@ const Notes: React.FC = () => {
                             onDelete={deleteNote}
                             onUpdateText={updateNoteText}
                             onChangeColor={changeNoteColor}
-                            onToggleResize={toggleResize}
-                            onUpdateSize={updateSize}
                         />
                     ))}
 
