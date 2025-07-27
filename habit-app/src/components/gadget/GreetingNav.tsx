@@ -10,6 +10,7 @@ import './DatePicker.css';
 
 interface Props {
     onChangeDate: (date: Date) => void;
+    heatmapData?: Record<string, number>;
 }
 
 const getGreeting = () => {
@@ -19,7 +20,7 @@ const getGreeting = () => {
     return 'Good Evening';
 };
 
-export const GreetingNav = ({ onChangeDate }: Props) => {
+export const GreetingNav = ({ onChangeDate, heatmapData = {} }: Props) => {
     const {
         currentDate,
         month,
@@ -30,20 +31,12 @@ export const GreetingNav = ({ onChangeDate }: Props) => {
         setDateFromString
     } = useDate();
 
-    const taskData = {
-        '2025-07-22': 1,
-        '2025-07-24': 4,
-        '2025-07-23': 3,
-        '2025-07-25': 2,
-    };
-
     const greeting = useMemo(() => getGreeting(), []);
 
     const [opened, setOpened] = useState(false);
 
     useEffect(() => {
         onChangeDate(currentDate);
-        console.log('on update', currentDate);
     }, [currentDate]);
 
     return (
@@ -107,7 +100,7 @@ export const GreetingNav = ({ onChangeDate }: Props) => {
                                 setOpened(false);
                             }
                         }}
-                        data={taskData}
+                        data={heatmapData}
                         highlightToday={false}
                     />
                 </Popover.Dropdown>

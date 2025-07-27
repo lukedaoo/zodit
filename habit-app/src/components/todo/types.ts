@@ -21,7 +21,6 @@ export interface Task {
     createDate?: string;
 }
 
-
 export const presets = {
     basic: { include: ['title', 'description', 'completed'] as (keyof Task)[] },
 

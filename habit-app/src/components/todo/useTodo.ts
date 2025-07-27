@@ -48,10 +48,42 @@ export const useTodo = () => {
         setGroups(todo.groups);
     };
 
+    const buildHeatMapFromTaskDates = (month: string): Record<string, number> => {
+        console.log('buildHeatMapFromTaskDates', month);
+        const heatMap: Record<string, number> = {};
+
+        // Parse the month parameter
+        const [year, monthNum] = month.split('-');
+        const targetYear = parseInt(year);
+        const targetMonth = parseInt(monthNum);
+
+        todos.forEach(todo => {
+            todo.groups.forEach(group => {
+                group.tasks.forEach(task => {
+                    const taskDate = task.startDate || todo.date;
+
+                    if (taskDate) {
+                        const date = new Date(taskDate);
+                        if (date.getFullYear() === targetYear && date.getMonth() + 1 === targetMonth) {
+                            const dateKey = taskDate.split('T')[0]; // Extract YYYY-MM-DD part
+
+                            if (heatMap[dateKey]) {
+                                heatMap[dateKey] += 1;
+                            } else {
+                                heatMap[dateKey] = 1;
+                            }
+                        }
+                    }
+                });
+            });
+        });
+
+        return heatMap;
+    }
+
     useEffect(() => {
         console.log('todos', todos);
     }, [todos]);
-
 
     const [groups, setGroups] = useState<Group[]>([]);
 
@@ -213,6 +245,7 @@ export const useTodo = () => {
         createTodo,
         getTodoByDate,
         loadTodo,
+        buildHeatMapFromTaskDates,
         groups,
         addGroup,
         updateGroupName,

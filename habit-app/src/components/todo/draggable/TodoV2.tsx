@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { AddGroupButton } from '../AddButtonComponents';
 import { DraggableGroupList } from './DraggableGroupList';
 import { useTodo } from '../useTodo';
@@ -22,10 +22,20 @@ const Todo: React.FC = () => {
         deleteTask,
         reorderTask,
         reorderGroup,
-        moveTaskBetweenGroups
+        moveTaskBetweenGroups,
+        buildHeatMapFromTaskDates
     } = useTodo();
 
     const [activeId, setActiveId] = useState<any>(null);
+    const [currentDate, setCurrentDate] = useState<Date>(new Date());
+
+
+    const heatmapData = useMemo(() => {
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth() + 1;
+        const monthString = `${year}-${month.toString().padStart(2, '0')}`;
+        return buildHeatMapFromTaskDates(monthString);
+    }, [currentDate, buildHeatMapFromTaskDates]);
 
     const handleDragStart = (event: any) => {
         setActiveId(event.active.id as string);
@@ -89,20 +99,24 @@ const Todo: React.FC = () => {
 
     const activeItem = activeGroup ?? activeTask ?? null;
 
+    const handleDateChange = (date: Date) => {
+        // Update current date state to trigger heatmap regeneration
+        setCurrentDate(date);
+
+        const dateAsString = date.toISOString().split('T')[0];
+        const existingTodo = getTodoByDate(dateAsString);
+        if (existingTodo) {
+            loadTodo(existingTodo);
+        } else {
+            const newTodo = createTodo(dateAsString);
+            loadTodo(newTodo);
+        }
+    };
+
     return (
         <div className="space-y-6">
             <div className="max-w-3xl mx-auto space-y-8">
-                <GreetingNav onChangeDate={(date) => {
-                    const dateAsString = date.toISOString().split('T')[0];
-                    const existingTodo = getTodoByDate(dateAsString);
-                    if (existingTodo) {
-                        loadTodo(existingTodo);
-                    } else {
-                        const newTodo = createTodo(dateAsString);
-                        loadTodo(newTodo);
-                    }
-                }} />
-                <AddGroupButton onClick={addGroup} />
+                <GreetingNav onChangeDate={handleDateChange} heatmapData={heatmapData} />                <AddGroupButton onClick={addGroup} />
 
                 <DndContext
                     collisionDetection={rectIntersection}
