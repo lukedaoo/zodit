@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { DEFAULT_DIMENSIONS } from '../noteUtils';
 
 interface UseResizeProps {
     onResize: (width: number, height: number) => void;
@@ -15,8 +16,8 @@ export const useResize = ({ onResize, currentWidth, currentHeight }: UseResizePr
         const startHeight = currentHeight;
 
         const onMouseMove = (moveEvent: MouseEvent) => {
-            const newWidth = Math.max(120, startWidth + (moveEvent.clientX - startX));
-            const newHeight = Math.max(100, startHeight + (moveEvent.clientY - startY));
+            const newWidth = Math.max(DEFAULT_DIMENSIONS.width, startWidth + (moveEvent.clientX - startX));
+            const newHeight = Math.max(DEFAULT_DIMENSIONS.height, startHeight + (moveEvent.clientY - startY));
             onResize(newWidth, newHeight);
         };
 

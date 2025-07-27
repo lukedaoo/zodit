@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import type { Note } from '../types';
 import { getOverlappingGroups } from '../noteUtils';
 import { useNoteState } from './useNoteState';
@@ -18,12 +18,17 @@ export const useNotes = (initialNotes?: Note[]) => {
         setResizingId,
     } = useNoteState(initialNotes);
 
+    useEffect(() => {
+        console.log('Notes updated:', notes);
+    }, [notes]);
+
     const {
         addNote,
         deleteNote,
         updateNoteText,
         updateNotePosition,
         updateNoteSize,
+        toggleNotePin,
         changeNoteColor,
         bringNoteToFront,
         arrangeInGrid,
@@ -72,6 +77,7 @@ export const useNotes = (initialNotes?: Note[]) => {
         updateNoteSize,
         changeNoteColor,
         bringNoteToFront,
+        toggleNotePin,
 
 
         arrangeInGrid,

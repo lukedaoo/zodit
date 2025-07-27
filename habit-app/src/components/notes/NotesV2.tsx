@@ -27,6 +27,7 @@ const Notes = () => {
         toggleResize,
         handleBackgroundClick,
         handleDragEnd,
+        toggleNotePin
     } = useNotes();
 
     return (
@@ -64,12 +65,13 @@ const Notes = () => {
                                 onUpdateText={(text) => updateNoteText(note.id, text)}
                                 onChangeColor={() => changeNoteColor(note.id)}
                                 onToggleResize={() => toggleResize(note.id)}
+                                onTogglePin={() => toggleNotePin(note.id)}
                                 onResize={(width, height) => updateNoteSize(note.id, width, height)}
                                 topNoteId={topNoteId}
                                 bringNoteToFront={bringNoteToFront}
                             />
-                        ))}
 
+                        ))}
                         {notes.length === 0 && <EmptyState />}
                     </DndContext>
                 </div>

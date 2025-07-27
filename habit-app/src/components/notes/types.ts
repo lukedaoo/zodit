@@ -5,6 +5,8 @@ export interface Note {
     position: { x: number; y: number };
     width?: number;
     height?: number;
+    isPinned?: boolean;
+    date: Date;
 }
 
 export interface NoteState {

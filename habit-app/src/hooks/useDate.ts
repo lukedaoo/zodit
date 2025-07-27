@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { convertDate, convertDateFromString, getZonedDayjs, getPeriodOfDayNow } from '@common/utils';
+import { convertDate, convertDateFromString, getZonedDayjs } from '@common/utils';
 
 const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 
@@ -10,15 +10,6 @@ export const useDate = () => {
     const month = monthNames[dateObj.month()];
     const date = dateObj.date();
     const year = dateObj.year();
-
-
-    const getGreeting = () => {
-        const periodOfDay = getPeriodOfDayNow();
-        if (periodOfDay === 'morning') return 'Good Morning';
-        if (periodOfDay === 'afternoon') return 'Good Afternoon';
-        return 'Good Evening';
-    };
-    const greeting = useMemo(() => getGreeting(), []);
 
     const goToPreviousDay = () => {
         setCurrentDate(prev => getZonedDayjs(prev).subtract(1, 'day').startOf('day').toDate());
@@ -41,7 +32,6 @@ export const useDate = () => {
         month,
         date,
         year,
-        greeting,
         goToPreviousDay,
         goToNextDay,
         setDate,

@@ -2,8 +2,8 @@ import type { Note } from './types';
 import { NOTE_COLORS } from './types';
 
 export const DEFAULT_DIMENSIONS = {
-    width: 192,
-    height: 160
+    width: 220,
+    height: 180
 }
 
 export const notesOverlap = (note1: Note, note2: Note): boolean => {
@@ -60,7 +60,8 @@ export const createNewNote = (): Note => {
             y: Math.random() * 300 + 100,
         },
         width: DEFAULT_DIMENSIONS.width,
-        height: DEFAULT_DIMENSIONS.height
+        height: DEFAULT_DIMENSIONS.height,
+        date: new Date(),
     };
 };
 
