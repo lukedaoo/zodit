@@ -87,29 +87,28 @@ const NoteCard: React.FC<NoteCardProps> = ({
         height: note.height || 160,
     };
 
+    // Check if this note has others underneath it (for visual indicators)
+    const isOnTop = note.id === topNoteId;
+
     return (
         <div
             ref={setNodeRef}
             {...listeners}
             {...attributes}
             style={style}
-            className={`absolute p-3 border-2 shadow-lg ${note.color} cursor-move will-change-transform`}
+            className={`absolute p-3 border-2 shadow-lg ${note.color} cursor-move will-change-transform ${isOnTop ? 'ring-2 ring-blue-400 ring-opacity-50' : ''
+                }`}
             onMouseDown={() => bringNoteToFront(note.id)}
             onClick={(e) => e.stopPropagation()} // Prevent background click when clicking on note
         >
+            {/* Stack indicator - shows when note is on top of others */}
+            {isOnTop && (
+                <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-blue-500 border border-white rounded-full shadow-sm z-30"
+                    title="This note is on top" />
+            )}
             {/* Controls */}
             <div className="absolute -top-2 -right-2 flex gap-1 z-10"
                 onPointerDown={(e) => e.stopPropagation()}>
-                <button
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onChangeColor(note.id);
-                    }}
-                    className="w-6 h-6 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors"
-                    title="Change color theme"
-                >
-                    <Palette className="w-3 h-3 text-gray-600" />
-                </button>
                 <button
                     onClick={(e) => {
                         e.stopPropagation();
@@ -128,9 +127,12 @@ const NoteCard: React.FC<NoteCardProps> = ({
                         e.stopPropagation();
                         onEdit(note.id);
                     }}
-                    className="w-6 h-6 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors"
+                    className={`w-6 h-6 rounded-full shadow-md flex items-center justify-center transition-all duration-200 ${isEditing
+                        ? 'bg-blue-500 hover:bg-blue-600 text-white'
+                        : 'bg-white hover:bg-gray-50 text-gray-600'
+                        }`}
                 >
-                    <Edit3 className="w-3 h-3 text-gray-600" />
+                    <Edit3 className="w-3 h-3" />
                 </button>
                 <button
                     onClick={(e) => {
@@ -140,6 +142,21 @@ const NoteCard: React.FC<NoteCardProps> = ({
                     className="w-6 h-6 bg-red-500 rounded-full shadow-md flex items-center justify-center hover:bg-red-600 transition-colors"
                 >
                     <X className="w-3 h-3 text-white" />
+                </button>
+            </div>
+
+            {/* Theme toggle button - bottom left */}
+            <div className="absolute -bottom-2 -left-2 z-10"
+                onPointerDown={(e) => e.stopPropagation()}>
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onChangeColor(note.id);
+                    }}
+                    className="w-6 h-6 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors"
+                    title="Change color theme"
+                >
+                    <Palette className="w-3 h-3 text-gray-600" />
                 </button>
             </div>
 
@@ -239,6 +256,60 @@ const Notes: React.FC = () => {
     const [topNoteId, setTopNoteId] = useState<string | null>(null);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [resizingId, setResizingId] = useState<string | null>(null);
+
+    // Helper function to check if two notes overlap
+    const notesOverlap = (note1: Note, note2: Note): boolean => {
+        const rect1 = {
+            left: note1.position.x,
+            right: note1.position.x + (note1.width || 192),
+            top: note1.position.y,
+            bottom: note1.position.y + (note1.height || 160)
+        };
+
+        const rect2 = {
+            left: note2.position.x,
+            right: note2.position.x + (note2.width || 192),
+            top: note2.position.y,
+            bottom: note2.position.y + (note2.height || 160)
+        };
+
+        return !(rect1.right <= rect2.left ||
+            rect2.right <= rect1.left ||
+            rect1.bottom <= rect2.top ||
+            rect2.bottom <= rect1.top);
+    };
+
+    // Get notes that are underneath a given note
+    const getNotesUnderneath = (targetNote: Note): Note[] => {
+        return notes.filter(note =>
+            note.id !== targetNote.id &&
+            notesOverlap(targetNote, note) &&
+            // Check if the other note has a lower z-index (is underneath)
+            (note.id !== topNoteId && targetNote.id === topNoteId)
+        );
+    };
+
+    // Get all overlapping groups
+    const getOverlappingGroups = (): Note[][] => {
+        const processed = new Set<string>();
+        const groups: Note[][] = [];
+
+        notes.forEach(note => {
+            if (processed.has(note.id)) return;
+
+            const overlapping = notes.filter(other =>
+                other.id !== note.id && notesOverlap(note, other)
+            );
+
+            if (overlapping.length > 0) {
+                const group = [note, ...overlapping];
+                group.forEach(n => processed.add(n.id));
+                groups.push(group);
+            }
+        });
+
+        return groups;
+    };
 
     // Handle clicks outside notes to disable resize mode
     const handleBackgroundClick = () => {
@@ -354,6 +425,36 @@ const Notes: React.FC = () => {
                     className="relative h-full overflow-hidden"
                     onClick={handleBackgroundClick}
                 >
+                    {/* Debug overlay showing overlapping groups */}
+                    {process.env.NODE_ENV === 'development' && (
+                        <div className="absolute top-4 right-4 bg-black bg-opacity-75 text-white p-3 rounded-lg text-xs max-w-sm">
+                            <div className="font-bold mb-2 text-sm">Overlapping Groups:</div>
+                            {getOverlappingGroups().length === 0 ? (
+                                <div className="text-gray-300 italic">No overlapping notes</div>
+                            ) : (
+                                getOverlappingGroups().map((group, idx) => (
+                                    <div key={idx} className="mb-3 last:mb-0">
+                                        <div className="font-medium text-yellow-300">
+                                            Group {idx + 1}: {group.length} notes
+                                        </div>
+                                        <div className="text-gray-300 text-xs mt-1 space-y-1">
+                                            {group.map(note => (
+                                                <div key={note.id} className="flex items-center gap-2">
+                                                    <span className="font-mono text-blue-300">
+                                                        {note.id.length > 8 ? `${note.id.slice(0, 8)}...` : note.id}
+                                                    </span>
+                                                    <span className="text-gray-400">
+                                                        "{note.text.length > 15 ? `${note.text.slice(0, 15)}...` : note.text}"
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    )}
+
                     {notes.map((note) => (
                         <NoteCard
                             key={note.id}
