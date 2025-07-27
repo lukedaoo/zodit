@@ -1,21 +1,23 @@
-import { X, Edit3, Palette, Maximize2 } from 'lucide-react';
+import { X, Palette, Maximize2, RulerDimensionLine } from 'lucide-react';
 
 interface NoteControlsProps {
-    isEditing: boolean;
     isResizing: boolean;
-    onEdit: () => void;
     onDelete: () => void;
     onChangeColor: () => void;
     onToggleResize: () => void;
+    onResetSize: () => void;
+    // isEditing?: boolean;
+    // onEdit?: () => void;
 }
 
 export const NoteControls = ({
-    isEditing,
     isResizing,
-    onEdit,
     onDelete,
     onChangeColor,
     onToggleResize,
+    onResetSize,
+    // isEditing,
+    // onEdit,
 }: NoteControlsProps) => {
     return (
         <>
@@ -35,6 +37,18 @@ export const NoteControls = ({
                 >
                     <Maximize2 className="w-3 h-3" />
                 </button>
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onResetSize();
+                    }}
+                    className={`w-6 h-6 rounded-full shadow-md flex items-center justify-center transition-all duration-200 bg-white hover:bg-gray-50 text-gray-600
+                        }`}
+                    title="Reset size"
+                >
+                    <RulerDimensionLine className="w-3 h-3" />
+                </button>
+
                 { /* Edit control 
                     <button
                         onClick={(e) => {

@@ -26,6 +26,10 @@ export const useNotes = (initialNotes?: Note[]) => {
         updateNoteSize,
         changeNoteColor,
         bringNoteToFront,
+        arrangeInGrid,
+        arrangeInStack,
+        arrangeInCircle,
+        arrangeRandomly,
     } = useNoteActions({
         updateNotes,
         setEditingId,
@@ -68,6 +72,12 @@ export const useNotes = (initialNotes?: Note[]) => {
         updateNoteSize,
         changeNoteColor,
         bringNoteToFront,
+
+
+        arrangeInGrid,
+        arrangeInStack,
+        arrangeInCircle,
+        arrangeRandomly,
 
         // Interactions
         toggleEdit,

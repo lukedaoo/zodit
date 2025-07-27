@@ -2,10 +2,8 @@ import { useCallback } from 'react';
 import type { Note } from '../types';
 import { NOTE_COLORS } from '../types';
 import { createNewNote } from '../noteUtils';
-import {
-    arrangeNotesInGrid, stackNotesVertically,
-    arrangeNotesInCircle, spreadNotesRandomly
-} from '../noteUtils';
+import { arrangeNotesInGrid, stackNotesVertically, arrangeNotesInCircle, spreadNotesRandomly } from '../noteUtils';
+
 
 interface UseNoteActionsProps {
     updateNotes: (updater: (notes: Note[]) => Note[]) => void;

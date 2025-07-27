@@ -75,12 +75,13 @@ export const NoteCard = ({
         >
 
             <NoteControls
-                isEditing={isEditing}
                 isResizing={isResizing}
-                onEdit={onToggleEdit}
                 onDelete={onDelete}
                 onChangeColor={onChangeColor}
                 onToggleResize={onToggleResize}
+                onResetSize={() => onResize(DEFAULT_DIMENSIONS.width, DEFAULT_DIMENSIONS.height)}
+            // onEdit={onToggleEdit}
+            // isEditing={isEditing}
             />
 
             <NoteContent

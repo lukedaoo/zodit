@@ -1,6 +1,7 @@
 import { DndContext } from '@dnd-kit/core';
 import { NoteCard } from './NoteCard';
 import { AddNoteButton } from './AddNoteButton';
+import { ArrangeButton } from './ArrangeButton';
 import { EmptyState } from './EmptyState';
 import { OverlappingDisplay } from './OverlappingDisplay';
 import { useNotes } from './hooks/useNotes';
@@ -18,6 +19,10 @@ const Notes = () => {
         updateNoteSize,
         changeNoteColor,
         bringNoteToFront,
+        arrangeInGrid,
+        arrangeInStack,
+        arrangeInCircle,
+        arrangeRandomly,
         toggleEdit,
         toggleResize,
         handleBackgroundClick,
@@ -27,6 +32,13 @@ const Notes = () => {
     return (
         <div className="fixed inset-0 top-16 w-screen h-screen" style={{ backgroundColor: 'var(--color-background)', margin: 0, padding: 0 }}>
             <AddNoteButton onAddNote={addNote} />
+            <ArrangeButton
+                onArrangeGrid={arrangeInGrid}
+                onArrangeStack={arrangeInStack}
+                onArrangeCircle={arrangeInCircle}
+                onArrangeRandom={arrangeRandomly}
+            />
+
 
             <div className="w-full h-full overflow-auto" onClick={handleBackgroundClick}>
                 <div
