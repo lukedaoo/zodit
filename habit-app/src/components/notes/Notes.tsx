@@ -4,7 +4,6 @@ import {
     DndContext,
     useDraggable,
 } from '@dnd-kit/core';
-import { restrictToParentElement } from '@dnd-kit/modifiers';
 
 interface Note {
     id: string;
@@ -279,15 +278,6 @@ const Notes: React.FC = () => {
             rect2.bottom <= rect1.top);
     };
 
-    // Get notes that are underneath a given note
-    const getNotesUnderneath = (targetNote: Note): Note[] => {
-        return notes.filter(note =>
-            note.id !== targetNote.id &&
-            notesOverlap(targetNote, note) &&
-            // Check if the other note has a lower z-index (is underneath)
-            (note.id !== topNoteId && targetNote.id === topNoteId)
-        );
-    };
 
     // Get all overlapping groups
     const getOverlappingGroups = (): Note[][] => {
@@ -401,7 +391,7 @@ const Notes: React.FC = () => {
     };
 
     return (
-        <div className="fixed inset-0 top-16 w-screen h-screen overflow-hidden" style={{ backgroundColor: 'var(--color-background)', margin: 0, padding: 0 }}>
+        <div className="fixed inset-0 top-16 w-screen h-screen" style={{ backgroundColor: 'var(--color-background)', margin: 0, padding: 0 }}>
             <div className="fixed bottom-6 left-6 z-50">
                 <button
                     onClick={addNewNote}
@@ -420,69 +410,81 @@ const Notes: React.FC = () => {
                 </button>
             </div>
 
-            <DndContext onDragEnd={handleDragEnd} modifiers={[restrictToParentElement]}>
+            {/* Scrollable container */}
+            <div
+                className="w-full h-full overflow-auto"
+                onClick={handleBackgroundClick}
+            >
+                {/* Large canvas area */}
                 <div
-                    className="relative h-full overflow-hidden"
-                    onClick={handleBackgroundClick}
+                    className="relative"
+                    style={{
+                        width: '300vw',
+                        height: '300vh',
+                        minWidth: '3000px',
+                        minHeight: '2000px'
+                    }}
                 >
-                    {/* Debug overlay showing overlapping groups */}
-                    {process.env.NODE_ENV === 'development' && (
-                        <div className="absolute top-4 right-4 bg-black bg-opacity-75 text-white p-3 rounded-lg text-xs max-w-sm">
-                            <div className="font-bold mb-2 text-sm">Overlapping Groups:</div>
-                            {getOverlappingGroups().length === 0 ? (
-                                <div className="text-gray-300 italic">No overlapping notes</div>
-                            ) : (
-                                getOverlappingGroups().map((group, idx) => (
-                                    <div key={idx} className="mb-3 last:mb-0">
-                                        <div className="font-medium text-yellow-300">
-                                            Group {idx + 1}: {group.length} notes
+                    <DndContext onDragEnd={handleDragEnd}>
+                        {/* Debug overlay showing overlapping groups */}
+                        {process.env.NODE_ENV === 'development' && (
+                            <div className="fixed top-20 right-4 bg-black bg-opacity-75 text-white p-3 rounded-lg text-xs max-w-sm z-50">
+                                <div className="font-bold mb-2 text-sm">Overlapping Groups:</div>
+                                {getOverlappingGroups().length === 0 ? (
+                                    <div className="text-gray-300 italic">No overlapping notes</div>
+                                ) : (
+                                    getOverlappingGroups().map((group, idx) => (
+                                        <div key={idx} className="mb-3 last:mb-0">
+                                            <div className="font-medium text-yellow-300">
+                                                Group {idx + 1}: {group.length} notes
+                                            </div>
+                                            <div className="text-gray-300 text-xs mt-1 space-y-1">
+                                                {group.map(note => (
+                                                    <div key={note.id} className="flex items-center gap-2">
+                                                        <span className="font-mono text-blue-300">
+                                                            {note.id.length > 8 ? `${note.id.slice(0, 8)}...` : note.id}
+                                                        </span>
+                                                        <span className="text-gray-400">
+                                                            "{note.text.length > 15 ? `${note.text.slice(0, 15)}...` : note.text}"
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
-                                        <div className="text-gray-300 text-xs mt-1 space-y-1">
-                                            {group.map(note => (
-                                                <div key={note.id} className="flex items-center gap-2">
-                                                    <span className="font-mono text-blue-300">
-                                                        {note.id.length > 8 ? `${note.id.slice(0, 8)}...` : note.id}
-                                                    </span>
-                                                    <span className="text-gray-400">
-                                                        "{note.text.length > 15 ? `${note.text.slice(0, 15)}...` : note.text}"
-                                                    </span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-                    )}
-
-                    {notes.map((note) => (
-                        <NoteCard
-                            key={note.id}
-                            note={note}
-                            isEditing={editingId === note.id}
-                            isResizing={resizingId === note.id}
-                            onEdit={handleEdit}
-                            onDelete={deleteNote}
-                            onUpdateText={updateNoteText}
-                            onChangeColor={changeNoteColor}
-                            onToggleResize={handleResizeToggle}
-                            onResize={updateNoteSize}
-                            topNoteId={topNoteId}
-                            bringNoteToFront={bringNoteToFront}
-                        />
-                    ))}
-
-                    {notes.length === 0 && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="text-center" style={{ color: 'var(--color-foreground)' }}>
-                                <Edit3 className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                                <p className="text-lg mb-2">No notes yet!</p>
-                                <p className="text-sm">Click the floating button to create your first sticky note</p>
+                                    ))
+                                )}
                             </div>
-                        </div>
-                    )}
+                        )}
+
+                        {notes.map((note) => (
+                            <NoteCard
+                                key={note.id}
+                                note={note}
+                                isEditing={editingId === note.id}
+                                isResizing={resizingId === note.id}
+                                onEdit={handleEdit}
+                                onDelete={deleteNote}
+                                onUpdateText={updateNoteText}
+                                onChangeColor={changeNoteColor}
+                                onToggleResize={handleResizeToggle}
+                                onResize={updateNoteSize}
+                                topNoteId={topNoteId}
+                                bringNoteToFront={bringNoteToFront}
+                            />
+                        ))}
+
+                        {notes.length === 0 && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="text-center" style={{ color: 'var(--color-foreground)' }}>
+                                    <Edit3 className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                                    <p className="text-lg mb-2">No notes yet!</p>
+                                    <p className="text-sm">Click the floating button to create your first sticky note</p>
+                                </div>
+                            </div>
+                        )}
+                    </DndContext>
                 </div>
-            </DndContext>
+            </div>
         </div>
     );
 };

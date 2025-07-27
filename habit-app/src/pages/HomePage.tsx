@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { TodoV1, TodoV2 } from '@components/todo';
-import { Notes } from '@components/notes';
+import { NotesV1, NotesV2 } from '@components/notes';
 import { Navbar } from '@components/gadget/NavBar';
 import { ScrollButton } from "@components/gadget/ScrollButton";
 
@@ -9,6 +9,7 @@ const HomePage: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'dashboard' | 'todo' | 'notes'>('dashboard');
 
     const TodoComponent = version === 'v1' ? TodoV1 : TodoV2;
+    const NotesComponent = version === 'v1' ? NotesV1 : NotesV2;
 
     const handleNavigation = (tab: 'dashboard' | 'todo' | 'notes') => {
         setActiveTab(tab);
@@ -19,7 +20,7 @@ const HomePage: React.FC = () => {
             case 'todo':
                 return <TodoComponent />;
             case 'notes':
-                return <Notes />;
+                return <NotesComponent />;
             case 'dashboard':
             default:
                 return (
