@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
-import { Plus, X, Edit3, Palette } from 'lucide-react';
+import { Plus, X, Edit3, Palette, Maximize2 } from 'lucide-react';
 import {
     DndContext,
     useDraggable,
 } from '@dnd-kit/core';
 import { restrictToParentElement } from '@dnd-kit/modifiers';
 
-
 interface Note {
     id: string;
     text: string;
     color: string;
     position: { x: number; y: number };
+    width?: number;
+    height?: number;
 }
 
 const NOTE_COLORS = {
@@ -40,33 +41,50 @@ const NOTE_COLORS = {
 interface NoteCardProps {
     note: Note;
     isEditing: boolean;
+    isResizing: boolean;
     onEdit: (id: string) => void;
     onDelete: (id: string) => void;
     onUpdateText: (id: string, text: string) => void;
     onChangeColor: (id: string) => void;
+    onToggleResize: (id: string) => void;
+    onResize: (id: string, width: number, height: number) => void;
+    topNoteId: string | null;
+    bringNoteToFront: (id: string) => void;
 }
 
 const NoteCard: React.FC<NoteCardProps> = ({
     note,
     isEditing,
+    isResizing,
     onEdit,
     onDelete,
     onUpdateText,
     onChangeColor,
+    onToggleResize,
+    onResize,
+    topNoteId,
+    bringNoteToFront,
 }) => {
+    const draggable = useDraggable({ id: note.id });
     const {
         attributes,
         listeners,
         setNodeRef,
         transform,
-        isDragging,
-    } = useDraggable({ id: note.id });
+    } = isResizing ? {
+        attributes: {},
+        listeners: {},
+        setNodeRef: () => { },
+        transform: null,
+    } : draggable;
 
     const style = {
         left: `${note.position.x}px`,
         top: `${note.position.y}px`,
         transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : 'none',
-        zIndex: isDragging ? 50 : 10,
+        zIndex: note.id === topNoteId ? 999 : 10,
+        width: note.width || 192,
+        height: note.height || 160,
     };
 
     return (
@@ -75,7 +93,9 @@ const NoteCard: React.FC<NoteCardProps> = ({
             {...listeners}
             {...attributes}
             style={style}
-            className={`absolute w-48 h-40 p-3 border-2 shadow-lg ${note.color} cursor-move will-change-transform`}
+            className={`absolute p-3 border-2 shadow-lg ${note.color} cursor-move will-change-transform`}
+            onMouseDown={() => bringNoteToFront(note.id)}
+            onClick={(e) => e.stopPropagation()} // Prevent background click when clicking on note
         >
             {/* Controls */}
             <div className="absolute -top-2 -right-2 flex gap-1 z-10"
@@ -89,6 +109,19 @@ const NoteCard: React.FC<NoteCardProps> = ({
                     title="Change color theme"
                 >
                     <Palette className="w-3 h-3 text-gray-600" />
+                </button>
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onToggleResize(note.id);
+                    }}
+                    className={`w-6 h-6 rounded-full shadow-md flex items-center justify-center transition-all duration-200 ${isResizing
+                        ? 'bg-blue-500 hover:bg-blue-600 text-white'
+                        : 'bg-white hover:bg-gray-50 text-gray-600'
+                        }`}
+                    title="Resize"
+                >
+                    <Maximize2 className="w-3 h-3" />
                 </button>
                 <button
                     onClick={(e) => {
@@ -132,6 +165,52 @@ const NoteCard: React.FC<NoteCardProps> = ({
                 </div>
             )}
 
+            {/* Improved Resize handle */}
+            {isResizing && (
+                <div
+                    className="absolute -right-1 -bottom-1 w-6 h-6 cursor-se-resize z-20 group"
+                    onMouseDown={(e) => {
+                        e.stopPropagation();
+                        const startX = e.clientX;
+                        const startY = e.clientY;
+                        const startWidth = note.width || 192;
+                        const startHeight = note.height || 160;
+
+                        const onMouseMove = (moveEvent: MouseEvent) => {
+                            const newWidth = Math.max(120, startWidth + (moveEvent.clientX - startX));
+                            const newHeight = Math.max(100, startHeight + (moveEvent.clientY - startY));
+                            onResize(note.id, newWidth, newHeight);
+                        };
+
+                        const onMouseUp = () => {
+                            window.removeEventListener('mousemove', onMouseMove);
+                            window.removeEventListener('mouseup', onMouseUp);
+                        };
+
+                        window.addEventListener('mousemove', onMouseMove);
+                        window.addEventListener('mouseup', onMouseUp);
+                    }}
+                    title="Drag to resize"
+                >
+                    {/* Triangular resize indicator */}
+                    <div className="absolute right-0 bottom-0 w-0 h-0 border-l-6 border-b-6 border-l-transparent border-b-gray-400 group-hover:border-b-gray-600 transition-colors" />
+
+                    {/* Grip lines */}
+                    <div className="absolute right-1 bottom-1 flex flex-col gap-0.5">
+                        <div className="flex gap-0.5">
+                            <div className="w-0.5 h-0.5 bg-gray-400 rounded-full group-hover:bg-gray-600 transition-colors" />
+                            <div className="w-0.5 h-0.5 bg-gray-400 rounded-full group-hover:bg-gray-600 transition-colors" />
+                        </div>
+                        <div className="flex gap-0.5">
+                            <div className="w-0.5 h-0.5 bg-gray-400 rounded-full group-hover:bg-gray-600 transition-colors" />
+                        </div>
+                    </div>
+
+                    {/* Invisible larger hit area */}
+                    <div className="absolute -right-2 -bottom-2 w-8 h-8" />
+                </div>
+            )}
+
             {/* Drag handle visual */}
             <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-8 h-4 bg-white/60 border border-gray-200 rounded-sm shadow-sm"></div>
         </div>
@@ -150,12 +229,27 @@ const Notes: React.FC = () => {
                 x: Math.random() * 400 + 50,
                 y: Math.random() * 300 + 100,
             },
+            width: 192,
+            height: 160,
         };
         NOTES.push(note);
     }
-    const [notes, setNotes] = useState<Note[]>(NOTES);
 
+    const [notes, setNotes] = useState<Note[]>(NOTES);
+    const [topNoteId, setTopNoteId] = useState<string | null>(null);
     const [editingId, setEditingId] = useState<string | null>(null);
+    const [resizingId, setResizingId] = useState<string | null>(null);
+
+    // Handle clicks outside notes to disable resize mode
+    const handleBackgroundClick = () => {
+        if (resizingId) {
+            setResizingId(null);
+        }
+    };
+
+    const bringNoteToFront = (id: string) => {
+        setTopNoteId(id);
+    };
 
     const addNewNote = () => {
         const allColors = [...NOTE_COLORS.light, ...NOTE_COLORS.dark];
@@ -167,6 +261,8 @@ const Notes: React.FC = () => {
                 x: Math.random() * 400 + 50,
                 y: Math.random() * 300 + 100,
             },
+            width: 192,
+            height: 160,
         };
         setNotes((prev) => [...prev, newNote]);
         setEditingId(newNote.id);
@@ -176,13 +272,9 @@ const Notes: React.FC = () => {
         setNotes(prev =>
             prev.map(note => {
                 if (note.id === id) {
-                    // Determine current theme
                     const isCurrentlyLight = NOTE_COLORS.light.includes(note.color);
                     const newTheme = isCurrentlyLight ? NOTE_COLORS.dark : NOTE_COLORS.light;
-
-                    // Get a random color from the opposite theme
                     const newColor = newTheme[Math.floor(Math.random() * newTheme.length)];
-
                     return { ...note, color: newColor };
                 }
                 return note;
@@ -202,6 +294,20 @@ const Notes: React.FC = () => {
 
     const handleEdit = (id: string) => {
         setEditingId((prev) => (prev === id ? null : id));
+        setTopNoteId(id);
+    };
+
+    const handleResizeToggle = (id: string) => {
+        setResizingId((prev) => (prev === id ? null : id));
+        setTopNoteId(id);
+    };
+
+    const updateNoteSize = (id: string, width: number, height: number) => {
+        setNotes((prev) =>
+            prev.map((note) =>
+                note.id === id ? { ...note, width, height } : note
+            )
+        );
     };
 
     const handleDragEnd = (event: any) => {
@@ -216,23 +322,16 @@ const Notes: React.FC = () => {
         setNotes((prev) =>
             prev.map((n) =>
                 n.id === id
-                    ? {
-                        ...n,
-                        position: {
-                            x: newX,
-                            y: newY,
-                        },
-                    }
+                    ? { ...n, position: { x: newX, y: newY } }
                     : n
             )
         );
+        setTopNoteId(id);
     };
 
     return (
         <div className="fixed inset-0 top-16 w-screen h-screen overflow-hidden" style={{ backgroundColor: 'var(--color-background)', margin: 0, padding: 0 }}>
-            {/* Control Buttons */}
             <div className="fixed bottom-6 left-6 z-50">
-                {/* Add Button */}
                 <button
                     onClick={addNewNote}
                     onMouseEnter={(e) => {
@@ -250,20 +349,25 @@ const Notes: React.FC = () => {
                 </button>
             </div>
 
-            {/* Empty state */}
-
-            <DndContext onDragEnd={handleDragEnd}
-                modifiers={[restrictToParentElement]}>
-                <div className="relative h-full overflow-hidden">
+            <DndContext onDragEnd={handleDragEnd} modifiers={[restrictToParentElement]}>
+                <div
+                    className="relative h-full overflow-hidden"
+                    onClick={handleBackgroundClick}
+                >
                     {notes.map((note) => (
                         <NoteCard
                             key={note.id}
                             note={note}
                             isEditing={editingId === note.id}
+                            isResizing={resizingId === note.id}
                             onEdit={handleEdit}
                             onDelete={deleteNote}
                             onUpdateText={updateNoteText}
                             onChangeColor={changeNoteColor}
+                            onToggleResize={handleResizeToggle}
+                            onResize={updateNoteSize}
+                            topNoteId={topNoteId}
+                            bringNoteToFront={bringNoteToFront}
                         />
                     ))}
 
