@@ -4,7 +4,7 @@
 
 - (x) or json file
 
-- ( ) Task detail will be floating card view 
+- ( ) Task detail will be floating card view to link habit
 - (x) fold groups
 - (x) User Pref for collapsing groups/tasks
 - (x) move groups arroud
@@ -13,3 +13,13 @@
 - vim mode
 
 - Drag json file to create groups/tasks
+
+- limit number of toolbar items
+- collapse toolbar 
+- support mobile view for toolbar
+
+- clean up code
+
+
+- use localStorage as database
+

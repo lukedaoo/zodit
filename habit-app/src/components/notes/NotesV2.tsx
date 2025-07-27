@@ -5,6 +5,8 @@ import { ArrangeButton } from './ArrangeButton';
 import { EmptyState } from './EmptyState';
 import { OverlappingDisplay } from './OverlappingDisplay';
 import { useNotes } from './hooks/useNotes';
+import { useSharedNotes } from '../../hooks/useSharedNotes';
+import { useEffect } from 'react';
 
 const Notes = () => {
     const {
@@ -18,6 +20,7 @@ const Notes = () => {
         updateNoteText,
         updateNoteSize,
         changeNoteColor,
+        toggleNotePin,
         bringNoteToFront,
         arrangeInGrid,
         arrangeInStack,
@@ -27,8 +30,13 @@ const Notes = () => {
         toggleResize,
         handleBackgroundClick,
         handleDragEnd,
-        toggleNotePin
     } = useNotes();
+
+    const { updateNotes: updateSharedNotes } = useSharedNotes();
+
+    useEffect(() => {
+        updateSharedNotes(notes);
+    }, [notes, updateSharedNotes]);
 
     return (
         <div className="fixed inset-0 top-16 w-screen h-screen" style={{ backgroundColor: 'var(--color-background)', margin: 0, padding: 0 }}>
@@ -39,7 +47,6 @@ const Notes = () => {
                 onArrangeCircle={arrangeInCircle}
                 onArrangeRandom={arrangeRandomly}
             />
-
 
             <div className="w-full h-full overflow-auto" onClick={handleBackgroundClick}>
                 <div
@@ -70,8 +77,8 @@ const Notes = () => {
                                 topNoteId={topNoteId}
                                 bringNoteToFront={bringNoteToFront}
                             />
-
                         ))}
+
                         {notes.length === 0 && <EmptyState />}
                     </DndContext>
                 </div>

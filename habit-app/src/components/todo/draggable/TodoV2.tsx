@@ -1,17 +1,26 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import { Pin } from 'lucide-react';
 import { AddGroupButton } from '../AddButtonComponents';
 import { DraggableGroupList } from './DraggableGroupList';
+import { ToolboxBar } from '@components/gadget/ToolBoxBar';
+import type { Toolbox } from '@components/gadget/ToolBoxBar';
+import { PinnedNotesTool } from './tools/PinnedNotesTools';
 import { useTodo } from '../useTodo';
 import { useTodoDate } from './hooks/useTodoDate';
 import { useTodoDragAndDrop } from './hooks/useTodoDragAndDrop';
 import { TodoDragOverlay } from './TodoDragOverlay';
 
 import { GreetingNav } from '@components/gadget/GreetingNav';
+import { useSharedNotes } from '@hooks/useSharedNotes';
 
 import { DndContext, DragOverlay, rectIntersection } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
-const Todo: React.FC = () => {
+interface TodoProps {
+    onNavigateToNotes?: () => void;
+}
+
+const Todo: React.FC<TodoProps> = ({ onNavigateToNotes }) => {
     const {
         createTodo,
         getTodoByDate,
@@ -30,7 +39,6 @@ const Todo: React.FC = () => {
         todos
     } = useTodo();
 
-    // Date management hook
     const {
         isLoading,
         heatmapData,
@@ -43,7 +51,6 @@ const Todo: React.FC = () => {
         todos
     });
 
-    // Drag and drop hook
     const {
         activeId,
         activeDragItem,
@@ -56,48 +63,108 @@ const Todo: React.FC = () => {
         moveTaskBetweenGroups
     });
 
+    const { pinnedNotes } = useSharedNotes();
+
+    const toolboxTools = useMemo((): Toolbox[] => {
+        const tools: Toolbox[] = [];
+
+        if (pinnedNotes.length > 0) {
+            tools.push({
+                id: 'pinned-notes',
+                icon: Pin,
+                label: 'Pinned Notes',
+                count: pinnedNotes.length,
+                available: true,
+                component: PinnedNotesTool,
+                componentProps: {
+                    notes: pinnedNotes.map(note => ({
+                        id: note.id,
+                        text: note.text,
+                        createdAt: new Date().toISOString(), // Notes don't have createdAt, using current time
+                        isPinned: note.isPinned
+                    })),
+                    onNavigateToNotes
+                }
+            });
+        }
+
+        for (let i = 0; i < 5; i++) {
+            tools.push({
+                id: `tool-${i}`,
+                icon: Pin,
+                label: `Tool ${i}`,
+                available: true,
+                component: PinnedNotesTool,
+                componentProps: {
+                    notes: pinnedNotes.map(note => ({
+                        id: note.id,
+                        text: note.text,
+                        createdAt: new Date().toISOString(), // Notes don't have createdAt, using current time
+                        isPinned: note.isPinned
+                    })),
+                    onNavigateToNotes
+                }
+            });
+        }
+
+        return tools;
+    }, [pinnedNotes, onNavigateToNotes]);
+
+    const handleToolAction = (toolId: string, action: string, data?: any) => {
+        console.log(`Tool ${toolId} ${action}`, data);
+        // Handle tool actions here
+    };
 
     return (
-        <div className="space-y-6">
-            <div className="max-w-3xl mx-auto space-y-8">
-                <GreetingNav
-                    onChangeDate={handleDateChange}
-                    heatmapData={heatmapData}
-                />
-                <AddGroupButton onClick={addGroup} />
+        <>
+            {/* Toolbox Bar */}
+            <ToolboxBar
+                tools={toolboxTools}
+                onToolAction={handleToolAction}
+            />
 
-                <DndContext
-                    collisionDetection={rectIntersection}
-                    onDragStart={handleDragStart}
-                    onDragEnd={handleDragEnd}
-                >
-                    <SortableContext
-                        items={groups.map(g => g.id)}
-                        strategy={verticalListSortingStrategy}
+            <div className="space-y-6">
+                <div className="max-w-3xl mx-auto space-y-8">
+                    <GreetingNav
+                        onChangeDate={handleDateChange}
+                        heatmapData={heatmapData}
+                    />
+
+                    <AddGroupButton onClick={addGroup} />
+
+                    <DndContext
+                        collisionDetection={rectIntersection}
+                        onDragStart={handleDragStart}
+                        onDragEnd={handleDragEnd}
                     >
-                        <DraggableGroupList
-                            groups={groups}
-                            onUpdateGroupName={updateGroupName}
-                            onUpdateTask={updateTask}
-                            onDeleteGroup={deleteGroup}
-                            onDeleteTask={deleteTask}
-                            onAddTask={addTask}
-                        />
-                    </SortableContext>
+                        <SortableContext
+                            items={groups.map(g => g.id)}
+                            strategy={verticalListSortingStrategy}
+                        >
+                            <DraggableGroupList
+                                groups={groups}
+                                onUpdateGroupName={updateGroupName}
+                                onUpdateTask={updateTask}
+                                onDeleteGroup={deleteGroup}
+                                onDeleteTask={deleteTask}
+                                onAddTask={addTask}
+                            />
+                        </SortableContext>
 
-                    <DragOverlay>
-                        <TodoDragOverlay activeDragItem={activeDragItem} activeId={activeId} />
-                    </DragOverlay>
-                </DndContext>
+                        <DragOverlay>
+                            <TodoDragOverlay activeDragItem={activeDragItem} activeId={activeId} />
+                        </DragOverlay>
+                    </DndContext>
 
-                {groups.length === 0 && !isLoading && (
-                    <div className="text-center py-12 text-muted-foreground">
-                        <p className="text-lg mb-2">No groups yet</p>
-                        <p className="text-sm">Create your first group to get started!</p>
-                    </div>
-                )}
+                    {groups.length === 0 && !isLoading && (
+                        <div className="text-center py-12 text-muted-foreground">
+                            <p className="text-lg mb-2">No groups yet</p>
+                            <p className="text-sm">Create your first group to get started!</p>
+                        </div>
+                    )}
+                </div>
             </div>
-        </div>
+        </>
     );
 };
 

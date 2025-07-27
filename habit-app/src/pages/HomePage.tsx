@@ -15,10 +15,14 @@ const HomePage: React.FC = () => {
         setActiveTab(tab);
     };
 
+    const handleNavigateToNotes = () => {
+        setActiveTab('notes');
+    };
+
     const renderContent = () => {
         switch (activeTab) {
             case 'todo':
-                return <TodoComponent />;
+                return <TodoComponent onNavigateToNotes={handleNavigateToNotes} />;
             case 'notes':
                 return <NotesComponent />;
             case 'dashboard':
@@ -27,8 +31,13 @@ const HomePage: React.FC = () => {
                     <div className="card p-6">
                         <h2 className="text-xl font-semibold mb-4 text-primary">Dashboard</h2>
                         <p className="text-muted-foreground">
-                            Welcome to your dashboard. Switch to "To Do" to see your tasks.
+                            Welcome to your dashboard. Switch to "To Do" to see your tasks, or "Notes" to manage your sticky notes.
                         </p>
+                        <div className="mt-4 space-y-2">
+                            <div className="text-sm text-muted-foreground">
+                                💡 <strong>Tip:</strong> Pin important notes in the Notes tab to access them from your Todo list!
+                            </div>
+                        </div>
                     </div>
                 );
         }
@@ -42,7 +51,7 @@ const HomePage: React.FC = () => {
             />
             <ScrollButton />
             <div className="p-6 pt-24">
-                <div className="max-w-3xl mx-auto"> {/* Add negative margin */}
+                <div className="max-w-3xl mx-auto">
                     {renderContent()}
                 </div>
             </div>
