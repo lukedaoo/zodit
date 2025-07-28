@@ -63,7 +63,7 @@ const Todo: React.FC<TodoProps> = ({ onNavigateToNotes }) => {
         moveTaskBetweenGroups
     });
 
-    const { pinnedNotes } = useSharedNotes();
+    /* const { pinnedNotes } = useSharedNotes();
 
     const toolboxTools = useMemo((): Toolbox[] => {
         const tools: Toolbox[] = [];
@@ -108,20 +108,20 @@ const Todo: React.FC<TodoProps> = ({ onNavigateToNotes }) => {
         }
 
         return tools;
-    }, [pinnedNotes, onNavigateToNotes]);
+    }, [pinnedNotes, onNavigateToNotes]); */
 
-    const handleToolAction = (toolId: string, action: string, data?: any) => {
-        console.log(`Tool ${toolId} ${action}`, data);
-        // Handle tool actions here
-    };
+    // const handleToolAction = (toolId: string, action: string, data?: any) => {
+    //     console.log(`Tool ${toolId} ${action}`, data);
+    //     // Handle tool actions here
+    // };
+            // <ToolboxBar
+            //     tools={toolboxTools}
+            //     onToolAction={handleToolAction}
+            // />
 
     return (
         <>
             {/* Toolbox Bar */}
-            <ToolboxBar
-                tools={toolboxTools}
-                onToolAction={handleToolAction}
-            />
 
             <div className="space-y-6">
                 <div className="max-w-3xl mx-auto space-y-8">

@@ -5,8 +5,8 @@ import { ArrangeButton } from './ArrangeButton';
 import { EmptyState } from './EmptyState';
 import { OverlappingDisplay } from './OverlappingDisplay';
 import { useNotes } from './hooks/useNotes';
-import { useSharedNotes } from '../../hooks/useSharedNotes';
-import { useEffect } from 'react';
+// import { useSharedNotes } from '../../hooks/useSharedNotes';
+// import { useEffect } from 'react';
 
 const Notes = () => {
     const {
@@ -32,11 +32,11 @@ const Notes = () => {
         handleDragEnd,
     } = useNotes();
 
-    const { updateNotes: updateSharedNotes } = useSharedNotes();
-
-    useEffect(() => {
-        updateSharedNotes(notes);
-    }, [notes, updateSharedNotes]);
+    // const { updateNotes: updateSharedNotes } = useSharedNotes();
+    //
+    // useEffect(() => {
+    //     updateSharedNotes(notes);
+    // }, [notes]);
 
     return (
         <div className="fixed inset-0 top-16 w-screen h-screen" style={{ backgroundColor: 'var(--color-background)', margin: 0, padding: 0 }}>

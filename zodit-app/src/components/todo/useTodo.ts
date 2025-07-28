@@ -49,7 +49,6 @@ export const useTodo = () => {
     };
 
     const buildHeatMapFromTaskDates = (month: string): Record<string, number> => {
-        console.log('buildHeatMapFromTaskDates', month);
         const heatMap: Record<string, number> = {};
 
         // Parse the month parameter
