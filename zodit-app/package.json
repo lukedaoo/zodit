@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "prod": "vitest run && vite build && vite preview --open",
-    "test": "vitest --open"
+    "test": "vitest",
+    "test:open": "vitest && vite preview --outDir html --open"
   },
   "dependencies": {
     "react": "^19.1.0",
@@ -30,6 +31,7 @@
     "@types/react-dom": "^19.1.6",
     "@types/react-router-dom": "^5.3.3",
     "@vitejs/plugin-react": "^4.6.0",
+    "@vitest/ui": "^3.2.4",
     "autoprefixer": "^10.4.21",
     "dayjs": "^1.11.13",
     "eslint": "^9.30.1",

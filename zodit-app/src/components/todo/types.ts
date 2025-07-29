@@ -8,6 +8,7 @@ export interface Group {
     title: string;
     tasks: Task[];
 }
+
 // update the metadatas if any
 export interface Task {
     id: string;
