@@ -45,7 +45,8 @@ const Todo: React.FC<TodoProps> = () => {
     const {
         isLoading,
         heatmapData,
-        handleDateChange
+        handleDateChange,
+        currentDate
     } = useTodoDate({
         getTodoByDate,
         loadTodo,
@@ -124,7 +125,6 @@ const Todo: React.FC<TodoProps> = () => {
     // />
 
     const handleAddGroup = () => {
-        console.log('AddGroupButton clicked');
         if (isInitialized && !isLoading) {
             addGroup();
         }
@@ -132,7 +132,6 @@ const Todo: React.FC<TodoProps> = () => {
 
     const handleDateChangeWrapper = useCallback((date: Date) => {
         if (isInitialized && !isLoading) {
-            console.log('TodoV2: Calling handleDateChange', date);
             handleDateChange(date);
         }
     }, [isInitialized, isLoading, handleDateChange]);
@@ -146,6 +145,7 @@ const Todo: React.FC<TodoProps> = () => {
                     <GreetingNav
                         onChangeDate={handleDateChangeWrapper}
                         heatmapData={heatmapData}
+                        currentDate={currentDate}
                     />
 
                     <AddGroupButton

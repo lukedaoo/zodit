@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getToday } from '@common/utils';
+import { getToday, convert, toDate } from '@common/utils';
 import type { Todo as DisplayTodo, Group as DisplayGroup, Task as DisplayTask } from './types';
 import type { Todo, Group } from '@database/models';
 import { ModelFactory } from '@database/models';
@@ -40,6 +40,7 @@ const toDisplayTodo = (dataTodo: Todo): DisplayTodo => ({
             startDate: task.startDate,
             description: task.description,
             priority: task.priority,
+            createdDate: convert(task.createdAt),
             tags: task.tags,
             customFields: task.customFields
         }))
@@ -64,6 +65,7 @@ const toDataTodo = (todo: DisplayTodo): Todo => {
                 description: task.description,
                 priority: task.priority,
                 tags: task.tags,
+                createdAt: new Date(task.createdDate as string),
                 customFields: task.customFields,
                 groupId: group.id
             }))
@@ -72,13 +74,11 @@ const toDataTodo = (todo: DisplayTodo): Todo => {
     return dataTodo;
 };
 
-// Merge groups and tasks from multiple todos for the same date
 const mergeTodos = (todos: DisplayTodo[]): DisplayTodo[] => {
     const dateMap = new Map<string, DisplayTodo>();
     todos.forEach(todo => {
         const existing = dateMap.get(todo.date);
         if (existing) {
-            // Merge groups, avoiding duplicates by ID
             const mergedGroups = [
                 ...existing.groups,
                 ...todo.groups.filter(g => !existing.groups.some(eg => eg.id === g.id))
@@ -130,15 +130,6 @@ export const useTodo = () => {
         connectAndLoad();
     }, []);
 
-    useEffect(() => {
-        console.log('Action:', action);
-    }, [action]);
-
-
-    useEffect(() => {
-        console.log('Error:', error);
-    }, [error]);
-
     const generateId = useCallback((prefix: string) => {
         return prefix + ":id#" + Math.floor(Math.random() * 8 ** 6).toString(8).padStart(6, '0');
     }, []);
@@ -156,7 +147,6 @@ export const useTodo = () => {
             }
             setAction(actionType);
             setError(null);
-            console.log(actionType);
         } catch (err) {
             setError('Failed to sync groups: ' + (err instanceof Error ? err.message : 'Unknown error'));
         }
@@ -203,6 +193,7 @@ export const useTodo = () => {
 
     const buildHeatMapFromTaskDates = useCallback((month: string): Record<string, number> => {
         try {
+            if (!isInitialized) return {};
             const heatMap: Record<string, number> = {};
             const [year, monthNum] = month.split('-');
             const targetYear = parseInt(year);
@@ -210,12 +201,11 @@ export const useTodo = () => {
 
             todos.forEach(todo => {
                 todo.groups.forEach(group => {
-                    group.tasks.forEach(task => {
-                        const taskDate = task.startDate || todo.date;
-                        if (taskDate) {
-                            const date = new Date(taskDate);
+                    group.tasks.forEach(_ => {
+                        if (todo.date) {
+                            const date = toDate(todo.date);
                             if (date.getFullYear() === targetYear && date.getMonth() + 1 === targetMonth) {
-                                const dateKey = taskDate.split('T')[0];
+                                const dateKey = todo.date;
                                 heatMap[dateKey] = (heatMap[dateKey] || 0) + 1;
                             }
                         }

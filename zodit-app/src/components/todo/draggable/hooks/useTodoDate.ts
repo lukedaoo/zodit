@@ -21,11 +21,6 @@ export const useTodoDate = ({
     const [currentDate, setCurrentDate] = useState<Date>(new Date());
     const [isLoading, setIsLoading] = useState(false);
 
-    useEffect(() => {
-        console.log('on change date', currentDate);
-    }, [currentDate]);
-
-
     const heatmapData = useMemo(() => {
         const year = currentDate.getFullYear();
         const month = currentDate.getMonth() + 1;

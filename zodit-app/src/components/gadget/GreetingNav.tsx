@@ -1,16 +1,15 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Popover, Tooltip } from '@mantine/core';
-import { useDate } from '@hooks/useDate';
-
 import { getPeriodOfDayNow } from '@common/utils';
 import { DatePickerHeatmap } from './DatePickerHeatmap';
+import { useDate } from '@hooks/useDate';
 import './DatePicker.css';
-
 
 interface Props {
     onChangeDate: (date: Date) => void;
     heatmapData?: Record<string, number>;
+    currentDate: Date;
 }
 
 const getGreeting = () => {
@@ -20,24 +19,12 @@ const getGreeting = () => {
     return 'Good Evening';
 };
 
-export const GreetingNav = ({ onChangeDate, heatmapData = {} }: Props) => {
-    const {
-        currentDate,
-        month,
-        date,
-        year,
-        goToPreviousDay,
-        goToNextDay,
-        setDateFromString
-    } = useDate();
-
+export const GreetingNav = ({ onChangeDate, heatmapData = {}, currentDate }: Props) => {
+    const { month, date, year, goToPreviousDay, goToNextDay, setDateFromString }
+        = useDate(currentDate);
     const greeting = useMemo(() => getGreeting(), []);
 
     const [opened, setOpened] = useState(false);
-
-    useEffect(() => {
-        onChangeDate(currentDate);
-    }, [currentDate]);
 
     return (
         <div className="mantine border border-primary rounded-lg p-4 mb-4 flex items-center gap-6" style={{ color: 'var(--color-card-foreground)', borderColor: 'var(--color-border)' }}>
@@ -48,7 +35,7 @@ export const GreetingNav = ({ onChangeDate, heatmapData = {} }: Props) => {
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    goToPreviousDay();
+                                    goToPreviousDay(onChangeDate);
                                 }}
                                 className="mantine w-8 h-8 flex items-center justify-center rounded-md transition-colors"
                                 onMouseEnter={(e) => {
@@ -74,7 +61,7 @@ export const GreetingNav = ({ onChangeDate, heatmapData = {} }: Props) => {
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    goToNextDay();
+                                    goToNextDay(onChangeDate);
                                 }}
                                 className="mantine w-8 h-8 flex items-center justify-center rounded-md transition-colors"
                                 onMouseEnter={(e) => {
@@ -96,7 +83,7 @@ export const GreetingNav = ({ onChangeDate, heatmapData = {} }: Props) => {
                         currentDate={currentDate}
                         onChange={(newDate) => {
                             if (newDate) {
-                                setDateFromString(newDate);
+                                setDateFromString(newDate, onChangeDate);
                                 setOpened(false);
                             }
                         }}
@@ -120,6 +107,6 @@ export const GreetingNav = ({ onChangeDate, heatmapData = {} }: Props) => {
                     <div className="w-10 h-10 rounded-lg flex items-center justify-center text-xl">☀️</div>
                 </div>
             </div>
-        </div >
+        </div>
     );
 };

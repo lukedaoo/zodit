@@ -69,7 +69,7 @@ export const DatePickerHeatmap = ({
                 const intensity = intensityMap[dateStr] ?? -1;
 
                 const colors = getColors();
-                const bg = intensity > 0 ? colors[intensity] : 'transparent';
+                const bg = intensity >= 0 ? colors[intensity] : 'transparent';
                 const textColor = intensity >= 0 ? getTextColor(intensity, isDarkTheme) : 'var(--color-foreground)';
 
                 const isToday = day.isSame(dayjs(), 'day');

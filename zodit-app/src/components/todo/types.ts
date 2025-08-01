@@ -23,7 +23,7 @@ export interface Task {
     endDate?: string | any;
     tags?: string[];
 
-    createDate?: string;
+    createdDate?: string;
     customFields?: Record<string, any>;
 }
 

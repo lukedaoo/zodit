@@ -10,6 +10,10 @@ export const convertDate = (newDate: Date) => {
     return dayjs(newDate).tz(getTimezone()).startOf('day').toDate();
 };
 
+export const toDate = (date: Date | string) => {
+    return dayjs(date).toDate();
+}
+
 export const convertDateFromString = (newDate: string) => {
     return dayjs.tz(newDate, getTimezone()).startOf('day').toDate();
 };
@@ -32,6 +36,13 @@ export const getTimezone = () => {
 export const getToday = (): string => {
     return dayjs().format('YYYY-MM-DD');
 }
+
+export const convert = (date: Date | null | undefined, format: string = 'YYYY-MM-DD'): string => {
+    if (!date) {
+        return 'Invalid Date';
+    }
+    return dayjs(date).format(format);
+};
 
 // for display date and time for tasks
 export const formatDate = (dateString?: string): string => {
