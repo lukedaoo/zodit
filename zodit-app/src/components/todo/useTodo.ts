@@ -1,214 +1,374 @@
-import { useState, useEffect } from 'react';
-import type { Todo, Group } from './types';
+import { useState, useEffect, useCallback } from 'react';
+import { getToday } from '@common/utils';
+import type { Todo as DisplayTodo, Group as DisplayGroup, Task as DisplayTask } from './types';
+import type { Todo, Group } from '@database/models';
+import { ModelFactory } from '@database/models';
+import { DataProviderFactory, LocalStorageDataProvider } from '@database/provider';
+
+DataProviderFactory.register('localStorage', LocalStorageDataProvider);
+const dataProvider = DataProviderFactory.create({ name: 'localStorage' });
+
+type ActionType =
+    | 'init'
+    | 'load_todos'
+    | 'load_todo_by_date'
+    | 'load_heatmap'
+    | 'create_todo'
+    | 'add_group'
+    | 'update_group_name'
+    | 'delete_group'
+    | 'add_task'
+    | 'update_task'
+    | 'delete_task'
+    | 'reorder_tasks'
+    | 'reorder_groups'
+    | 'move_task_between_groups'
+    | null;
+
+// Utility to convert Data Model to Display Model
+const toDisplayTodo = (dataTodo: Todo): DisplayTodo => ({
+    id: dataTodo.id,
+    date: dataTodo.date,
+    title: dataTodo.title || '',
+    groups: dataTodo.groups.map(group => ({
+        id: group.id,
+        title: group.title,
+        tasks: group.tasks.map(task => ({
+            id: task.id,
+            title: task.title,
+            completed: task.completed,
+            startDate: task.startDate,
+            description: task.description,
+            priority: task.priority,
+            tags: task.tags,
+            customFields: task.customFields
+        }))
+    }))
+});
+
+// Utility to convert Display Model to Data Model
+const toDataTodo = (todo: DisplayTodo): Todo => {
+    const dataTodo = ModelFactory.createTodo({
+        id: todo.id,
+        date: todo.date,
+        title: todo.title,
+        groups: todo.groups.map(group => ({
+            id: group.id,
+            title: group.title,
+            todoId: todo.id,
+            tasks: group.tasks.map(task => ({
+                id: task.id,
+                title: task.title,
+                completed: task.completed,
+                startDate: task.startDate,
+                description: task.description,
+                priority: task.priority,
+                tags: task.tags,
+                customFields: task.customFields,
+                groupId: group.id
+            }))
+        })) as Group[]
+    });
+    return dataTodo;
+};
+
+// Merge groups and tasks from multiple todos for the same date
+const mergeTodos = (todos: DisplayTodo[]): DisplayTodo[] => {
+    const dateMap = new Map<string, DisplayTodo>();
+    todos.forEach(todo => {
+        const existing = dateMap.get(todo.date);
+        if (existing) {
+            // Merge groups, avoiding duplicates by ID
+            const mergedGroups = [
+                ...existing.groups,
+                ...todo.groups.filter(g => !existing.groups.some(eg => eg.id === g.id))
+            ];
+            existing.groups = mergedGroups;
+        } else {
+            dateMap.set(todo.date, { ...todo });
+        }
+    });
+    return Array.from(dateMap.values());
+};
 
 export const useTodo = () => {
-
-    let GROUP_DATABASE: Group[] = [];
-    // [
-    //     {
-    //         id: '1',
-    //         name: 'Group 1',
-    //         tasks: [{
-    //             id: '1', title: 'Task 1', completed: false,
-    //             startDate: {
-    //                 alias: 'today',
-    //                 resolved: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString().split('T')[0],
-    //             } as any
-    //         },
-    //         {
-    //             id: '2', title: 'Task 2', completed: false,
-    //             startDate: {
-    //                 alias: 'tmr',
-    //                 resolved: new Date(new Date().setDate(new Date().getDate() + 3)).toISOString().split('T')[0],
-    //             } as any
-    //         }]
-    //     }
-    // ];
-
-    const [todos, setTodos] = useState<Todo[]>([]);
+    const [todos, setTodos] = useState<DisplayTodo[]>([]);
     const [activeTodoId, setActiveTodoId] = useState<string | null>(null);
-
-    const createTodo = (date: string): Todo => {
-        const newTodo: Todo = {
-            id: generateId('todo'),
-            date,
-            groups: JSON.parse(JSON.stringify(GROUP_DATABASE))
-        };
-
-        setTodos([...todos, newTodo]);
-        return newTodo;
-    }
-
-    const getTodoByDate = (date: string): Todo | undefined => {
-        return todos?.find(t => t.date === date);
-    }
-
-    const loadTodo = (todo: Todo) => {
-        setActiveTodoId(todo.id);
-        setGroups(todo.groups);
-    };
-
-    const buildHeatMapFromTaskDates = (month: string): Record<string, number> => {
-        const heatMap: Record<string, number> = {};
-
-        // Parse the month parameter
-        const [year, monthNum] = month.split('-');
-        const targetYear = parseInt(year);
-        const targetMonth = parseInt(monthNum);
-
-        todos.forEach(todo => {
-            todo.groups.forEach(group => {
-                group.tasks.forEach(task => {
-                    const taskDate = task.startDate || todo.date;
-
-                    if (taskDate) {
-                        const date = new Date(taskDate);
-                        if (date.getFullYear() === targetYear && date.getMonth() + 1 === targetMonth) {
-                            const dateKey = taskDate.split('T')[0]; // Extract YYYY-MM-DD part
-
-                            if (heatMap[dateKey]) {
-                                heatMap[dateKey] += 1;
-                            } else {
-                                heatMap[dateKey] = 1;
-                            }
-                        }
-                    }
-                });
-            });
-        });
-
-        return heatMap;
-    }
+    const [action, setAction] = useState<ActionType>(null);
+    const [error, setError] = useState<string | null>(null);
+    const [isInitialized, setIsInitialized] = useState(false);
+    const groups = todos.find(t => t.id === activeTodoId)?.groups || [];
 
     useEffect(() => {
-        console.log('todos', todos);
+        const connectAndLoad = async () => {
+            try {
+                if (!dataProvider.isConnected()) {
+                    dataProvider.connect();
+                }
+                const allTodos = dataProvider.getTodos();
+                const displayTodos = mergeTodos(allTodos.map(toDisplayTodo));
+                setTodos(displayTodos);
+
+                const todayStr = getToday();
+                const todayTodo = displayTodos.find(t => t.date === todayStr);
+                if (todayTodo) {
+                    setActiveTodoId(todayTodo.id);
+                } else {
+                    const newTodo = dataProvider.createTodo(ModelFactory.createTodo({ date: todayStr }));
+                    const displayNewTodo = toDisplayTodo(newTodo);
+                    setTodos(prev => mergeTodos([...prev, displayNewTodo]));
+                    setActiveTodoId(displayNewTodo.id);
+                }
+                setAction('init');
+                setError(null);
+            } catch (err) {
+                setError('Failed to load todos: ' + (err instanceof Error ? err.message : 'Unknown error'));
+            } finally {
+                setIsInitialized(true);
+            }
+        };
+        connectAndLoad();
+    }, []);
+
+    useEffect(() => {
+        console.log('Action:', action);
+    }, [action]);
+
+
+    useEffect(() => {
+        console.log('Error:', error);
+    }, [error]);
+
+    const generateId = useCallback((prefix: string) => {
+        return prefix + ":id#" + Math.floor(Math.random() * 8 ** 6).toString(8).padStart(6, '0');
+    }, []);
+
+    const syncGroups = useCallback((newGroups: DisplayGroup[], actionType: ActionType) => {
+        if (!activeTodoId) return;
+        try {
+            const updatedTodos = todos.map(todo =>
+                todo.id === activeTodoId ? { ...todo, groups: newGroups } : todo
+            );
+            setTodos(updatedTodos);
+            const activeTodo = updatedTodos.find(t => t.id === activeTodoId);
+            if (activeTodo) {
+                dataProvider.updateTodo(activeTodoId, toDataTodo(activeTodo));
+            }
+            setAction(actionType);
+            setError(null);
+            console.log(actionType);
+        } catch (err) {
+            setError('Failed to sync groups: ' + (err instanceof Error ? err.message : 'Unknown error'));
+        }
+    }, [todos, activeTodoId]);
+
+    const createTodo = useCallback((date: string): DisplayTodo => {
+        try {
+            if (!dataProvider.isConnected()) {
+                dataProvider.connect();
+            }
+            const newTodo = dataProvider.createTodo(ModelFactory.createTodo({ date }));
+            const displayTodo = toDisplayTodo(newTodo);
+            setTodos(prev => [...prev, displayTodo]);
+            setAction('create_todo');
+            setError(null);
+            return displayTodo;
+        } catch (err) {
+            setError('Failed to create todo: ' + (err instanceof Error ? err.message : 'Unknown error'));
+            throw err; // Re-throw to allow caller to handle
+        }
+    }, []);
+
+    const getTodoByDate = useCallback((date: string): DisplayTodo | undefined => {
+        try {
+            setAction('load_todo_by_date');
+            setError(null);
+            return todos.find(t => t.date === date);
+        } catch (err) {
+            setError('Failed to get todo by date: ' + (err instanceof Error ? err.message : 'Unknown error'));
+            return undefined;
+        }
     }, [todos]);
 
-    const [groups, setGroups] = useState<Group[]>([]);
+    const loadTodo = useCallback((todo: DisplayTodo) => {
+        try {
+            console.log('Loading todo:', todo);
+            setActiveTodoId(todo.id as string);
+            setAction('load_todo_by_date');
+            setError(null);
+        } catch (err) {
+            setError('Failed to load todo: ' + (err instanceof Error ? err.message : 'Unknown error'));
+        }
+    }, []);
 
-    const generateId = (prefix: string) => {
-        return prefix + ":id#" +
-            Math.floor(Math.random() * 8 ** 6).toString(8).padStart(6, '0');
-    };
+    const buildHeatMapFromTaskDates = useCallback((month: string): Record<string, number> => {
+        try {
+            const heatMap: Record<string, number> = {};
+            const [year, monthNum] = month.split('-');
+            const targetYear = parseInt(year);
+            const targetMonth = parseInt(monthNum);
 
-    useEffect(() => {
-        if (!activeTodoId) return;
-
-        setTodos(prev =>
-            prev.map(todo =>
-                todo.id === activeTodoId
-                    ? { ...todo, groups }
-                    : todo
-            )
-        );
-    }, [groups, activeTodoId]);
-
-    const addGroup = () => {
-        const newGroup: Group = {
-            id: generateId('group'),
-            title: 'Untitled',
-            tasks: []
-        };
-        setGroups([...groups, newGroup]);
-    };
-
-    const updateGroupName = (groupId: string, newName: string) => {
-        setGroups((prev) =>
-            prev.map((g) => (g.id === groupId ? { ...g, title: newName } : g))
-        );
-    };
-
-    const deleteGroup = (groupId: string) => {
-        setGroups(groups.filter((g) => g.id !== groupId));
-    };
-
-    const addTask = (groupId: string) => {
-        setGroups(groups.map((group) =>
-            group.id === groupId
-                ? {
-                    ...group,
-                    tasks: [
-                        ...group.tasks,
-                        {
-                            id: generateId('task'),
-                            title: '',
-                            completed: false
+            todos.forEach(todo => {
+                todo.groups.forEach(group => {
+                    group.tasks.forEach(task => {
+                        const taskDate = task.startDate || todo.date;
+                        if (taskDate) {
+                            const date = new Date(taskDate);
+                            if (date.getFullYear() === targetYear && date.getMonth() + 1 === targetMonth) {
+                                const dateKey = taskDate.split('T')[0];
+                                heatMap[dateKey] = (heatMap[dateKey] || 0) + 1;
+                            }
                         }
-                    ]
-                }
-                : group
-        ));
-    };
+                    });
+                });
+            });
 
-    const updateTask = (groupId: string, taskId: string, updates: any) => {
-        const updatedGroups = groups.map(group => {
-            if (group.id !== groupId) return group;
+            setAction('load_heatmap');
+            setError(null);
+            return heatMap;
+        } catch (err) {
+            setError('Failed to build heatmap: ' + (err instanceof Error ? err.message : 'Unknown error'));
+            return {};
+        }
+    }, [todos]);
 
-            const updatedTasks = group.tasks.map(task =>
-                task.id === taskId ? { ...updates, id: taskId } : task
+    const addGroup = useCallback(() => {
+        try {
+            const newGroup: DisplayGroup = {
+                id: generateId('group'),
+                title: 'Untitled',
+                tasks: []
+            };
+            syncGroups([...groups, newGroup], 'add_group');
+            setError(null);
+        } catch (err) {
+            setError('Failed to add group: ' + (err instanceof Error ? err.message : 'Unknown error'));
+        }
+    }, [groups, syncGroups, generateId]);
+
+    const updateGroupName = useCallback((groupId: string, newName: string) => {
+        try {
+            syncGroups(
+                groups.map(g => (g.id === groupId ? { ...g, title: newName } : g)),
+                'update_group_name'
             );
+            setError(null);
+        } catch (err) {
+            setError('Failed to update group name: ' + (err instanceof Error ? err.message : 'Unknown error'));
+        }
+    }, [groups, syncGroups]);
 
-            return { ...group, tasks: updatedTasks };
-        });
+    const deleteGroup = useCallback((groupId: string) => {
+        try {
+            syncGroups(groups.filter(g => g.id !== groupId), 'delete_group');
+            setError(null);
+        } catch (err) {
+            setError('Failed to delete group: ' + (err instanceof Error ? err.message : 'Unknown error'));
+        }
+    }, [groups, syncGroups]);
 
-        setGroups(updatedGroups);
-    };
+    const addTask = useCallback((groupId: string) => {
+        try {
+            const newTask: DisplayTask = {
+                id: generateId('task'),
+                title: '',
+                completed: false
+            };
+            syncGroups(
+                groups.map(group =>
+                    group.id === groupId ? { ...group, tasks: [...group.tasks, newTask] } : group
+                ),
+                'add_task'
+            );
+            setError(null);
+        } catch (err) {
+            setError('Failed to add task: ' + (err instanceof Error ? err.message : 'Unknown error'));
+        }
+    }, [groups, syncGroups, generateId]);
 
-    const deleteTask = (groupId: string, taskId: string) => {
-        setGroups(groups.map((group) =>
-            group.id === groupId
-                ? {
-                    ...group,
-                    tasks: group.tasks.filter((task) => task.id !== taskId)
-                }
-                : group
-        ));
-    };
+    const updateTask = useCallback((groupId: string, taskId: string, updates: Partial<DisplayTask>) => {
+        try {
+            syncGroups(
+                groups.map(group =>
+                    group.id === groupId
+                        ? {
+                            ...group,
+                            tasks: group.tasks.map(task =>
+                                task.id === taskId ? { ...task, ...updates } : task
+                            )
+                        }
+                        : group
+                ),
+                'update_task'
+            );
+            setError(null);
+        } catch (err) {
+            setError('Failed to update task: ' + (err instanceof Error ? err.message : 'Unknown error'));
+        }
+    }, [groups, syncGroups]);
 
-    const reorderTask = (groupId: string, newOrder: string[]) => {
-        setGroups((prevGroups) =>
-            prevGroups.map((group) => {
-                if (group.id !== groupId) return group;
+    const deleteTask = useCallback((groupId: string, taskId: string) => {
+        try {
+            syncGroups(
+                groups.map(group =>
+                    group.id === groupId
+                        ? { ...group, tasks: group.tasks.filter(task => task.id !== taskId) }
+                        : group
+                ),
+                'delete_task'
+            );
+            setError(null);
+        } catch (err) {
+            setError('Failed to delete task: ' + (err instanceof Error ? err.message : 'Unknown error'));
+        }
+    }, [groups, syncGroups]);
 
-                const taskMap = new Map(group.tasks.map((task) => [task.id, task]));
-                const reorderedTasks = newOrder.map((id) => taskMap.get(id)).filter(Boolean) as any;
+    const reorderTask = useCallback((groupId: string, newOrder: string[]) => {
+        try {
+            const group = groups.find(g => g.id === groupId);
+            if (!group) return;
+            const taskMap = new Map(group.tasks.map(task => [task.id, task]));
+            const reorderedTasks = newOrder
+                .map(id => taskMap.get(id))
+                .filter(Boolean) as DisplayTask[];
+            syncGroups(
+                groups.map(g => (g.id === groupId ? { ...g, tasks: reorderedTasks } : g)),
+                'reorder_tasks'
+            );
+            dataProvider.reorderTasksInGroup(activeTodoId!, groupId, newOrder);
+            setError(null);
+        } catch (err) {
+            setError('Failed to reorder tasks: ' + (err instanceof Error ? err.message : 'Unknown error'));
+        }
+    }, [groups, syncGroups, activeTodoId]);
 
-                return {
-                    ...group,
-                    tasks: reorderedTasks,
-                };
-            })
-        );
-    };
+    const reorderGroup = useCallback((newOrder: string[]) => {
+        try {
+            const groupMap = Object.fromEntries(groups.map(group => [group.id, group]));
+            const reorderedGroups = newOrder
+                .map(id => groupMap[id])
+                .filter((group): group is DisplayGroup => Boolean(group));
+            syncGroups(reorderedGroups, 'reorder_groups');
+            dataProvider.reorderGroupsInTodo(activeTodoId!, newOrder);
+            setError(null);
+        } catch (err) {
+            setError('Failed to reorder groups: ' + (err instanceof Error ? err.message : 'Unknown error'));
+        }
+    }, [groups, syncGroups, activeTodoId]);
 
-    const reorderGroup = (newOrder: string[]) => {
-        setGroups((prevGroups) => {
-            const groupMap = Object.fromEntries(prevGroups.map((group) => [group.id, group]));
-            return newOrder
-                .map((id) => groupMap[id])
-                .filter((group): group is Group => Boolean(group));
-        });
-    };
-
-    const moveTaskBetweenGroups = (
+    const moveTaskBetweenGroups = useCallback((
         sourceGroupId: string,
         targetGroupId: string,
         taskId: string,
         targetTaskId: string | null
     ) => {
-        setGroups((prevGroups) => {
-            const sourceGroupIndex = prevGroups.findIndex(g => g.id === sourceGroupId);
-            const targetGroupIndex = prevGroups.findIndex(g => g.id === targetGroupId);
+        try {
+            const sourceGroup = groups.find(g => g.id === sourceGroupId);
+            const targetGroup = groups.find(g => g.id === targetGroupId);
+            if (!sourceGroup || !targetGroup) return;
 
-            if (sourceGroupIndex === -1 || targetGroupIndex === -1) return prevGroups;
-
-            const sourceGroup = prevGroups[sourceGroupIndex];
-            const targetGroup = prevGroups[targetGroupIndex];
-
-            const taskIndex = sourceGroup.tasks.findIndex(t => t.id === taskId);
-            if (taskIndex === -1) return prevGroups;
-
-            const task = sourceGroup.tasks[taskIndex];
+            const task = sourceGroup.tasks.find(t => t.id === taskId);
+            if (!task) return;
 
             let targetIndex = targetGroup.tasks.length;
             if (targetTaskId) {
@@ -216,28 +376,26 @@ export const useTodo = () => {
                 if (foundIndex !== -1) targetIndex = foundIndex;
             }
 
-            const newGroups = [...prevGroups];
+            const newGroups = groups.map(group => {
+                if (group.id === sourceGroupId) {
+                    return { ...group, tasks: group.tasks.filter(t => t.id !== taskId) };
+                }
+                if (group.id === targetGroupId) {
+                    return {
+                        ...group,
+                        tasks: [...group.tasks.slice(0, targetIndex), task, ...group.tasks.slice(targetIndex)]
+                    };
+                }
+                return group;
+            });
 
-            newGroups[sourceGroupIndex] = {
-                ...sourceGroup,
-                tasks: [
-                    ...sourceGroup.tasks.slice(0, taskIndex),
-                    ...sourceGroup.tasks.slice(taskIndex + 1)
-                ]
-            };
-
-            newGroups[targetGroupIndex] = {
-                ...targetGroup,
-                tasks: [
-                    ...targetGroup.tasks.slice(0, targetIndex),
-                    task,
-                    ...targetGroup.tasks.slice(targetIndex)
-                ]
-            };
-
-            return newGroups;
-        });
-    };
+            syncGroups(newGroups, 'move_task_between_groups');
+            dataProvider.moveTaskBetweenGroups(activeTodoId!, taskId, targetGroupId, targetIndex);
+            setError(null);
+        } catch (err) {
+            setError('Failed to move task: ' + (err instanceof Error ? err.message : 'Unknown error'));
+        }
+    }, [groups, syncGroups, activeTodoId]);
 
     return {
         todos,
@@ -254,6 +412,10 @@ export const useTodo = () => {
         deleteTask,
         reorderTask,
         reorderGroup,
-        moveTaskBetweenGroups
+        moveTaskBetweenGroups,
+        action,
+        error,
+        isInitialized
     };
 };
+

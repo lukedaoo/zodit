@@ -1,12 +1,13 @@
-import { useState, useCallback, useMemo } from 'react';
-import type { useTodo } from '../../useTodo';
+import { useState, useCallback, useMemo, useEffect } from 'react';
+import type { Todo } from '../../types';
 
 interface UseTodoDateProps {
-    getTodoByDate: ReturnType<typeof useTodo>['getTodoByDate'];
-    loadTodo: ReturnType<typeof useTodo>['loadTodo'];
-    createTodo: ReturnType<typeof useTodo>['createTodo'];
-    buildHeatMapFromTaskDates: ReturnType<typeof useTodo>['buildHeatMapFromTaskDates'];
-    todos: ReturnType<typeof useTodo>['todos'];
+    getTodoByDate: (date: string) => Todo | undefined;
+    loadTodo: (todo: Todo) => void;
+    createTodo: (date: string) => Todo;
+    buildHeatMapFromTaskDates: (month: string) => Record<string, number>;
+    todos: Todo[];
+    isInitialized: boolean;
 }
 
 export const useTodoDate = ({
@@ -14,21 +15,22 @@ export const useTodoDate = ({
     loadTodo,
     createTodo,
     buildHeatMapFromTaskDates,
-    todos
+    todos,
+    isInitialized
 }: UseTodoDateProps) => {
     const [currentDate, setCurrentDate] = useState<Date>(new Date());
     const [isLoading, setIsLoading] = useState(false);
 
+    useEffect(() => {
+        console.log('on change date', currentDate);
+    }, [currentDate]);
+
+
     const heatmapData = useMemo(() => {
-        try {
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth() + 1;
-            const monthString = `${year}-${month.toString().padStart(2, '0')}`;
-            return buildHeatMapFromTaskDates(monthString);
-        } catch (error) {
-            console.error('Error building heatmap data:', error);
-            return {};
-        }
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth() + 1;
+        const monthString = `${year}-${month.toString().padStart(2, '0')}`;
+        return buildHeatMapFromTaskDates(monthString);
     }, [currentDate, todos, buildHeatMapFromTaskDates]);
 
     const handleDateChange = useCallback(async (date: Date) => {
@@ -38,19 +40,22 @@ export const useTodoDate = ({
 
             const dateAsString = date.toISOString().split('T')[0];
             const existingTodo = getTodoByDate(dateAsString);
-
             if (existingTodo) {
                 loadTodo(existingTodo);
             } else {
-                const newTodo = createTodo(dateAsString);
-                loadTodo(newTodo);
+                const todo = createTodo(dateAsString);
+                loadTodo(todo);
             }
-        } catch (error) {
-            console.error('Error changing date:', error);
         } finally {
             setIsLoading(false);
         }
-    }, [getTodoByDate, loadTodo, createTodo]);
+    }, [createTodo, getTodoByDate, loadTodo]);
+
+    useEffect(() => {
+        if (isInitialized) {
+            handleDateChange(currentDate);
+        }
+    }, [isInitialized]);
 
     return {
         currentDate,

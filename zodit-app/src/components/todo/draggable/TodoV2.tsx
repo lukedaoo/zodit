@@ -1,26 +1,28 @@
-import React, { useMemo } from 'react';
-import { Pin } from 'lucide-react';
+import React, { useCallback } from 'react';
 import { AddGroupButton } from '../AddButtonComponents';
 import { DraggableGroupList } from './DraggableGroupList';
-import { ToolboxBar } from '@components/gadget/ToolBoxBar';
-import type { Toolbox } from '@components/gadget/ToolBoxBar';
-import { PinnedNotesTool } from './tools/PinnedNotesTools';
 import { useTodo } from '../useTodo';
 import { useTodoDate } from './hooks/useTodoDate';
 import { useTodoDragAndDrop } from './hooks/useTodoDragAndDrop';
 import { TodoDragOverlay } from './TodoDragOverlay';
 
 import { GreetingNav } from '@components/gadget/GreetingNav';
-import { useSharedNotes } from '@hooks/useSharedNotes';
 
 import { DndContext, DragOverlay, rectIntersection } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
 interface TodoProps {
-    onNavigateToNotes?: () => void;
+    // onNavigateToNotes?: () => void;
 }
 
-const Todo: React.FC<TodoProps> = ({ onNavigateToNotes }) => {
+
+// import { Pin } from 'lucide-react';
+// import { ToolboxBar } from '@components/gadget/ToolBoxBar';
+// import type { Toolbox } from '@components/gadget/ToolBoxBar';
+// import { PinnedNotesTool } from './tools/PinnedNotesTools';
+// import { useSharedNotes } from '@hooks/useSharedNotes';
+
+const Todo: React.FC<TodoProps> = () => {
     const {
         createTodo,
         getTodoByDate,
@@ -36,7 +38,8 @@ const Todo: React.FC<TodoProps> = ({ onNavigateToNotes }) => {
         reorderGroup,
         moveTaskBetweenGroups,
         buildHeatMapFromTaskDates,
-        todos
+        todos,
+        isInitialized
     } = useTodo();
 
     const {
@@ -48,7 +51,8 @@ const Todo: React.FC<TodoProps> = ({ onNavigateToNotes }) => {
         loadTodo,
         createTodo,
         buildHeatMapFromTaskDates,
-        todos
+        todos,
+        isInitialized
     });
 
     const {
@@ -114,10 +118,24 @@ const Todo: React.FC<TodoProps> = ({ onNavigateToNotes }) => {
     //     console.log(`Tool ${toolId} ${action}`, data);
     //     // Handle tool actions here
     // };
-            // <ToolboxBar
-            //     tools={toolboxTools}
-            //     onToolAction={handleToolAction}
-            // />
+    // <ToolboxBar
+    //     tools={toolboxTools}
+    //     onToolAction={handleToolAction}
+    // />
+
+    const handleAddGroup = () => {
+        console.log('AddGroupButton clicked');
+        if (isInitialized && !isLoading) {
+            addGroup();
+        }
+    };
+
+    const handleDateChangeWrapper = useCallback((date: Date) => {
+        if (isInitialized && !isLoading) {
+            console.log('TodoV2: Calling handleDateChange', date);
+            handleDateChange(date);
+        }
+    }, [isInitialized, isLoading, handleDateChange]);
 
     return (
         <>
@@ -126,11 +144,13 @@ const Todo: React.FC<TodoProps> = ({ onNavigateToNotes }) => {
             <div className="space-y-6">
                 <div className="max-w-3xl mx-auto space-y-8">
                     <GreetingNav
-                        onChangeDate={handleDateChange}
+                        onChangeDate={handleDateChangeWrapper}
                         heatmapData={heatmapData}
                     />
 
-                    <AddGroupButton onClick={addGroup} />
+                    <AddGroupButton
+                        onClick={handleAddGroup}
+                    />
 
                     <DndContext
                         collisionDetection={rectIntersection}

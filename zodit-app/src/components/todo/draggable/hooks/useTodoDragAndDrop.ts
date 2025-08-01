@@ -86,7 +86,7 @@ export const useTodoDragAndDrop = ({
 
         if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
             const newOrder = arrayMove(groups.map(g => g.id), oldIndex, newIndex);
-            reorderGroup(newOrder);
+            reorderGroup(newOrder as any);
         }
     }, [groups, reorderGroup]);
 
@@ -104,7 +104,7 @@ export const useTodoDragAndDrop = ({
 
         if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
             const newOrder = arrayMove(group.tasks.map(t => t.id), oldIndex, newIndex);
-            reorderTask(groupId, newOrder);
+            reorderTask(groupId, newOrder as any);
         }
     }, [groups, reorderTask]);
 
@@ -144,8 +144,6 @@ export const useTodoDragAndDrop = ({
             else if (activeGroupId !== overGroupId && overGroupId) {
                 moveTaskBetweenGroups(activeGroupId, overGroupId, activeTaskId, overTaskId || null);
             }
-        } catch (error) {
-            console.error('Error handling drag end:', error);
         } finally {
             setActiveId(null);
         }

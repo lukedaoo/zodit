@@ -4,5 +4,7 @@ export default defineConfig({
     test: {
         reporters: ['verbose', 'html'],
         outputFile: './html/vitest-report.html',
+        globals: true,
+        environment: 'jsdom',
     },
 })

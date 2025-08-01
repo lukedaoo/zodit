@@ -29,6 +29,10 @@ export const getTimezone = () => {
     return dayjs.tz.guess();
 }
 
+export const getToday = (): string => {
+    return dayjs().format('YYYY-MM-DD');
+}
+
 // for display date and time for tasks
 export const formatDate = (dateString?: string): string => {
     if (!dateString) return '';

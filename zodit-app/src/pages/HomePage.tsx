@@ -15,14 +15,14 @@ const HomePage: React.FC = () => {
         setActiveTab(tab);
     };
 
-    const handleNavigateToNotes = () => {
-        setActiveTab('notes');
-    };
+    // const handleNavigateToNotes = () => {
+    //     setActiveTab('notes');
+    // };
 
     const renderContent = () => {
         switch (activeTab) {
             case 'todo':
-                return <TodoComponent onNavigateToNotes={handleNavigateToNotes} />;
+                return <TodoComponent />;
             case 'notes':
                 return <NotesComponent />;
             case 'dashboard':

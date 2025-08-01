@@ -1,11 +1,13 @@
 export interface Todo {
     id: string;
     date: string;
+    title?: string;
     groups: Group[];
 }
 export interface Group {
     id: string;
     title: string;
+    priority?: 'low' | 'medium' | 'high';
     tasks: Task[];
 }
 
@@ -13,13 +15,16 @@ export interface Group {
 export interface Task {
     id: string;
     title: string;
+    priority?: 'low' | 'medium' | 'high';
     completed: boolean;
     description?: string;
     startTime?: string;
     startDate?: string;
     endDate?: string | any;
+    tags?: string[];
 
     createDate?: string;
+    customFields?: Record<string, any>;
 }
 
 export const presets = {

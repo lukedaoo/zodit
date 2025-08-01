@@ -13,10 +13,14 @@ export abstract class BaseModel {
         this.createdAt = data.createdAt || new Date();
         this.updatedAt = data.updatedAt || new Date();
     }
+    protected generateId = () => {
+        return this.getModelPrefix() + ":id#" +
+            Math.floor(Math.random() * 8 ** 6).toString(8).padStart(6, '0');
+    };
 
-    protected generateId(): string {
-        return `${this.getModelPrefix()}:${Date.now()}:${Math.random().toString(36).substr(2, 9)}`;
-    }
+    // protected generateId(): string {
+    //     return `${this.getModelPrefix()}:${Date.now()}:${Math.random().toString(36).substr(2, 9)}`;
+    // }
 
     protected abstract getModelPrefix(): string;
 

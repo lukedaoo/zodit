@@ -30,7 +30,8 @@
       "@hooks/*": ["src/hooks/*"],
       "@lib/*": ["src/lib/*"],
       "@pages/*": ["src/pages/*"],
-      "@user-prefs/*": ["src/user-prefs/*"]
+      "@user-prefs/*": ["src/user-prefs/*"],
+      "@database/*": ["src/database/*"]
     }
   },
   "include": ["src"]

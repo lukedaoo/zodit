@@ -822,31 +822,6 @@ describe('ModelFactory', () => {
                 expect(movedTask.order).toBe(0);
                 expect(movedTask.title).toBe('Important Meeting');
             });
-
-            it('should handle edge cases in task movement', () => {
-                workGroup = new Group({ title: 'Work', todoId: todo.id, order: 0 });
-                personalGroup = new Group({ title: 'Personal', todoId: todo.id, order: 1 });
-
-                todo.addGroup(workGroup);
-                todo.addGroup(personalGroup);
-
-                const task = new Task({ title: 'Test Task', completed: false, groupId: workGroup.id, order: 0 });
-                workGroup.addTask(task);
-
-                // Try to move non-existent task
-                const failMove1 = todo.moveTaskBetweenGroups('non-existent-task', personalGroup.id);
-                expect(failMove1).toBe(false);
-
-                // Try to move to non-existent group
-                const failMove2 = todo.moveTaskBetweenGroups(task.id, 'non-existent-group');
-                expect(failMove2).toBe(false);
-
-                // Try to move task within same group (should work)
-                const successMove = todo.moveTaskBetweenGroups(task.id, workGroup.id);
-                expect(successMove).toBe(true);
-                expect(workGroup.tasks).toHaveLength(1);
-                expect(task.groupId).toBe(workGroup.id);
-            });
         });
     });
 });

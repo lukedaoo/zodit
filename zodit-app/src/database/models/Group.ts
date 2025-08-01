@@ -46,7 +46,9 @@ export class Group extends BaseModel {
             order: this.order,
             color: this.color,
             collapsed: this.collapsed,
-            tasks: this.tasks.map(task => task.toJSON())
+            tasks: this.tasks
+                .filter((task): task is Task => task instanceof Task)
+                .map(task => task.toJSON())
         };
     }
 

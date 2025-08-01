@@ -32,7 +32,9 @@ export class Todo extends BaseModel {
         return {
             date: this.date,
             title: this.title,
-            groups: this.groups.map(group => group.toJSON())
+            groups: this.groups
+                .filter((group): group is Group => group instanceof Group)
+                .map(group => group.toJSON())
         };
     }
 
@@ -181,14 +183,44 @@ export class Todo extends BaseModel {
     moveTaskBetweenGroups(
         taskId: string,
         targetGroupId: string,
-        targetIndex?: number
-    ): boolean {
-        const source = this.findTask(taskId);
-        const targetGroup = this.findGroup(targetGroupId);
+        targetIndex?: number): boolean {
+        const sourceGroup = this.groups.find(g => g.tasks.some(t => t.id === taskId));
+        const targetGroup = this.groups.find(g => g.id === targetGroupId);
 
-        if (!source || !targetGroup) return false;
+        if (!sourceGroup || !targetGroup) {
+            return false;
+        }
 
-        return source.group.moveTaskToGroup(taskId, targetGroup, targetIndex);
+        const task = sourceGroup.tasks.find(t => t.id === taskId);
+        if (!task) {
+            return false;
+        }
+
+        // Validate targetIndex
+        const maxIndex = targetGroup.tasks.length;
+        const insertIndex = targetIndex !== undefined && targetIndex >= 0 && targetIndex <= maxIndex
+            ? targetIndex
+            : maxIndex;
+
+        if (sourceGroup.id === targetGroup.id) {
+            // Moving within the same group
+            const currentIndex = sourceGroup.tasks.findIndex(t => t.id === taskId);
+            if (currentIndex === insertIndex) {
+                return false; // No change needed
+            }
+
+            sourceGroup.tasks.splice(currentIndex, 1);
+            sourceGroup.tasks.splice(insertIndex, 0, task);
+            sourceGroup.tasks.forEach((t, i) => (t.order = i));
+        } else {
+            sourceGroup.tasks = sourceGroup.tasks.filter(t => t.id !== taskId);
+            task.groupId = targetGroup.id;
+            targetGroup.tasks.splice(insertIndex, 0, task);
+            sourceGroup.tasks.forEach((t, i) => (t.order = i));
+            targetGroup.tasks.forEach((t, i) => (t.order = i));
+        }
+
+        return true;
     }
 
     // Query helpers
