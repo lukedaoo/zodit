@@ -25,6 +25,7 @@ export default defineConfig({
             '@pages': path.resolve(__dirname, 'src/pages'),
             '@user-prefs': path.resolve(__dirname, 'src/user-prefs'),
             '@database': path.resolve(__dirname, 'src/database'),
+            '@context': path.resolve(__dirname, 'src/context'),
         },
     },
 })

@@ -31,7 +31,8 @@
       "@lib/*": ["src/lib/*"],
       "@pages/*": ["src/pages/*"],
       "@user-prefs/*": ["src/user-prefs/*"],
-      "@database/*": ["src/database/*"]
+      "@database/*": ["src/database/*"],
+      "@context/*": ["src/context/*"]
     }
   },
   "include": ["src"]

@@ -3,10 +3,8 @@ import { getToday, convert, toDate } from '@common/utils';
 import type { Todo as DisplayTodo, Group as DisplayGroup, Task as DisplayTask } from './types';
 import type { Todo, Group } from '@database/models';
 import { ModelFactory } from '@database/models';
-import { DataProviderFactory, LocalStorageDataProvider } from '@database/provider';
 
-DataProviderFactory.register('localStorage', LocalStorageDataProvider);
-const dataProvider = DataProviderFactory.create({ name: 'localStorage' });
+import { useDataProvider } from '@context/DataProviderContext';
 
 type ActionType =
     | 'init'
@@ -92,6 +90,8 @@ const mergeTodos = (todos: DisplayTodo[]): DisplayTodo[] => {
 };
 
 export const useTodo = () => {
+    const dataProvider = useDataProvider();
+
     const [todos, setTodos] = useState<DisplayTodo[]>([]);
     const [activeTodoId, setActiveTodoId] = useState<string | null>(null);
     const [action, setAction] = useState<ActionType>(null);

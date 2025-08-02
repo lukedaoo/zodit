@@ -11,19 +11,16 @@ interface UseNoteActionsProps {
     updateNotes: (updater: (notes: Note[]) => Note[]) => void;
     setEditingId: (id: string | null) => void;
     setTopNoteId: (id: string | null) => void;
-    // setResizingId: (id: string | null) => void;
 }
 
 export const useNoteActions = ({
     updateNotes,
     setEditingId,
     setTopNoteId,
-    // setResizingId,
 }: UseNoteActionsProps) => {
     const addNote = useCallback(() => {
         const newNote = createNewNote();
         updateNotes(prev => [...prev, newNote]);
-        // setEditingId(newNote.id); -- automatically edits the new note
     }, [updateNotes, setEditingId]);
 
     const deleteNote = useCallback((id: string) => {
@@ -79,14 +76,11 @@ export const useNoteActions = ({
         setTopNoteId(id);
     }, [setTopNoteId]);
 
-    // Arrangement functions - pinned notes appear at the front of the arrangement
     const arrangeInGrid = useCallback(() => {
         updateNotes(prev => {
             const pinnedNotes = prev.filter(note => note.isPinned);
             const unpinnedNotes = prev.filter(note => note.isPinned === false || note.isPinned === undefined);
-            // Arrange all notes together, with pinned notes first
             const allNotesToArrange = [...pinnedNotes, ...unpinnedNotes];
-            console.log(allNotesToArrange);
             return arrangeNotesInGrid(allNotesToArrange);
         });
     }, [updateNotes]);
@@ -95,7 +89,6 @@ export const useNoteActions = ({
         updateNotes(prev => {
             const pinnedNotes = prev.filter(note => note.isPinned);
             const unpinnedNotes = prev.filter(note => note.isPinned === false || note.isPinned === undefined);
-            // Arrange all notes together, with pinned notes first
             const allNotesToArrange = [...pinnedNotes, ...unpinnedNotes];
             return stackNotesVertically(allNotesToArrange);
         });
@@ -105,7 +98,6 @@ export const useNoteActions = ({
         updateNotes(prev => {
             const pinnedNotes = prev.filter(note => note.isPinned);
             const unpinnedNotes = prev.filter(note => note.isPinned === false || note.isPinned === undefined);
-            // Arrange all notes together, with pinned notes first
             const allNotesToArrange = [...pinnedNotes, ...unpinnedNotes];
             return arrangeNotesInCircle(allNotesToArrange);
         });
@@ -115,7 +107,6 @@ export const useNoteActions = ({
         updateNotes(prev => {
             const pinnedNotes = prev.filter(note => note.isPinned);
             const unpinnedNotes = prev.filter(note => note.isPinned === false || note.isPinned === undefined);
-            // For random, keep pinned notes in their current positions, only randomize unpinned
             const arrangedUnpinned = spreadNotesRandomly(unpinnedNotes);
             return [...pinnedNotes, ...arrangedUnpinned];
         });

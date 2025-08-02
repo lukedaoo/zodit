@@ -79,7 +79,6 @@ export const useNotes = (initialNotes?: Note[]) => {
         bringNoteToFront,
         toggleNotePin,
 
-
         arrangeInGrid,
         arrangeInStack,
         arrangeInCircle,

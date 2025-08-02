@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
+import { now, convert } from '@common/utils';
 import type { Todo } from '../../types';
 
 interface UseTodoDateProps {
@@ -18,7 +19,7 @@ export const useTodoDate = ({
     todos,
     isInitialized
 }: UseTodoDateProps) => {
-    const [currentDate, setCurrentDate] = useState<Date>(new Date());
+    const [currentDate, setCurrentDate] = useState<Date>(now());
     const [isLoading, setIsLoading] = useState(false);
 
     const heatmapData = useMemo(() => {
@@ -33,7 +34,7 @@ export const useTodoDate = ({
             setIsLoading(true);
             setCurrentDate(date);
 
-            const dateAsString = date.toISOString().split('T')[0];
+            const dateAsString = convert(date);
             const existingTodo = getTodoByDate(dateAsString);
             if (existingTodo) {
                 loadTodo(existingTodo);

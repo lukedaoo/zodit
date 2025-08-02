@@ -37,6 +37,10 @@ export const getToday = (): string => {
     return dayjs().format('YYYY-MM-DD');
 }
 
+export const now = (): Date => {
+    return dayjs().toDate();
+}
+
 export const convert = (date: Date | null | undefined, format: string = 'YYYY-MM-DD'): string => {
     if (!date) {
         return 'Invalid Date';
