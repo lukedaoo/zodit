@@ -6,7 +6,10 @@ export interface Note {
     width?: number;
     height?: number;
     isPinned?: boolean;
-    date: Date;
+    tags?: string[];
+
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface NoteState {

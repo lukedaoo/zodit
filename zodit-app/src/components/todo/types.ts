@@ -3,12 +3,18 @@ export interface Todo {
     date: string;
     title?: string;
     groups: Group[];
+
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 export interface Group {
     id: string;
     title: string;
     priority?: 'low' | 'medium' | 'high';
     tasks: Task[];
+
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
 // update the metadatas if any
@@ -25,6 +31,8 @@ export interface Task {
 
     createdDate?: string;
     customFields?: Record<string, any>;
+
+    updatedAt?: Date;
 }
 
 export const presets = {
@@ -47,7 +55,8 @@ export const DEFAULT_TASK = {
     description: '',
     startTime: '',
     startDate: '',
-    endDate: ''
+    endDate: '',
+    tags: [],
 };
 
 const isEmpty = (task: Task, config: any): boolean => {

@@ -1,7 +1,8 @@
 import type { Task } from '../types';
+import { DEFAULT_TASK } from '../types';
 import { TYPE_UTILS as tu } from '../types';
 import { textToObject, objectToText } from '@lib/template/textTemplateProcessor.ts';
-import { extractFields } from '@lib/field-extractor/fieldExtractor';
+import { splitFields } from '@lib/field-extractor/fieldExtractor';
 import { resolveAlias, unwrapAlias, validateAlias } from '@lib/alias/timeAliasResolver';
 
 export const taskToText = (task: Partial<Task>, config?: any): string => {
@@ -28,12 +29,32 @@ export const textToTask = (input: string, config: any): Partial<Task> => {
 };
 
 export const resolveMetadata = (task: Partial<Task>): Partial<Task> => {
-    const meta = extractFields(task, ['startTime', 'startDate', 'endDate']);
-    const result: Partial<Task> = {};
+    const metaKeys: (keyof Task)[] = ['startTime', 'startDate', 'endDate'];
 
-    for (const [key, value] of Object.entries(meta)) {
-        result[key as keyof Task] =
-            typeof value === 'string' ? resolveAlias(value) : value;
+    const { meta, rest } = splitFields(task, metaKeys, {
+        selected: 'meta',
+        others: 'rest',
+    });
+
+    for (const key of metaKeys) {
+        const value = meta[key];
+        if (typeof value === 'string') {
+            meta[key] = resolveAlias(value) as any;
+        }
+    }
+
+    const otherKnownKeys = Object.keys(rest).filter(k => k in (DEFAULT_TASK as Task)) as (keyof Task)[];
+    const { known, custom } = splitFields(rest, otherKnownKeys,
+        { selected: 'known', others: 'custom' }
+    );
+
+    const result: Partial<Task> = {
+        ...meta,
+        ...known,
+    };
+
+    if (Object.keys(custom).length > 0) {
+        (result as any).customFields = custom;
     }
 
     return result;

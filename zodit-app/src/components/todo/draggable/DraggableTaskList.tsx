@@ -86,7 +86,7 @@ export const DraggableTaskList = ({
                     </div>
                 </div>
             )}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center">
                 <div className="w-6"></div>
                 <div className="flex-1">
                     <AddTaskButton onClick={() => {

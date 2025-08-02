@@ -61,7 +61,6 @@ export const createNewNote = (): Note => {
         },
         width: DEFAULT_DIMENSIONS.width,
         height: DEFAULT_DIMENSIONS.height,
-        date: new Date(),
     };
 };
 

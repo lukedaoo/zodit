@@ -1,3 +1,4 @@
+import { now, getToday } from '@common/utils';
 interface Alias {
     id: string;
     alias: string;
@@ -28,10 +29,10 @@ export const resolveAlias = (input: string, aliases: Alias[] = DEFAULT_ALIASES):
 
     switch (alias.value) {
         case 'TODAY':
-            resolved = new Date().toISOString().split('T')[0];
+            resolved = getToday();
             break;
         case 'TOMORROW': {
-            const tomorrow = new Date();
+            const tomorrow = now();
             tomorrow.setDate(tomorrow.getDate() + 1);
             resolved = tomorrow.toISOString().split('T')[0];
             break;
@@ -44,7 +45,7 @@ export const resolveAlias = (input: string, aliases: Alias[] = DEFAULT_ALIASES):
             });
             break;
         case 'EOD': {
-            const today = new Date().toISOString().split('T')[0];
+            const today = now();
             resolved = { at: '23:59', date: today };
             break;
         }

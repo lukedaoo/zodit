@@ -1,26 +1,35 @@
 import { useMemo, useEffect } from 'react';
-import type { Note } from '../types';
+import type { Note as DisplayNote } from '../types';
 import { getOverlappingGroups } from '../noteUtils';
 import { useNoteState } from './useNoteState';
 import { useNoteActions } from './useNoteActions';
 import { useNoteInteractions } from './useNoteInteractions';
 import { useDragAndDrop } from './useDragAndDrop';
 
-export const useNotes = (initialNotes?: Note[]) => {
+export const useNotes = (initialNotes?: DisplayNote[]) => {
     const {
         notes,
         topNoteId,
         editingId,
         resizingId,
+        action,
         updateNotes,
         setTopNoteId,
         setEditingId,
         setResizingId,
+        setAction,
+        isInitialized,
+        error,
+        setError, 
     } = useNoteState(initialNotes);
 
     useEffect(() => {
         console.log('Notes updated:', notes);
-    }, [notes]);
+        console.log('Current action:', action);
+        if (error) {
+            console.error('Notes error:', error);
+        }
+    }, [notes, action, error]);
 
     const {
         addNote,
@@ -28,8 +37,8 @@ export const useNotes = (initialNotes?: Note[]) => {
         updateNoteText,
         updateNotePosition,
         updateNoteSize,
-        toggleNotePin,
         changeNoteColor,
+        toggleNotePin,
         bringNoteToFront,
         arrangeInGrid,
         arrangeInStack,
@@ -39,13 +48,11 @@ export const useNotes = (initialNotes?: Note[]) => {
         updateNotes,
         setEditingId,
         setTopNoteId,
+        setAction,
+        setError, // Pass setError directly
     });
 
-    const {
-        toggleEdit,
-        toggleResize,
-        handleBackgroundClick,
-    } = useNoteInteractions({
+    const { toggleEdit, toggleResize, handleBackgroundClick } = useNoteInteractions({
         editingId,
         resizingId,
         setEditingId,
@@ -67,7 +74,10 @@ export const useNotes = (initialNotes?: Note[]) => {
         topNoteId,
         editingId,
         resizingId,
+        action,
         overlappingGroups,
+        isInitialized,
+        error,
 
         // Actions
         addNote,
@@ -76,9 +86,8 @@ export const useNotes = (initialNotes?: Note[]) => {
         updateNotePosition,
         updateNoteSize,
         changeNoteColor,
-        bringNoteToFront,
         toggleNotePin,
-
+        bringNoteToFront,
         arrangeInGrid,
         arrangeInStack,
         arrangeInCircle,

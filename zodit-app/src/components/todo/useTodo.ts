@@ -28,9 +28,13 @@ const toDisplayTodo = (dataTodo: Todo): DisplayTodo => ({
     id: dataTodo.id,
     date: dataTodo.date,
     title: dataTodo.title || '',
+    createdAt: dataTodo.createdAt,
+    updatedAt: dataTodo.updatedAt,
     groups: dataTodo.groups.map(group => ({
         id: group.id,
         title: group.title,
+        createdAt: group.createdAt,
+        updatedAt: group.updatedAt,
         tasks: group.tasks.map(task => ({
             id: task.id,
             title: task.title,
@@ -40,7 +44,8 @@ const toDisplayTodo = (dataTodo: Todo): DisplayTodo => ({
             priority: task.priority,
             createdDate: convert(task.createdAt),
             tags: task.tags,
-            customFields: task.customFields
+            customFields: task.customFields,
+            updatedAt: task.updatedAt
         }))
     }))
 });
@@ -51,10 +56,14 @@ const toDataTodo = (todo: DisplayTodo): Todo => {
         id: todo.id,
         date: todo.date,
         title: todo.title,
+        createdAt: todo.createdAt,
+        updatedAt: todo.updatedAt,
         groups: todo.groups.map(group => ({
             id: group.id,
             title: group.title,
             todoId: todo.id,
+            createdAt: group.createdAt,
+            updatedAt: group.updatedAt,
             tasks: group.tasks.map(task => ({
                 id: task.id,
                 title: task.title,
@@ -63,9 +72,10 @@ const toDataTodo = (todo: DisplayTodo): Todo => {
                 description: task.description,
                 priority: task.priority,
                 tags: task.tags,
-                createdAt: new Date(task.createdDate as string),
                 customFields: task.customFields,
-                groupId: group.id
+                groupId: group.id,
+                createdAt: new Date(task.createdDate as string),
+                updatedAt: task.updatedAt,
             }))
         })) as Group[]
     });
@@ -262,7 +272,8 @@ export const useTodo = () => {
             const newTask: DisplayTask = {
                 id: generateId('task'),
                 title: '',
-                completed: false
+                completed: false,
+                createdDate: convert(new Date()),
             };
             syncGroups(
                 groups.map(group =>
@@ -278,6 +289,7 @@ export const useTodo = () => {
 
     const updateTask = useCallback((groupId: string, taskId: string, updates: Partial<DisplayTask>) => {
         try {
+            console.log(updates);
             syncGroups(
                 groups.map(group =>
                     group.id === groupId

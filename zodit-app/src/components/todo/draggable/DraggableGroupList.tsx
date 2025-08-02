@@ -35,7 +35,7 @@ export const DraggableGroupList = ({
         toggle
     } = useCollapsibleList(groups, threshold);
     return (
-        <div>
+        <div className="space-y-4">
             <SortableContext
                 items={visibleGroups.map((g) => g.id)}
                 strategy={verticalListSortingStrategy}

@@ -55,7 +55,7 @@ export const SortableGroupItem = ({
     return (
         <div ref={setNodeRef} style={style} {...attributes}>
             <div className="space-y-3">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center">
                     <button
                         ref={setActivatorNodeRef}
                         {...listeners}

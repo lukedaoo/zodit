@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { textToTask, taskToText, resolveTaskWithMetadata } from './taskUtils';
 import { presets } from '../types';
 import type { Task } from '../types';
+import { TYPE_UTILS as tu } from '../types';
 
 
 export const useTaskEditing = (
@@ -30,7 +31,7 @@ export const useTaskEditing = (
                 ...resolved,
                 completed: resolved.completed ?? task?.completed
             };
-            onSubmit(finalTask);
+            onSubmit(tu.trim(finalTask));
         } catch (err) {
             console.error('Error parsing task:', err);
         }
