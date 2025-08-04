@@ -16,6 +16,7 @@ import './App.css';
 import HomePage from '@pages/HomePage';
 import ThemePage from '@pages/ThemePage';
 import TodoPage from '@pages/TodoPage';
+import NotesPage from '@pages/NotePage';
 
 const App: React.FC = () => {
 
@@ -33,8 +34,12 @@ const App: React.FC = () => {
             <BrowserRouter>
                 <Routes>
                     <Route path="/" element={<HomePage />} />
-                    <Route path="/theme" element={<ThemePage />} />
-                    <Route path="/to-do" element={<TodoPage />} />
+                    {
+                        !import.meta.env.PROD &&
+                        <Route path="/theme" element={<ThemePage />} />
+                    }
+                    <Route path="/todo" element={<TodoPage />} />
+                    <Route path="/notes" element={<NotesPage />} />
                 </Routes>
             </BrowserRouter>
         </MantineProvider>

@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { TodoV1, TodoV2 } from '@components/todo';
-import { NotesV1, NotesV2 } from '@components/notes';
+import { TodoV1 } from '@components/todo';
+import { NotesV1 } from '@components/notes';
 import { Navbar } from '@components/gadget/NavBar';
 import { ScrollButton } from "@components/gadget/ScrollButton";
 
 const HomePage: React.FC = () => {
-    const [version, _] = useState<'v1' | 'v2'>('v2');
+    const [version, _] = useState<'v1' | 'v2'>('v1');
     const [activeTab, setActiveTab] = useState<'dashboard' | 'todo' | 'notes'>('dashboard');
 
-    const TodoComponent = version === 'v1' ? TodoV1 : TodoV2;
-    const NotesComponent = version === 'v1' ? NotesV1 : NotesV2;
+    const TodoComponent = version === 'v1' ? TodoV1 : null;
+    const NotesComponent = version === 'v1' ? NotesV1 : null;
 
     const handleNavigation = (tab: 'dashboard' | 'todo' | 'notes') => {
         setActiveTab(tab);
@@ -22,8 +22,14 @@ const HomePage: React.FC = () => {
     const renderContent = () => {
         switch (activeTab) {
             case 'todo':
+                if (!TodoComponent) {
+                    return null;
+                }
                 return <TodoComponent />;
             case 'notes':
+                if (!NotesComponent) {
+                    return null;
+                }
                 return <NotesComponent />;
             case 'dashboard':
             default:

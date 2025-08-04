@@ -1,3 +1,4 @@
+import { generateId } from '@common/utils';
 import type { Note as DisplayNote } from './types';
 import { NOTE_COLORS } from './types';
 
@@ -54,7 +55,7 @@ export const getOverlappingGroups = (notes: DisplayNote[]): DisplayNote[][] => {
 export const createNewNote = (): DisplayNote => {
     const allColors = [...NOTE_COLORS.light, ...NOTE_COLORS.dark];
     return {
-        id: Date.now().toString(),
+        id: generateId('note'),
         text: 'New note...',
         color: allColors[Math.floor(Math.random() * allColors.length)],
         position: {

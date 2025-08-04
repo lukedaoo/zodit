@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
+import { v4 as uuidv4 } from 'uuid';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -119,4 +120,9 @@ export const formatTime = (timeString?: string): string => {
         hour: 'numeric',
         minute: '2-digit',
     });
+};
+
+export const generateId = (prefix: string): string => {
+    const uuid = uuidv4().replace(/-/g, '');
+    return `${prefix}:id#${uuid.slice(0, 6)}`;
 };

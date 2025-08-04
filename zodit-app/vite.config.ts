@@ -12,6 +12,7 @@ export default defineConfig({
             input: {
                 main: "./index.html",
                 todo_app: "./todo-app-index.html",
+                notes_app: "./notes-app-index.html",
             },
         },
         outDir: 'dist', // Output directory for all builds

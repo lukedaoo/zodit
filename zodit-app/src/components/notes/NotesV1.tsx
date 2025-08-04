@@ -47,6 +47,7 @@ const Notes = () => {
                 onArrangeCircle={arrangeInCircle}
                 onArrangeRandom={arrangeRandomly}
             />
+            <OverlappingDisplay overlappingGroups={overlappingGroups} />
 
             <div className="w-full h-full overflow-auto" onClick={handleBackgroundClick}>
                 <div
@@ -59,7 +60,6 @@ const Notes = () => {
                     }}
                 >
                     <DndContext onDragEnd={handleDragEnd}>
-                        <OverlappingDisplay overlappingGroups={overlappingGroups} />
 
                         {notes.map((note) => (
                             <NoteCard

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import '../App.css';
-import { TodoV1 } from '@components/todo';
+import { NotesV1 } from '@components/notes';
 
-const TodoPage: React.FC = () => {
+const NotePage: React.FC = () => {
     const [version, setVersion] = useState<'v1' | 'v2'>('v1');
-    const TodoComponent = version === 'v1' ? TodoV1 : null;
+    const NoteComponent = version === 'v1' ? NotesV1 : null;
 
     return (
         <div className="min-h-screen p-8">
@@ -21,9 +21,9 @@ const TodoPage: React.FC = () => {
             <hr />
 
             {/* Render chosen version */}
-            {TodoComponent && <TodoComponent />}
+            {NoteComponent && <NoteComponent />}
         </div>
     )
 };
 
-export default TodoPage;
+export default NotePage;

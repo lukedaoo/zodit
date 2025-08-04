@@ -1,10 +1,10 @@
 import React, { useCallback } from 'react';
-import { AddGroupButton } from '../AddButtonComponents';
-import { DraggableGroupList } from './DraggableGroupList';
-import { useTodo } from '../useTodo';
-import { useTodoDate } from './hooks/useTodoDate';
-import { useTodoDragAndDrop } from './hooks/useTodoDragAndDrop';
-import { TodoDragOverlay } from './TodoDragOverlay';
+import { AddGroupButton } from './AddButtonComponents';
+import { DraggableGroupList } from './draggable/DraggableGroupList';
+import { useTodo } from './useTodo';
+import { useTodoDate } from './draggable/hooks/useTodoDate';
+import { useTodoDragAndDrop } from './draggable/hooks/useTodoDragAndDrop';
+import { TodoDragOverlay } from './draggable/TodoDragOverlay';
 
 import { GreetingNav } from '@components/gadget/GreetingNav';
 import { StatusMessage } from '@components/gadget/StatusMessage';

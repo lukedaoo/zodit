@@ -1,5 +1,5 @@
 import { useReducer, useCallback, useEffect, useMemo, useState } from 'react';
-import { getToday, convert, toDate } from '@common/utils';
+import { getToday, convert, toDate, generateId } from '@common/utils';
 import { useDataProvider } from '@context/DataProviderContext';
 import { ModelFactory } from '@database/models';
 import { toDisplayTodo, mergeTodos, toDataTodo } from './todoUtils';
@@ -46,11 +46,6 @@ export const useTodo = () => {
     const [isInitialized, setIsInitialized] = useState(false);
 
     const groups = state.todos.find(t => t.id === state.activeTodoId)?.groups || [];
-
-    const generateId = useCallback((prefix: string) =>
-        `${prefix}:id#${Math.floor(Math.random() * 8 ** 6).toString(8).padStart(6, '0')}`,
-        []
-    );
 
     // Debounced updater
     const debouncedUpdateTodo = useMemo(
