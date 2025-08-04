@@ -21,6 +21,8 @@ export const useDragAndDrop = ({
         const newX = Math.max(0, note.position.x + delta.x);
         const newY = Math.max(0, note.position.y + delta.y);
 
+        if (newX === note.position.x && newY === note.position.y) return;
+
         updateNotePosition(id, newX, newY);
         bringNoteToFront(id);
     }, [notes, updateNotePosition, bringNoteToFront]);

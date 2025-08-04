@@ -58,6 +58,14 @@ export const NoteCard = ({
 
     const isOnTop = note.id === topNoteId;
 
+    const handleClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!isEditing && !isResizing && !isOnTop) {
+            bringNoteToFront(note.id);
+        }
+    };
+
+
     return (
         <div
             ref={setNodeRef}
@@ -66,8 +74,7 @@ export const NoteCard = ({
             style={style}
             className={`absolute p-3 border-2 shadow-lg ${note.color} cursor-move will-change-transform 
                     ${isOnTop ? 'ring-2 ring-blue-400 ring-opacity-50' : ''}`}
-            onMouseDown={() => bringNoteToFront(note.id)}
-            onClick={(e) => e.stopPropagation()}
+            onClick={handleClick}
             onDoubleClick={(e) => {
                 e.stopPropagation();
                 if (!isEditing && !isResizing) {
