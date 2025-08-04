@@ -3,14 +3,6 @@ import type { Todo as DisplayTodo } from './types';
 import type { Todo, Group } from '@database/models';
 import { ModelFactory } from '@database/models';
 
-export const debounce = <T extends (...args: any[]) => void>(func: T, delay: number): T => {
-    let timeoutId: NodeJS.Timeout;
-    return ((...args: Parameters<T>) => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => func(...args), delay);
-    }) as T;
-};
-
 export const toDisplayTodo = (dataTodo: Todo): DisplayTodo => ({
     id: dataTodo.id,
     date: dataTodo.date,

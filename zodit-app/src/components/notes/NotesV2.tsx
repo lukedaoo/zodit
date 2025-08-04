@@ -4,7 +4,7 @@ import { AddNoteButton } from './AddNoteButton';
 import { ArrangeButton } from './ArrangeButton';
 import { EmptyState } from './EmptyState';
 import { OverlappingDisplay } from './OverlappingDisplay';
-import { useNotes } from './hooks/useNotes';
+import { useNotes } from './useNotes';
 // import { useSharedNotes } from '../../hooks/useSharedNotes';
 // import { useEffect } from 'react';
 

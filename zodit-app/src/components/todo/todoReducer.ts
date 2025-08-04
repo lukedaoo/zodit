@@ -74,7 +74,15 @@ export function todoReducer(state: State, action: TodoAction): State {
                 payload: {
                     update: g => g.map(gr =>
                         gr.id === action.payload.groupId
-                            ? { ...gr, tasks: [...gr.tasks, { id: action.payload.generateId('task'), title: '', completed: false, createdDate: action.payload.now }] }
+                            ? {
+                                ...gr, tasks: [...gr.tasks,
+                                {
+                                    id: action.payload.generateId('task'),
+                                    title: '',
+                                    completed: false,
+                                    createdDate: action.payload.now
+                                }]
+                            }
                             : gr
                     )
                 }

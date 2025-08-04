@@ -1,12 +1,14 @@
-import type { Note } from './types';
+import type { Note as DisplayNote } from './types';
 import { NOTE_COLORS } from './types';
+
+import { Note } from '@database/models';
 
 export const DEFAULT_DIMENSIONS = {
     width: 220,
     height: 180
 }
 
-export const notesOverlap = (note1: Note, note2: Note): boolean => {
+export const notesOverlap = (note1: DisplayNote, note2: DisplayNote): boolean => {
     const rect1 = {
         left: note1.position.x,
         right: note1.position.x + (note1.width || 192),
@@ -27,9 +29,9 @@ export const notesOverlap = (note1: Note, note2: Note): boolean => {
         rect2.bottom <= rect1.top);
 };
 
-export const getOverlappingGroups = (notes: Note[]): Note[][] => {
+export const getOverlappingGroups = (notes: DisplayNote[]): DisplayNote[][] => {
     const processed = new Set<string>();
-    const groups: Note[][] = [];
+    const groups: DisplayNote[][] = [];
 
     notes.forEach(note => {
         if (processed.has(note.id)) return;
@@ -49,7 +51,7 @@ export const getOverlappingGroups = (notes: Note[]): Note[][] => {
 };
 
 
-export const createNewNote = (): Note => {
+export const createNewNote = (): DisplayNote => {
     const allColors = [...NOTE_COLORS.light, ...NOTE_COLORS.dark];
     return {
         id: Date.now().toString(),
@@ -64,15 +66,15 @@ export const createNewNote = (): Note => {
     };
 };
 
-export const generateSampleNotes = (): Note[] => {
-    const notes: Note[] = [];
+export const generateSampleNotes = (): DisplayNote[] => {
+    const notes: DisplayNote[] = [];
     for (let i = 0; i < 5; i++) {
         notes.push(createNewNote());
     }
     return notes;
 };
 
-export const arrangeNotesInGrid = (notes: Note[]): Note[] => {
+export const arrangeNotesInGrid = (notes: DisplayNote[]): DisplayNote[] => {
     const GRID_SPACING_X = DEFAULT_DIMENSIONS.width + 28; // default width + 28 margin
     const GRID_SPACING_Y = DEFAULT_DIMENSIONS.height + 20; // 160 height + 20 margin
     const NOTES_PER_ROW = 6;
@@ -93,7 +95,7 @@ export const arrangeNotesInGrid = (notes: Note[]): Note[] => {
     });
 };
 
-export const stackNotesVertically = (notes: Note[]): Note[] => {
+export const stackNotesVertically = (notes: DisplayNote[]): DisplayNote[] => {
     const STACK_SPACING = 200; // Vertical spacing between notes
     const START_X = 100;
     const START_Y = 50;
@@ -107,7 +109,7 @@ export const stackNotesVertically = (notes: Note[]): Note[] => {
     }));
 };
 
-export const arrangeNotesInCircle = (notes: Note[]): Note[] => {
+export const arrangeNotesInCircle = (notes: DisplayNote[]): DisplayNote[] => {
     if (notes.length === 0) return notes;
     if (notes.length === 1) {
         return [{
@@ -133,7 +135,7 @@ export const arrangeNotesInCircle = (notes: Note[]): Note[] => {
     });
 };
 
-export const spreadNotesRandomly = (notes: Note[]): Note[] => {
+export const spreadNotesRandomly = (notes: DisplayNote[]): DisplayNote[] => {
     return notes.map(note => ({
         ...note,
         position: {
@@ -142,3 +144,33 @@ export const spreadNotesRandomly = (notes: Note[]): Note[] => {
         },
     }));
 };
+
+
+export const toDisplayNote = (dataNote: DisplayNote): DisplayNote => ({
+    id: dataNote.id,
+    text: dataNote.text,
+    color: dataNote.color,
+    position: dataNote.position,
+    width: dataNote.width,
+    height: dataNote.height,
+    isPinned: dataNote.isPinned,
+    tags: dataNote.tags,
+    createdAt: dataNote.createdAt,
+    updatedAt: dataNote.updatedAt
+});
+
+export const toDataNote = (displayNote: DisplayNote): Note => {
+    return new Note({
+        id: displayNote.id,
+        text: displayNote.text,
+        color: displayNote.color,
+        position: displayNote.position,
+        width: displayNote.width,
+        height: displayNote.height,
+        isPinned: displayNote.isPinned,
+        tags: displayNote.tags,
+        createdAt: displayNote.createdAt,
+        updatedAt: displayNote.updatedAt
+    });
+};
+

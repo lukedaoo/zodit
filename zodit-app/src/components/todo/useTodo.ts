@@ -2,11 +2,12 @@ import { useReducer, useCallback, useEffect, useMemo, useState } from 'react';
 import { getToday, convert, toDate } from '@common/utils';
 import { useDataProvider } from '@context/DataProviderContext';
 import { ModelFactory } from '@database/models';
-import { debounce, toDisplayTodo, mergeTodos, toDataTodo } from './todoUtils';
+import { toDisplayTodo, mergeTodos, toDataTodo } from './todoUtils';
 import { todoReducer } from './todoReducer';
 import type { State, TodoAction as Action } from './todoReducer';
 import type { Todo as DisplayTodo } from './types';
 
+import { debounce } from '@lib/debounce';
 import { createLogger } from "@lib/logger";
 
 const logger = createLogger("Todo");
