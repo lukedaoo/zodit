@@ -1,10 +1,10 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import {
-    SEPARATOR_PREF_KEY,
     USE_TEMPLATE_WHEN_ADDING_TASK,
     USER_THEME,
     GROUP_COLLAPSE_THRESHOLD,
-    TASK_COLLAPSE_THRESHOLD
+    TASK_COLLAPSE_THRESHOLD,
+    DEBOUNCE_TIME
 } from '@user-prefs/const';
 import {
     useUserSettings
@@ -21,7 +21,8 @@ const App: React.FC = () => {
 
     const { set } = useUserSettings();
 
-    set(SEPARATOR_PREF_KEY, SEPARATOR_PREF_KEY.defaultValue);
+    // set(SEPARATOR_PREF_KEY, SEPARATOR_PREF_KEY.defaultValue);
+    set(DEBOUNCE_TIME, DEBOUNCE_TIME.defaultValue);
     set(USE_TEMPLATE_WHEN_ADDING_TASK, true);
     set(USER_THEME, USER_THEME.defaultValue);
     set(GROUP_COLLAPSE_THRESHOLD, GROUP_COLLAPSE_THRESHOLD.defaultValue);

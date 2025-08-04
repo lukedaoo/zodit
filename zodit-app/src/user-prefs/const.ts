@@ -27,3 +27,8 @@ export const TASK_COLLAPSE_THRESHOLD: ConstPref = {
     key: 'task_collapse_threshold',
     defaultValue: 3
 }
+
+export const DEBOUNCE_TIME: ConstPref = {
+    key: 'debounce_time',
+    defaultValue: 500
+}

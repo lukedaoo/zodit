@@ -47,9 +47,12 @@ export const objectToText = <T>(
     const finalSeparator = separator ?? getUserSeparator();
     const fields = getObjectFields(obj, config);
 
-    return fields.map(field => {
+    return fields.filter(Boolean).map(field => {
         const value = (obj as any)[field];
         const notNull = value !== undefined && value !== null;
+        if (!notNull) {
+            return null;
+        }
         let displayValue;
         if (notNull && typeof value === 'object') {
             displayValue = valueObjectProcessor?.(value) ?? value;

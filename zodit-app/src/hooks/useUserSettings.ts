@@ -3,8 +3,13 @@ import { userPref } from '@user-prefs/localUserPref';
 import type { ConstPref } from '@user-prefs/const';
 
 export const useUserSettings = () => {
-    const get = useCallback(<T = any>(pref: ConstPref): T => {
-        const raw = userPref.get(pref.key);
+    const get = useCallback(<T = any>(pref: ConstPref | string): T => {
+        let raw;
+        if (typeof pref === 'string') {
+            return userPref.get(pref) as T;
+        } else {
+            raw = userPref.get(pref.key);
+        }
 
         if (raw === null || raw === undefined) {
             return pref.defaultValue;

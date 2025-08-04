@@ -5,6 +5,9 @@ import { useNoteInteractions } from './hooks/useNoteInteractions';
 import { useDragAndDrop } from './hooks/useDragAndDrop';
 import { noteReducer } from './noteReducer';
 import type { State, Action, ActionType } from './noteReducer';
+
+import { DEBOUNCE_TIME } from '@user-prefs/const';
+import { useUserSettings } from '@hooks/useUserSettings';
 import { useDataProvider } from '@context/DataProviderContext';
 import { debounce } from '@lib/debounce';
 import { createLogger } from "@lib/logger";
@@ -38,6 +41,9 @@ const loggingReducer = (
 
 export const useNotes = (initialNotes?: DisplayNote[]) => {
     const dataProvider = useDataProvider();
+    const { get } = useUserSettings();
+    const delay = get<number>(DEBOUNCE_TIME);
+
     const initialState: State = {
         notes: initialNotes || [],
         topNoteId: null,
@@ -50,11 +56,10 @@ export const useNotes = (initialNotes?: DisplayNote[]) => {
     const [error, setError] = useState<string | null>(null);
 
     // Debounced dataProvider methods
-    const delay = 400;
     const debouncedSaveToStorage = useMemo(
         () => debounce((key: string, data: any) => {
             dataProvider.saveToStorage(key, data);
-        }, delay),
+        }, delay || 500),
         [dataProvider]
     );
 
@@ -69,7 +74,6 @@ export const useNotes = (initialNotes?: DisplayNote[]) => {
     useEffect(() => {
         if (!isInitialized) return;
         try {
-            console.log('Saving notes', action);
             debouncedSaveToStorage('notes', notes.map(n => toDataNote(n).toJSON()));
             setError(null);
         } catch (err) {

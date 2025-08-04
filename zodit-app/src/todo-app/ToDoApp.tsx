@@ -1,12 +1,14 @@
 import React from 'react';
 import '../App.css';
+import { MantineProvider } from '@mantine/core';
 import Todo from '@components/todo/draggable/TodoV2';
 
 const TodoApp: React.FC = () => {
     return (
         <>
-            <h1>Todo App</h1>
-            <Todo />
+            <MantineProvider>
+                <Todo />
+            </MantineProvider>
         </>
     )
 };

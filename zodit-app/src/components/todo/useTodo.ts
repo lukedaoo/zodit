@@ -7,6 +7,8 @@ import { todoReducer } from './todoReducer';
 import type { State, TodoAction as Action } from './todoReducer';
 import type { Todo as DisplayTodo } from './types';
 
+import { useUserSettings } from '@hooks/useUserSettings';
+import { DEBOUNCE_TIME } from '@user-prefs/const';
 import { debounce } from '@lib/debounce';
 import { createLogger } from "@lib/logger";
 
@@ -33,6 +35,9 @@ const loggingReducer = (state: State, action: Action) => {
 }
 
 export const useTodo = () => {
+    const { get } = useUserSettings();
+    const delay = get<number>(DEBOUNCE_TIME);
+
     const dataProvider = useDataProvider();
     const [state, dispatch] = useReducer(loggingReducer, { todos: [], activeTodoId: null } as State);
     const [isLoading, setIsLoading] = useState(false);
@@ -51,7 +56,7 @@ export const useTodo = () => {
     const debouncedUpdateTodo = useMemo(
         () => debounce((todoId: string, todoData: any) => {
             dataProvider.updateTodo(todoId, todoData);
-        }, 400),
+        }, delay || 500),
         [dataProvider]
     );
 

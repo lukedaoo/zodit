@@ -182,51 +182,67 @@ export function noteReducer(
             return { ...state, topNoteId: action.payload.id };
 
         case 'ARRANGE_IN_GRID': {
-            const pinnedNotes = state.notes.filter(note => note.isPinned === true);
-            const unpinnedNotes = state.notes.filter(note => note.isPinned === false || note.isPinned === undefined);
-            const newNotes = [
-                ...pinnedNotes,
-                ...arrangeNotesInGrid(unpinnedNotes).map(note => ({ ...note, date: new Date() })),
-            ];
-            setAction('arrange_in_grid');
-            setError(null);
-            return { ...state, notes: newNotes };
+            try {
+                const arrangedNotes = arrangeNotesInGrid(state.notes).map(note => ({ ...note, date: new Date() }));
+                const newNotes = arrangedNotes.sort((a, b) => {
+                    if (a.isPinned === b.isPinned) return 0;
+                    return a.isPinned ? -1 : 1;
+                });
+                setAction('arrange_in_grid');
+                setError(null);
+                return { ...state, notes: newNotes };
+            } catch (err) {
+                setError(`Failed to arrange notes in grid: ${err instanceof Error ? err.message : 'Unknown error'}`);
+                return state;
+            }
         }
 
         case 'ARRANGE_IN_STACK': {
-            const pinnedNotes = state.notes.filter(note => note.isPinned === true);
-            const unpinnedNotes = state.notes.filter(note => note.isPinned === false || note.isPinned === undefined);
-            const newNotes = [
-                ...pinnedNotes,
-                ...stackNotesVertically(unpinnedNotes).map(note => ({ ...note, date: new Date() })),
-            ];
-            setAction('arrange_in_stack');
-            setError(null);
-            return { ...state, notes: newNotes };
+            try {
+                const arrangedNotes = stackNotesVertically(state.notes).map(note => ({ ...note, date: new Date() }));
+                const newNotes = arrangedNotes.sort((a, b) => {
+                    if (a.isPinned === b.isPinned) return 0;
+                    return a.isPinned ? -1 : 1;
+                });
+                setAction('arrange_in_stack');
+                setError(null);
+                return { ...state, notes: newNotes };
+            } catch (err) {
+                setError(`Failed to arrange notes in stack: ${err instanceof Error ? err.message : 'Unknown error'}`);
+                return state;
+            }
         }
 
         case 'ARRANGE_IN_CIRCLE': {
-            const pinnedNotes = state.notes.filter(note => note.isPinned === true);
-            const unpinnedNotes = state.notes.filter(note => note.isPinned === false || note.isPinned === undefined);
-            const newNotes = [
-                ...pinnedNotes,
-                ...arrangeNotesInCircle(unpinnedNotes).map(note => ({ ...note, date: new Date() })),
-            ];
-            setAction('arrange_in_circle');
-            setError(null);
-            return { ...state, notes: newNotes };
+            try {
+                const arrangedNotes = arrangeNotesInCircle(state.notes).map(note => ({ ...note, date: new Date() }));
+                const newNotes = arrangedNotes.sort((a, b) => {
+                    if (a.isPinned === b.isPinned) return 0;
+                    return a.isPinned ? -1 : 1;
+                });
+                setAction('arrange_in_circle');
+                setError(null);
+                return { ...state, notes: newNotes };
+            } catch (err) {
+                setError(`Failed to arrange notes in circle: ${err instanceof Error ? err.message : 'Unknown error'}`);
+                return state;
+            }
         }
 
         case 'ARRANGE_RANDOMLY': {
-            const pinnedNotes = state.notes.filter(note => note.isPinned === true);
-            const unpinnedNotes = state.notes.filter(note => note.isPinned === false || note.isPinned === undefined);
-            const newNotes = [
-                ...pinnedNotes,
-                ...spreadNotesRandomly(unpinnedNotes).map(note => ({ ...note, date: new Date() })),
-            ];
-            setAction('arrange_randomly');
-            setError(null);
-            return { ...state, notes: newNotes };
+            try {
+                const arrangedNotes = spreadNotesRandomly(state.notes).map(note => ({ ...note, date: new Date() }));
+                const newNotes = arrangedNotes.sort((a, b) => {
+                    if (a.isPinned === b.isPinned) return 0;
+                    return a.isPinned ? -1 : 1;
+                });
+                setAction('arrange_randomly');
+                setError(null);
+                return { ...state, notes: newNotes };
+            } catch (err) {
+                setError(`Failed to arrange notes randomly: ${err instanceof Error ? err.message : 'Unknown error'}`);
+                return state;
+            }
         }
 
         default:
