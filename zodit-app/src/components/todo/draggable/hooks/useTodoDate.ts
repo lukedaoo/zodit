@@ -4,8 +4,8 @@ import type { Todo } from '../../types';
 
 interface UseTodoDateProps {
     getTodoByDate: (date: string) => Todo | undefined;
-    loadTodo: (todo: Todo) => void;
-    createTodo: (date: string) => Todo;
+    loadTodo: (todo: Todo | undefined) => void;
+    createTodo: (date: string) => Todo | undefined;
     buildHeatMapFromTaskDates: (month: string) => Record<string, number>;
     todos: Todo[];
     isInitialized: boolean;
@@ -20,7 +20,6 @@ export const useTodoDate = ({
     isInitialized
 }: UseTodoDateProps) => {
     const [currentDate, setCurrentDate] = useState<Date>(now());
-    const [isLoading, setIsLoading] = useState(false);
 
     const heatmapData = useMemo(() => {
         const year = currentDate.getFullYear();
@@ -30,20 +29,15 @@ export const useTodoDate = ({
     }, [currentDate, todos, buildHeatMapFromTaskDates]);
 
     const handleDateChange = useCallback(async (date: Date) => {
-        try {
-            setIsLoading(true);
-            setCurrentDate(date);
+        setCurrentDate(date);
 
-            const dateAsString = convert(date);
-            const existingTodo = getTodoByDate(dateAsString);
-            if (existingTodo) {
-                loadTodo(existingTodo);
-            } else {
-                const todo = createTodo(dateAsString);
-                loadTodo(todo);
-            }
-        } finally {
-            setIsLoading(false);
+        const dateAsString = convert(date);
+        const existingTodo = getTodoByDate(dateAsString);
+        if (existingTodo) {
+            loadTodo(existingTodo);
+        } else {
+            const todo = createTodo(dateAsString);
+            loadTodo(todo);
         }
     }, [createTodo, getTodoByDate, loadTodo]);
 
@@ -55,7 +49,6 @@ export const useTodoDate = ({
 
     return {
         currentDate,
-        isLoading,
         heatmapData,
         handleDateChange
     };

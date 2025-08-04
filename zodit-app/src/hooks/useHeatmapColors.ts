@@ -11,6 +11,14 @@ interface HeatmapTheme {
     darkTextLight: string;
 }
 
+type IntensityConfig = {
+    thresholds: number[]; // ascending order
+};
+
+const defaultIntensityConfig: IntensityConfig = {
+    thresholds: [0, 5, 10, 15, 20],
+};
+
 const DEFAULT_THEME: HeatmapTheme = {
     lightPrimary: '#5F2EEA',
     lightBackground: '#FAF6FD',
@@ -26,19 +34,21 @@ export const useHeatmapColors = (customTheme?: Partial<HeatmapTheme>) => {
     const { isDarkTheme } = useTheme();
     const theme = { ...DEFAULT_THEME, ...customTheme };
 
-    const computeIntensity = (data: Record<string, number>): Record<string, number> => {
-        const values = Object.values(data);
-        if (values.length === 0) return {};
-
-        const max = Math.max(...values);
-        const min = Math.min(...values);
-        const range = max === min ? 1 : max - min;
-
+    const computeIntensity = (
+        data: Record<string, number>,
+        config: IntensityConfig = defaultIntensityConfig
+    ): Record<string, number> => {
+        const { thresholds } = config;
         const result: Record<string, number> = {};
+
         for (const [date, count] of Object.entries(data)) {
-            const intensity = Math.round(((count - min) / range) * 4);
-            result[date] = intensity;
+            let level = 0;
+            for (let i = 0; i < thresholds.length; i++) {
+                if (count > thresholds[i]) level = i;
+            }
+            result[date] = level;
         }
+
         return result;
     };
 

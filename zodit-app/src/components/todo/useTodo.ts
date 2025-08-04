@@ -1,444 +1,186 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useReducer, useCallback, useEffect, useMemo, useState } from 'react';
 import { getToday, convert, toDate } from '@common/utils';
-import type { Todo as DisplayTodo, Group as DisplayGroup, Task as DisplayTask } from './types';
-import type { Todo, Group } from '@database/models';
-import { ModelFactory } from '@database/models';
-
 import { useDataProvider } from '@context/DataProviderContext';
+import { ModelFactory } from '@database/models';
+import { debounce, toDisplayTodo, mergeTodos, toDataTodo } from './todoUtils';
+import { todoReducer } from './todoReducer';
+import type { State, TodoAction as Action } from './todoReducer';
+import type { Todo as DisplayTodo } from './types';
 
-type ActionType =
-    | 'init'
-    | 'load_todos'
-    | 'load_todo_by_date'
-    | 'load_heatmap'
-    | 'create_todo'
-    | 'add_group'
-    | 'update_group_name'
-    | 'update_group_collapse_status'
-    | 'delete_group'
-    | 'add_task'
-    | 'update_task'
-    | 'delete_task'
-    | 'reorder_tasks'
-    | 'reorder_groups'
-    | 'move_task_between_groups'
-    | null;
+const loggingReducer = (state: State, action: Action) => {
+    if (process.env.NODE_ENV === 'development') {
+        console.group(`%c[Todo Action] ${action.type}`, 'color: #4CAF50; font-weight: bold;');
+        console.log('%cPrev State:', 'color: #9E9E9E; font-weight: bold;', state);
+        console.log('%cAction:', 'color: #03A9F4; font-weight: bold;', action);
 
-// Utility to convert Data Model to Display Model
-const toDisplayTodo = (dataTodo: Todo): DisplayTodo => ({
-    id: dataTodo.id,
-    date: dataTodo.date,
-    title: dataTodo.title || '',
-    createdAt: dataTodo.createdAt,
-    updatedAt: dataTodo.updatedAt,
-    groups: dataTodo.groups.map(group => ({
-        id: group.id,
-        title: group.title,
-        createdAt: group.createdAt,
-        updatedAt: group.updatedAt,
-        collapsed: group.collapsed,
-        tasks: group.tasks.map(task => ({
-            id: task.id,
-            title: task.title,
-            completed: task.completed,
-            startDate: task.startDate,
-            description: task.description,
-            priority: task.priority,
-            createdDate: convert(task.createdAt),
-            tags: task.tags,
-            customFields: task.customFields,
-            updatedAt: task.updatedAt
-        }))
-    }))
-});
+        const nextState = todoReducer(state, action);
 
-function debounce<T extends (...args: any[]) => void>(func: T, delay: number): T {
-    let timeoutId: NodeJS.Timeout;
-    return ((...args: Parameters<T>) => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => func(...args), delay);
-    }) as T;
+        console.log('%cNext State:', 'color: #4CAF50; font-weight: bold;', nextState);
+        console.groupEnd();
+
+        return nextState;
+    } else {
+        console.group(`%c[Todo Action] ${action.type}`, 'color: #4CAF50; font-weight: bold;');
+        const nextState = todoReducer(state, action);
+        console.groupEnd();
+        return nextState;
+    }
 }
-
-// Utility to convert Display Model to Data Model
-const toDataTodo = (todo: DisplayTodo): Todo => {
-    const dataTodo = ModelFactory.createTodo({
-        id: todo.id,
-        date: todo.date,
-        title: todo.title,
-        createdAt: todo.createdAt,
-        updatedAt: todo.updatedAt,
-        groups: todo.groups.map(group => ({
-            id: group.id,
-            title: group.title,
-            todoId: todo.id,
-            collapsed: group.collapsed,
-            createdAt: group.createdAt,
-            updatedAt: group.updatedAt,
-            tasks: group.tasks.map(task => ({
-                id: task.id,
-                title: task.title,
-                completed: task.completed,
-                startDate: task.startDate,
-                description: task.description,
-                priority: task.priority,
-                tags: task.tags,
-                customFields: task.customFields,
-                groupId: group.id,
-                createdAt: new Date(task.createdDate as string),
-                updatedAt: task.updatedAt,
-            }))
-        })) as Group[]
-    });
-    return dataTodo;
-};
-
-const mergeTodos = (todos: DisplayTodo[]): DisplayTodo[] => {
-    const dateMap = new Map<string, DisplayTodo>();
-    todos.forEach(todo => {
-        const existing = dateMap.get(todo.date);
-        if (existing) {
-            const mergedGroups = [
-                ...existing.groups,
-                ...todo.groups.filter(g => !existing.groups.some(eg => eg.id === g.id))
-            ];
-            existing.groups = mergedGroups;
-        } else {
-            dateMap.set(todo.date, { ...todo });
-        }
-    });
-    return Array.from(dateMap.values());
-};
 
 export const useTodo = () => {
     const dataProvider = useDataProvider();
-
-    const [todos, setTodos] = useState<DisplayTodo[]>([]);
-    const [activeTodoId, setActiveTodoId] = useState<string | null>(null);
-    const [action, setAction] = useState<ActionType>(null);
+    const [state, dispatch] = useReducer(loggingReducer, { todos: [], activeTodoId: null } as State);
+    const [isLoading, setIsLoading] = useState(false);
+    const [action, setAction] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [isInitialized, setIsInitialized] = useState(false);
-    const groups = todos.find(t => t.id === activeTodoId)?.groups || [];
 
-    useEffect(() => {
-        const connectAndLoad = async () => {
-            try {
-                if (!dataProvider.isConnected()) {
-                    dataProvider.connect();
-                }
-                const allTodos = dataProvider.getTodos();
-                const displayTodos = mergeTodos(allTodos.map(toDisplayTodo));
-                setTodos(displayTodos);
+    const groups = state.todos.find(t => t.id === state.activeTodoId)?.groups || [];
 
-                const todayStr = getToday();
-                const todayTodo = displayTodos.find(t => t.date === todayStr);
-                if (todayTodo) {
-                    setActiveTodoId(todayTodo.id);
-                } else {
-                    const newTodo = dataProvider.createTodo(ModelFactory.createTodo({ date: todayStr }));
-                    const displayNewTodo = toDisplayTodo(newTodo);
-                    setTodos(prev => mergeTodos([...prev, displayNewTodo]));
-                    setActiveTodoId(displayNewTodo.id);
-                }
-                setAction('init');
-                setError(null);
-            } catch (err) {
-                setError('Failed to load todos: ' + (err instanceof Error ? err.message : 'Unknown error'));
-            } finally {
-                setIsInitialized(true);
-            }
-        };
-        connectAndLoad();
-    }, []);
+    const generateId = useCallback((prefix: string) =>
+        `${prefix}:id#${Math.floor(Math.random() * 8 ** 6).toString(8).padStart(6, '0')}`,
+        []
+    );
 
-    const generateId = useCallback((prefix: string) => {
-        return prefix + ":id#" + Math.floor(Math.random() * 8 ** 6).toString(8).padStart(6, '0');
-    }, []);
-
+    // Debounced updater
     const debouncedUpdateTodo = useMemo(
-        () => debounce((todoId: string, todoData: Todo) => {
+        () => debounce((todoId: string, todoData: any) => {
             dataProvider.updateTodo(todoId, todoData);
-        }, 300),
+        }, 400),
         [dataProvider]
     );
 
-    const syncGroups = useCallback((newGroups: DisplayGroup[], actionType: ActionType) => {
-        if (!activeTodoId) return;
-        try {
-            setTodos(currentTodos => {
-                const updatedTodos = currentTodos.map(todo =>
-                    todo.id === activeTodoId ? { ...todo, groups: newGroups } : todo
-                );
+    // Auto-sync to data provider when todos change
+    useEffect(() => {
+        if (!state.activeTodoId) return;
+        const activeTodo = state.todos.find(t => t.id === state.activeTodoId);
+        if (activeTodo) {
+            debouncedUpdateTodo(state.activeTodoId, toDataTodo(activeTodo));
+        }
+    }, [state.todos, state.activeTodoId, debouncedUpdateTodo]);
 
-                const activeTodo = updatedTodos.find(t => t.id === activeTodoId);
-                if (activeTodo) {
-                    debouncedUpdateTodo(activeTodoId, toDataTodo(activeTodo));
+    // === Initialization ===
+    useEffect(() => {
+        const connectAndLoad = async () => {
+            try {
+                setIsLoading(true);
+                if (!dataProvider.isConnected()) {
+                    dataProvider.connect();
                 }
 
-                return updatedTodos;
-            });
+                const allTodos = dataProvider.getTodos();
+                const displayTodos = mergeTodos(allTodos.map(toDisplayTodo));
+                dispatch({ type: 'SET_TODOS', payload: displayTodos });
 
-            setAction(actionType);
-            setError(null);
-        } catch (err) {
-            setError('Failed to sync groups: ' + (err instanceof Error ? err.message : 'Unknown error'));
-        }
-    }, [activeTodoId, debouncedUpdateTodo]);
+                const todayStr = getToday();
+                let targetTodo = displayTodos.find(t => t.date === todayStr);
 
-    const createTodo = useCallback((date: string): DisplayTodo => {
-        try {
-            if (!dataProvider.isConnected()) {
-                dataProvider.connect();
-            }
-            const newTodo = dataProvider.createTodo(ModelFactory.createTodo({ date }));
-            const displayTodo = toDisplayTodo(newTodo);
-            setTodos(prev => [...prev, displayTodo]);
-            setAction('create_todo');
-            setError(null);
-            return displayTodo;
-        } catch (err) {
-            setError('Failed to create todo: ' + (err instanceof Error ? err.message : 'Unknown error'));
-            throw err; // Re-throw to allow caller to handle
-        }
-    }, []);
-
-    const getTodoByDate = useCallback((date: string): DisplayTodo | undefined => {
-        try {
-            setAction('load_todo_by_date');
-            setError(null);
-            return todos.find(t => t.date === date);
-        } catch (err) {
-            setError('Failed to get todo by date: ' + (err instanceof Error ? err.message : 'Unknown error'));
-            return undefined;
-        }
-    }, [todos]);
-
-    const loadTodo = useCallback((todo: DisplayTodo) => {
-        try {
-            setActiveTodoId(todo.id as string);
-            setAction('load_todo_by_date');
-            setError(null);
-        } catch (err) {
-            setError('Failed to load todo: ' + (err instanceof Error ? err.message : 'Unknown error'));
-        }
-    }, []);
-
-    const buildHeatMapFromTaskDates = useCallback((month: string): Record<string, number> => {
-        try {
-            if (!isInitialized) return {};
-            const heatMap: Record<string, number> = {};
-            const [year, monthNum] = month.split('-');
-            const targetYear = parseInt(year);
-            const targetMonth = parseInt(monthNum);
-
-            todos.forEach(todo => {
-                todo.groups.forEach(group => {
-                    group.tasks.forEach(_ => {
-                        if (todo.date) {
-                            const date = toDate(todo.date);
-                            if (date.getFullYear() === targetYear && date.getMonth() + 1 === targetMonth) {
-                                const dateKey = todo.date;
-                                heatMap[dateKey] = (heatMap[dateKey] || 0) + 1;
-                            }
-                        }
+                if (!targetTodo) {
+                    const newTodo = dataProvider.createTodo(
+                        ModelFactory.createTodo({ date: todayStr })
+                    );
+                    targetTodo = toDisplayTodo(newTodo);
+                    dispatch({
+                        type: 'SET_TODOS',
+                        payload: mergeTodos([...displayTodos, targetTodo]),
                     });
-                });
-            });
+                }
 
-            setAction('load_heatmap');
-            setError(null);
-            return heatMap;
-        } catch (err) {
-            setError('Failed to build heatmap: ' + (err instanceof Error ? err.message : 'Unknown error'));
-            return {};
-        }
-    }, [todos]);
-
-    const addGroup = useCallback(() => {
-        try {
-            const newGroup: DisplayGroup = {
-                id: generateId('group'),
-                title: 'Untitled',
-                tasks: []
-            };
-            syncGroups([...groups, newGroup], 'add_group');
-            setError(null);
-        } catch (err) {
-            setError('Failed to add group: ' + (err instanceof Error ? err.message : 'Unknown error'));
-        }
-    }, [groups, syncGroups, generateId]);
-
-    const updateGroupName = useCallback((groupId: string, newName: string) => {
-        try {
-            syncGroups(
-                groups.map(g => (g.id === groupId ? { ...g, title: newName } : g)),
-                'update_group_name'
-            );
-            setError(null);
-        } catch (err) {
-            setError('Failed to update group name: ' + (err instanceof Error ? err.message : 'Unknown error'));
-        }
-    }, [groups, syncGroups]);
-
-    const updateGroupCollapseStatus = useCallback((groupId: string, isCollapsed: boolean) => {
-        try {
-            syncGroups(
-                groups.map(g => (g.id === groupId ? { ...g, collapsed: isCollapsed } : g)),
-                'update_group_collapse_status'
-            );
-            setError(null);
-        } catch (err) {
-            setError('Failed to update group collapse status: ' + (err instanceof Error ? err.message : 'Unknown error'));
-        }
-    }, [groups, syncGroups]);
-
-    const deleteGroup = useCallback((groupId: string) => {
-        try {
-            syncGroups(groups.filter(g => g.id !== groupId), 'delete_group');
-            setError(null);
-        } catch (err) {
-            setError('Failed to delete group: ' + (err instanceof Error ? err.message : 'Unknown error'));
-        }
-    }, [groups, syncGroups]);
-
-    const addTask = useCallback((groupId: string) => {
-        try {
-            const newTask: DisplayTask = {
-                id: generateId('task'),
-                title: '',
-                completed: false,
-                createdDate: convert(new Date()),
-            };
-            syncGroups(
-                groups.map(group =>
-                    group.id === groupId ? { ...group, tasks: [...group.tasks, newTask] } : group
-                ),
-                'add_task'
-            );
-            setError(null);
-        } catch (err) {
-            setError('Failed to add task: ' + (err instanceof Error ? err.message : 'Unknown error'));
-        }
-    }, [groups, syncGroups, generateId]);
-
-    const updateTask = useCallback((groupId: string, taskId: string, updates: Partial<DisplayTask>) => {
-        try {
-            syncGroups(
-                groups.map(group =>
-                    group.id === groupId
-                        ? {
-                            ...group,
-                            tasks: group.tasks.map(task =>
-                                task.id === taskId ? { ...task, ...updates } : task
-                            )
-                        }
-                        : group
-                ),
-                'update_task'
-            );
-            setError(null);
-        } catch (err) {
-            setError('Failed to update task: ' + (err instanceof Error ? err.message : 'Unknown error'));
-        }
-    }, [groups, syncGroups]);
-
-    const deleteTask = useCallback((groupId: string, taskId: string) => {
-        try {
-            syncGroups(
-                groups.map(group =>
-                    group.id === groupId
-                        ? { ...group, tasks: group.tasks.filter(task => task.id !== taskId) }
-                        : group
-                ),
-                'delete_task'
-            );
-            setError(null);
-        } catch (err) {
-            setError('Failed to delete task: ' + (err instanceof Error ? err.message : 'Unknown error'));
-        }
-    }, [groups, syncGroups]);
-
-    const reorderTask = useCallback((groupId: string, newOrder: string[]) => {
-        try {
-            const group = groups.find(g => g.id === groupId);
-            if (!group) return;
-            const taskMap = new Map(group.tasks.map(task => [task.id, task]));
-            const reorderedTasks = newOrder
-                .map(id => taskMap.get(id))
-                .filter(Boolean) as DisplayTask[];
-            syncGroups(
-                groups.map(g => (g.id === groupId ? { ...g, tasks: reorderedTasks } : g)),
-                'reorder_tasks'
-            );
-            dataProvider.reorderTasksInGroup(activeTodoId!, groupId, newOrder);
-            setError(null);
-        } catch (err) {
-            setError('Failed to reorder tasks: ' + (err instanceof Error ? err.message : 'Unknown error'));
-        }
-    }, [groups, syncGroups, activeTodoId]);
-
-    const reorderGroup = useCallback((newOrder: string[]) => {
-        try {
-            const groupMap = Object.fromEntries(groups.map(group => [group.id, group]));
-            const reorderedGroups = newOrder
-                .map(id => groupMap[id])
-                .filter((group): group is DisplayGroup => Boolean(group));
-            syncGroups(reorderedGroups, 'reorder_groups');
-            dataProvider.reorderGroupsInTodo(activeTodoId!, newOrder);
-            setError(null);
-        } catch (err) {
-            setError('Failed to reorder groups: ' + (err instanceof Error ? err.message : 'Unknown error'));
-        }
-    }, [groups, syncGroups, activeTodoId]);
-
-    const moveTaskBetweenGroups = useCallback((
-        sourceGroupId: string,
-        targetGroupId: string,
-        taskId: string,
-        targetTaskId: string | null
-    ) => {
-        try {
-            const sourceGroup = groups.find(g => g.id === sourceGroupId);
-            const targetGroup = groups.find(g => g.id === targetGroupId);
-            if (!sourceGroup || !targetGroup) return;
-
-            const task = sourceGroup.tasks.find(t => t.id === taskId);
-            if (!task) return;
-
-            let targetIndex = targetGroup.tasks.length;
-            if (targetTaskId) {
-                const foundIndex = targetGroup.tasks.findIndex(t => t.id === targetTaskId);
-                if (foundIndex !== -1) targetIndex = foundIndex;
+                setError(null);
+            } catch (err) {
+                setError(
+                    'Failed to load todos: ' +
+                    (err instanceof Error ? err.message : 'Unknown error')
+                );
+            } finally {
+                setIsInitialized(true);
+                setIsLoading(false);
             }
+        };
 
-            const newGroups = groups.map(group => {
-                if (group.id === sourceGroupId) {
-                    return { ...group, tasks: group.tasks.filter(t => t.id !== taskId) };
-                }
-                if (group.id === targetGroupId) {
-                    return {
-                        ...group,
-                        tasks: [...group.tasks.slice(0, targetIndex), task, ...group.tasks.slice(targetIndex)]
-                    };
-                }
-                return group;
-            });
-
-            syncGroups(newGroups, 'move_task_between_groups');
-            dataProvider.moveTaskBetweenGroups(activeTodoId!, taskId, targetGroupId, targetIndex);
-            setError(null);
-        } catch (err) {
-            setError('Failed to move task: ' + (err instanceof Error ? err.message : 'Unknown error'));
+        if (!isInitialized) {
+            connectAndLoad();
         }
-    }, [groups, syncGroups, activeTodoId]);
+    }, [dataProvider, isInitialized]);
+
+    // === Public API ===
+    const createTodo = (date: string): DisplayTodo | undefined => {
+        try {
+            setIsLoading(true);
+            if (!dataProvider.isConnected()) dataProvider.connect();
+            const newTodo = toDisplayTodo(dataProvider.createTodo(ModelFactory.createTodo({ date })));
+            dispatch({ type: 'SET_TODOS', payload: [...state.todos, newTodo] });
+            setAction('create_todo');
+            return newTodo;
+        } catch (err) {
+            setError(`Failed to create todo: ${err instanceof Error ? err.message : 'Unknown error'}`);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const getTodoByDate = useCallback(
+        (date: string) => state.todos.find(t => t.date === date),
+        [state.todos]
+    );
+
+    const loadTodo = useCallback((todo: DisplayTodo | undefined): void => {
+        if (!todo) return;
+        dispatch({ type: 'SET_ACTIVE_TODO', payload: todo.id });
+    }, []);
+
+    const buildHeatMapFromTaskDates = useCallback((month: string) => {
+        if (!isInitialized) return {};
+        const [year, monthNum] = month.split('-').map(Number);
+        const heatMap: Record<string, number> = {};
+        state.todos.forEach(todo => {
+            if (toDate(todo.date).getFullYear() === year && toDate(todo.date).getMonth() + 1 === monthNum) {
+                const count = todo.groups.reduce((sum, g) => sum + g.tasks.length, 0);
+                if (count > 0) heatMap[todo.date] = (heatMap[todo.date] || 0) + count;
+            }
+        });
+        setAction('load_heatmap');
+        return heatMap;
+    }, [state.todos, isInitialized]);
+
+    // === Groups ===
+    const addGroup = () => dispatch({ type: 'ADD_GROUP', payload: { generateId } });
+    const updateGroupName = (id: string, title: string) => dispatch({ type: 'UPDATE_GROUP_NAME', payload: { id, title } });
+    const updateGroupCollapseStatus = (id: string, collapsed: boolean) => dispatch({ type: 'UPDATE_GROUP_COLLAPSE', payload: { id, collapsed } });
+    const deleteGroup = (id: string) => dispatch({ type: 'DELETE_GROUP', payload: { id } });
+
+    // === Tasks ===
+    const addTask = (groupId: string) =>
+        dispatch({ type: 'ADD_TASK', payload: { groupId, generateId, now: convert(new Date()) } });
+    const updateTask = (groupId: string, taskId: string, updates: Partial<any>) =>
+        dispatch({ type: 'UPDATE_TASK', payload: { groupId, taskId, updates } });
+    const deleteTask = (groupId: string, taskId: string) =>
+        dispatch({ type: 'DELETE_TASK', payload: { groupId, taskId } });
+    const reorderTask = (groupId: string, newOrder: string[]) => {
+        dispatch({ type: 'REORDER_TASKS', payload: { groupId, newOrder } });
+        dataProvider.reorderTasksInGroup(state.activeTodoId!, groupId, newOrder);
+    };
+    const reorderGroup = (newOrder: string[]) => {
+        dispatch({ type: 'REORDER_GROUPS', payload: { newOrder } });
+        dataProvider.reorderGroupsInTodo(state.activeTodoId!, newOrder);
+    };
+    const moveTaskBetweenGroups = (sourceGroupId: string, targetGroupId: string, taskId: string, targetTaskId: string | null) => {
+        let targetIndex = groups.length;
+        if (targetTaskId) {
+            const idx = groups.find(g => g.id === targetGroupId)?.tasks.findIndex(t => t.id === targetTaskId) ?? -1;
+            if (idx !== -1) targetIndex = idx;
+        }
+        dispatch({ type: 'MOVE_TASK_BETWEEN_GROUPS', payload: { sourceGroupId, targetGroupId, taskId, targetIndex } });
+        dataProvider.moveTaskBetweenGroups(state.activeTodoId!, taskId, targetGroupId, targetIndex);
+    };
 
     return {
-        todos,
+        todos: state.todos,
+        groups,
         createTodo,
         getTodoByDate,
         loadTodo,
         buildHeatMapFromTaskDates,
-        groups,
         addGroup,
         updateGroupName,
         updateGroupCollapseStatus,
@@ -451,7 +193,7 @@ export const useTodo = () => {
         moveTaskBetweenGroups,
         action,
         error,
-        isInitialized
+        isInitialized,
+        isLoading
     };
 };
-

@@ -53,7 +53,7 @@ export class LocalStorageDataProvider implements DataProvider {
             throw error;
         } finally {
             this.storageStats[operationType]++;
-            console.log('Storage Stats:', this.storageStats);
+            // console.log('Storage Stats:', this.storageStats);
         }
     }
 

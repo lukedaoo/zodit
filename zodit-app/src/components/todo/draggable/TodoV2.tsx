@@ -7,6 +7,7 @@ import { useTodoDragAndDrop } from './hooks/useTodoDragAndDrop';
 import { TodoDragOverlay } from './TodoDragOverlay';
 
 import { GreetingNav } from '@components/gadget/GreetingNav';
+import { StatusMessage } from '@components/gadget/StatusMessage';
 
 import { DndContext, DragOverlay, rectIntersection } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -24,6 +25,7 @@ interface TodoProps {
 
 const Todo: React.FC<TodoProps> = () => {
     const {
+        error,
         createTodo,
         getTodoByDate,
         loadTodo,
@@ -40,11 +42,11 @@ const Todo: React.FC<TodoProps> = () => {
         moveTaskBetweenGroups,
         buildHeatMapFromTaskDates,
         todos,
-        isInitialized
+        isInitialized,
+        isLoading
     } = useTodo();
 
     const {
-        isLoading,
         heatmapData,
         handleDateChange,
         currentDate
@@ -139,6 +141,8 @@ const Todo: React.FC<TodoProps> = () => {
 
     return (
         <>
+            <StatusMessage isLoading={isLoading} error={error} />
+
             {/* Toolbox Bar */}
 
             <div className="space-y-6">

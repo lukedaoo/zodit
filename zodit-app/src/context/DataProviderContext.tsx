@@ -1,6 +1,7 @@
 import React, { createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
-import { DataProviderFactory, LocalStorageDataProvider } from '@database/provider';
+import { DataProviderFactory } from '@database/provider/dataProviderFactory';
+import { LocalStorageDataProvider } from '@database/provider/localStorageDataProvider';
 
 DataProviderFactory.register('localStorage', LocalStorageDataProvider);
 

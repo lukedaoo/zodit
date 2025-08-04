@@ -45,7 +45,7 @@ export const resolveAlias = (input: string, aliases: Alias[] = DEFAULT_ALIASES):
             });
             break;
         case 'EOD': {
-            const today = now();
+            const today = getToday();
             resolved = { at: '23:59', date: today };
             break;
         }

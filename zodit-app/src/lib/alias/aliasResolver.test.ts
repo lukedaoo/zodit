@@ -9,7 +9,7 @@ describe('resolveAlias', () => {
 
     it('returns resolved date for "today"', () => {
         const result = resolveAlias('today');
-        const today = new Date().toISOString().split('T')[0];
+        const today = require('dayjs')().format('YYYY-MM-DD');
         expect(result).toEqual({ alias: 'today', resolved: today });
     });
 
@@ -31,7 +31,7 @@ describe('resolveAlias', () => {
     });
 
     it('returns resolved object for "eod"', () => {
-        const today = new Date().toISOString().split('T')[0];
+        const today = require('dayjs')().format('YYYY-MM-DD');
         expect(resolveAlias('eod')).toEqual({
             alias: 'eod',
             resolved: { at: '23:59', date: today },
@@ -489,8 +489,7 @@ describe('validateAlias', () => {
             const input = { alias: 'today', resolved: '2024-07-19' };
 
             // Move to next day
-            vi.setSystemTime(new Date('2024-07-20T00:00:00Z'));
-
+            vi.setSystemTime(new Date('2024-07-18T00:00:00Z'));
             const result = validateAlias(input);
 
             expect(result).toEqual({
