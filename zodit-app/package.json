@@ -9,7 +9,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "prod": "vitest run && vite build && vite preview --open",
+    "prod:test": "vitest run && vite build && vite preview --open",
+    "prod": "vite build && vite preview --open",
     "test": "vitest",
     "test:open": "vitest && vite preview --outDir html --open"
   },

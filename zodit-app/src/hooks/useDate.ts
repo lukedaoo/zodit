@@ -42,7 +42,6 @@ export const useDate = (controlledDate?: Date) => {
     const setDateFromString = (newDate: string, onChange?: (date: Date) => void) => {
         const convertedDate = convertDateFromString(newDate);
         if (onChange) {
-            console.log('useDate: Setting date from string', newDate);
             onChange(convertedDate);
         } else {
             setInternalDate(convertedDate);

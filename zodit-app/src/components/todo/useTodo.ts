@@ -7,22 +7,26 @@ import { todoReducer } from './todoReducer';
 import type { State, TodoAction as Action } from './todoReducer';
 import type { Todo as DisplayTodo } from './types';
 
+import { createLogger } from "@lib/logger";
+
+const logger = createLogger("Todo");
+
 const loggingReducer = (state: State, action: Action) => {
+    logger.group(`[Todo Action] ${action.type}`);
+
     if (process.env.NODE_ENV === 'development') {
-        console.group(`%c[Todo Action] ${action.type}`, 'color: #4CAF50; font-weight: bold;');
-        console.log('%cPrev State:', 'color: #9E9E9E; font-weight: bold;', state);
-        console.log('%cAction:', 'color: #03A9F4; font-weight: bold;', action);
+        logger.log('Prev State:', 'color: #9CA3AF; font-weight: bold;', state);
+        logger.log('Action:', 'color: #03A9F4; font-weight: bold;', action);
 
         const nextState = todoReducer(state, action);
 
-        console.log('%cNext State:', 'color: #4CAF50; font-weight: bold;', nextState);
-        console.groupEnd();
+        logger.log('Next State:', 'color: #9CA3AF; font-weight: bold;', nextState);
+        logger.groupEnd();
 
         return nextState;
     } else {
-        console.group(`%c[Todo Action] ${action.type}`, 'color: #4CAF50; font-weight: bold;');
         const nextState = todoReducer(state, action);
-        console.groupEnd();
+        logger.groupEnd();
         return nextState;
     }
 }
