@@ -12,6 +12,7 @@ interface Props {
     onUpdateTask: (taskId: string, task: Partial<any>) => void;
     onDeleteTask: (taskId: string) => void;
     onAddTask: () => void;
+    onCollapseGroup: (collapsed: boolean) => void;
 }
 
 export const SortableGroupItem = ({
@@ -21,8 +22,9 @@ export const SortableGroupItem = ({
     onUpdateTask,
     onDeleteTask,
     onAddTask,
+    onCollapseGroup,
 }: Props) => {
-    const [collapsed, setCollapsed] = useState(false);
+    const [collapsed, setCollapsed] = useState(group.collapsed);
     const [isEditing, setIsEditing] = useState(false);
 
     const {
@@ -96,6 +98,7 @@ export const SortableGroupItem = ({
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     setCollapsed(!collapsed);
+                                    onCollapseGroup(!collapsed);
                                 }}
                                 className="hover:text-green-500 transition-colors"
                             >

@@ -30,6 +30,7 @@ const Todo: React.FC<TodoProps> = () => {
         groups,
         addGroup,
         updateGroupName,
+        updateGroupCollapseStatus,
         deleteGroup,
         addTask,
         updateTask,
@@ -168,6 +169,7 @@ const Todo: React.FC<TodoProps> = () => {
                                 onDeleteGroup={deleteGroup}
                                 onDeleteTask={deleteTask}
                                 onAddTask={addTask}
+                                onGroupCollapseStatusChange={updateGroupCollapseStatus}
                             />
                         </SortableContext>
 

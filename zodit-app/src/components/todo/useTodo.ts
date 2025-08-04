@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getToday, convert, toDate } from '@common/utils';
 import type { Todo as DisplayTodo, Group as DisplayGroup, Task as DisplayTask } from './types';
 import type { Todo, Group } from '@database/models';
@@ -14,6 +14,7 @@ type ActionType =
     | 'create_todo'
     | 'add_group'
     | 'update_group_name'
+    | 'update_group_collapse_status'
     | 'delete_group'
     | 'add_task'
     | 'update_task'
@@ -35,6 +36,7 @@ const toDisplayTodo = (dataTodo: Todo): DisplayTodo => ({
         title: group.title,
         createdAt: group.createdAt,
         updatedAt: group.updatedAt,
+        collapsed: group.collapsed,
         tasks: group.tasks.map(task => ({
             id: task.id,
             title: task.title,
@@ -50,6 +52,14 @@ const toDisplayTodo = (dataTodo: Todo): DisplayTodo => ({
     }))
 });
 
+function debounce<T extends (...args: any[]) => void>(func: T, delay: number): T {
+    let timeoutId: NodeJS.Timeout;
+    return ((...args: Parameters<T>) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => func(...args), delay);
+    }) as T;
+}
+
 // Utility to convert Display Model to Data Model
 const toDataTodo = (todo: DisplayTodo): Todo => {
     const dataTodo = ModelFactory.createTodo({
@@ -62,6 +72,7 @@ const toDataTodo = (todo: DisplayTodo): Todo => {
             id: group.id,
             title: group.title,
             todoId: todo.id,
+            collapsed: group.collapsed,
             createdAt: group.createdAt,
             updatedAt: group.updatedAt,
             tasks: group.tasks.map(task => ({
@@ -144,23 +155,35 @@ export const useTodo = () => {
         return prefix + ":id#" + Math.floor(Math.random() * 8 ** 6).toString(8).padStart(6, '0');
     }, []);
 
+    const debouncedUpdateTodo = useMemo(
+        () => debounce((todoId: string, todoData: Todo) => {
+            dataProvider.updateTodo(todoId, todoData);
+        }, 300),
+        [dataProvider]
+    );
+
     const syncGroups = useCallback((newGroups: DisplayGroup[], actionType: ActionType) => {
         if (!activeTodoId) return;
         try {
-            const updatedTodos = todos.map(todo =>
-                todo.id === activeTodoId ? { ...todo, groups: newGroups } : todo
-            );
-            setTodos(updatedTodos);
-            const activeTodo = updatedTodos.find(t => t.id === activeTodoId);
-            if (activeTodo) {
-                dataProvider.updateTodo(activeTodoId, toDataTodo(activeTodo));
-            }
+            setTodos(currentTodos => {
+                const updatedTodos = currentTodos.map(todo =>
+                    todo.id === activeTodoId ? { ...todo, groups: newGroups } : todo
+                );
+
+                const activeTodo = updatedTodos.find(t => t.id === activeTodoId);
+                if (activeTodo) {
+                    debouncedUpdateTodo(activeTodoId, toDataTodo(activeTodo));
+                }
+
+                return updatedTodos;
+            });
+
             setAction(actionType);
             setError(null);
         } catch (err) {
             setError('Failed to sync groups: ' + (err instanceof Error ? err.message : 'Unknown error'));
         }
-    }, [todos, activeTodoId]);
+    }, [activeTodoId, debouncedUpdateTodo]);
 
     const createTodo = useCallback((date: string): DisplayTodo => {
         try {
@@ -192,7 +215,6 @@ export const useTodo = () => {
 
     const loadTodo = useCallback((todo: DisplayTodo) => {
         try {
-            console.log('Loading todo:', todo);
             setActiveTodoId(todo.id as string);
             setAction('load_todo_by_date');
             setError(null);
@@ -258,6 +280,18 @@ export const useTodo = () => {
         }
     }, [groups, syncGroups]);
 
+    const updateGroupCollapseStatus = useCallback((groupId: string, isCollapsed: boolean) => {
+        try {
+            syncGroups(
+                groups.map(g => (g.id === groupId ? { ...g, collapsed: isCollapsed } : g)),
+                'update_group_collapse_status'
+            );
+            setError(null);
+        } catch (err) {
+            setError('Failed to update group collapse status: ' + (err instanceof Error ? err.message : 'Unknown error'));
+        }
+    }, [groups, syncGroups]);
+
     const deleteGroup = useCallback((groupId: string) => {
         try {
             syncGroups(groups.filter(g => g.id !== groupId), 'delete_group');
@@ -289,7 +323,6 @@ export const useTodo = () => {
 
     const updateTask = useCallback((groupId: string, taskId: string, updates: Partial<DisplayTask>) => {
         try {
-            console.log(updates);
             syncGroups(
                 groups.map(group =>
                     group.id === groupId
@@ -408,6 +441,7 @@ export const useTodo = () => {
         groups,
         addGroup,
         updateGroupName,
+        updateGroupCollapseStatus,
         deleteGroup,
         addTask,
         updateTask,

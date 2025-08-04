@@ -11,6 +11,7 @@ export interface Group {
     id: string;
     title: string;
     priority?: 'low' | 'medium' | 'high';
+    collapsed?: boolean;
     tasks: Task[];
 
     createdAt?: Date;

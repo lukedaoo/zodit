@@ -8,8 +8,8 @@ export interface Note {
     isPinned?: boolean;
     tags?: string[];
 
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
 export interface NoteState {

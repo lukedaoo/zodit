@@ -15,6 +15,7 @@ interface Props {
     onUpdateTask: (groupId: string, taskId: string, updates: Partial<any>) => void;
     onDeleteTask: (groupId: string, taskId: string) => void;
     onAddTask: (groupId: string) => void;
+    onGroupCollapseStatusChange: (groupId: string, collapsed: boolean) => void;
 }
 
 export const DraggableGroupList = ({
@@ -24,6 +25,7 @@ export const DraggableGroupList = ({
     onUpdateTask,
     onDeleteTask,
     onAddTask,
+    onGroupCollapseStatusChange
 }: Props) => {
     const { get } = useUserSettings();
     const threshold = get(GROUP_COLLAPSE_THRESHOLD);
@@ -49,6 +51,7 @@ export const DraggableGroupList = ({
                         onUpdateTask={(taskId, task) => onUpdateTask(group.id, taskId, task)}
                         onDeleteTask={(taskId) => onDeleteTask(group.id, taskId)}
                         onAddTask={() => onAddTask(group.id)}
+                        onCollapseGroup={(collapsed) => onGroupCollapseStatusChange(group.id, collapsed)}
                     />
                 ))}
             </SortableContext>
