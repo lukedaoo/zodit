@@ -168,10 +168,12 @@ export const useTodo = () => {
         dataProvider.moveTaskBetweenGroups(state.activeTodoId!, taskId, targetGroupId, targetIndex);
     };
     const bulkToggleTasks = (completed: boolean) => dispatch({ type: 'BULK_TOGGLE_TASKS', payload: { completed } });
-
+    const bulkDeleteTasksByIds = (ids: string[]) => dispatch({ type: 'BULK_DELETE_TASKS', payload: { taskIds: ids } });
+    const bulkDeleteTasksWithFilter = (filter: (task: any) => boolean) => dispatch({ type: 'BULK_DELETE_TASKS', payload: { filter } });
 
     return {
         todos: state.todos,
+        activeTodoId: state.activeTodoId,
         groups,
         createTodo,
         getTodoByDate,
@@ -190,6 +192,8 @@ export const useTodo = () => {
         reorderGroup,
         moveTaskBetweenGroups,
         bulkToggleTasks,
+        bulkDeleteTasksByIds,
+        bulkDeleteTasksWithFilter,
         action,
         error,
         isInitialized,

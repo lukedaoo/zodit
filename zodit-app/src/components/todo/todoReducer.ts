@@ -1,5 +1,5 @@
 import type { Todo as DisplayTodo, Group as DisplayGroup, Task as DisplayTask } from './types';
-
+import { TYPE_UTILS as tu, presets } from './types';
 export type State = {
     todos: DisplayTodo[];
     activeTodoId: string | null;
@@ -23,7 +23,8 @@ export type TodoAction =
     | { type: 'BULK_UPDATE_GROUP_COLLAPSE'; payload: { collapsed: boolean } }
     | { type: 'BULK_DELETE_GROUPS' }
     // Toggle task completeness in bulk for active todo
-    | { type: 'BULK_TOGGLE_TASKS'; payload: { completed: boolean } };
+    | { type: 'BULK_TOGGLE_TASKS'; payload: { completed: boolean } }
+    | { type: 'BULK_DELETE_TASKS'; payload: { filter?: (task: DisplayTask) => boolean; taskIds?: string[]; } };
 
 
 export function todoReducer(state: State, action: TodoAction): State {
@@ -185,10 +186,34 @@ export function todoReducer(state: State, action: TodoAction): State {
             return todoReducer(state, {
                 type: 'SYNC_GROUPS',
                 payload: {
-                    update: g => g.map(gr => ({
-                        ...gr,
-                        tasks: gr.tasks.map(t => ({ ...t, completed: action.payload.completed }))
-                    }))
+                    update: groups =>
+                        groups.map(gr => ({
+                            ...gr,
+                            tasks: gr.tasks.map(t =>
+                                tu.isEmpty(t, presets.minimal) // skip empty tasks
+                                    ? t
+                                    : { ...t, completed: action.payload.completed }
+                            )
+                        }))
+                }
+            });
+        case 'BULK_DELETE_TASKS':
+            return todoReducer(state, {
+                type: 'SYNC_GROUPS',
+                payload: {
+                    update: groups => {
+                        // Create the filter function
+                        const filterFn = action.payload.taskIds
+                            ? (task: DisplayTask) => action.payload.taskIds!.includes(task.id)
+                            : action.payload.filter;
+
+                        if (!filterFn) return groups; // No filter provided
+
+                        return groups.map(gr => ({
+                            ...gr,
+                            tasks: gr.tasks.filter(t => !filterFn(t))
+                        }));
+                    }
                 }
             });
 

@@ -37,7 +37,8 @@ export interface Task {
 }
 
 export const presets = {
-    basic: { include: ['title', 'description', 'completed'] as (keyof Task)[] },
+    basic: { include: ['title', 'id', 'completed'] as (keyof Task)[] },
+    minimal: { include: ['title', 'completed'] as (keyof Task)[] },
 
     scheduled: {
         include: ['title', 'description', 'startTime', 'startDate', 'endDate', 'completed'] as (keyof Task)[],

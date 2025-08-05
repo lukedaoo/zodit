@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { X, FoldVertical, UnfoldVertical, Trash2, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import type { Task } from '../types';
+import { TYPE_UTILS as tu, presets } from '../types';
+import { X, FoldVertical, UnfoldVertical, Trash2, AlertTriangle, CheckCircle2, Filter } from 'lucide-react';
 
 interface TodoToolProps {
     onClose: () => void;
@@ -7,7 +9,8 @@ interface TodoToolProps {
     onCollapseAllGroups?: () => void;
     onExpandAllGroups?: () => void;
     onDeleteAllGroups?: () => void;
-    onToggleAllTasks?: () => void;
+    onToggleAllTasks?: (shouldMarkIncomplete: boolean) => void;
+    onRemoveEmptyTasks?: () => void;
 }
 
 const TodoToolHeader: React.FC<{ onClose: () => void }> = ({ onClose }) => (
@@ -54,8 +57,8 @@ const ToggleCollapseButton: React.FC<{
             onClick={onToggle}
             disabled={!hasGroups}
             className={`w-full p-3 rounded-lg border flex items-center gap-3 transition-all duration-200 ${hasGroups
-                    ? 'hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer'
-                    : 'opacity-50 cursor-not-allowed'
+                ? 'hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer'
+                : 'opacity-50 cursor-not-allowed'
                 }`}
             style={{
                 backgroundColor: 'var(--color-background)',
@@ -64,8 +67,8 @@ const ToggleCollapseButton: React.FC<{
             }}
             title={hasGroups
                 ? shouldCollapseAll
-                    ? `Collapse ${expandedGroups.length} expanded groups`
-                    : `Expand ${collapsedGroups.length} collapsed groups`
+                    ? `Collapse tasks in ${expandedGroups.length} expanded groups`
+                    : `Expand tasks in ${collapsedGroups.length} collapsed groups`
                 : 'No groups to toggle'
             }
         >
@@ -76,13 +79,13 @@ const ToggleCollapseButton: React.FC<{
             )}
             <div className="flex-1 text-left">
                 <div className="text-sm font-medium">
-                    {shouldCollapseAll ? 'Collapse All Groups' : 'Expand All Groups'}
+                    {shouldCollapseAll ? 'Collapse All Tasks in Groups' : 'Expand All Tasks in Groups'}
                 </div>
                 <div className="text-xs" style={{ color: 'var(--color-muted-foreground)' }}>
                     {hasGroups
                         ? shouldCollapseAll
-                            ? `${expandedGroups.length} groups will be collapsed`
-                            : `${collapsedGroups.length} groups will be expanded`
+                            ? `All Tasks in ${expandedGroups.length} groups will be collapsed`
+                            : `All Tasks in ${collapsedGroups.length} groups will be expanded`
                         : 'No groups available'
                     }
                 </div>
@@ -91,46 +94,141 @@ const ToggleCollapseButton: React.FC<{
     );
 };
 
+const getShouldMarkIncomplete = (groups: Array<{ id: string; title: string; collapsed: boolean; tasks: Array<{ id: string; title: string; completed: boolean }> }>) => {
+    const allTasks = groups.flatMap(g => g.tasks);
+
+    const emptyTasks: Task[] = [];
+    const nonEmptyTasks: Task[] = [];
+
+    for (const task of allTasks) {
+        if (tu.isEmpty(task, presets.minimal)) {
+            emptyTasks.push(task);
+        } else {
+            nonEmptyTasks.push(task);
+        }
+    }
+
+    const total = nonEmptyTasks.length;
+    const completed = nonEmptyTasks.filter(t => t.completed).length;
+    const hasTasks = total > 0;
+    const shouldMarkIncomplete = completed >= total / 2;
+
+    return {
+        hasTasks,
+        totalTasks: total,
+        completedTasks: completed,
+        emptyTasksCount: emptyTasks.length,
+        nonEmptyTasksCount: nonEmptyTasks.length,
+        shouldMarkIncomplete
+    };
+};
+
+const getEmptyTasksInfo = (groups: Array<{ id: string; title: string; collapsed: boolean; tasks: Array<{ id: string; title: string; completed: boolean }> }>) => {
+    const allTasks = groups.flatMap(g => g.tasks);
+    const emptyTasks = allTasks.filter(task => tu.isEmpty(task, presets.minimal));
+    return {
+        hasEmptyTasks: emptyTasks.length > 0,
+        emptyTasksCount: emptyTasks.length,
+        totalTasks: allTasks.length
+    };
+};
+
 const ToggleTasksButton: React.FC<{
-    groups: Array<{ id: string; title: string; collapsed: boolean; tasks: Array<{ id: string; completed: boolean }> }>;
-    onToggle: () => void
+    groups: Array<{
+        id: string;
+        title: string;
+        collapsed: boolean;
+        tasks: Array<{ id: string; title: string; completed: boolean }>;
+    }>;
+    onToggle: (shouldMarkIncomplete: boolean) => void;
 }> = ({ groups, onToggle }) => {
-    const totalTasks = groups.reduce((sum, group) => sum + group.tasks.length, 0);
-    const completedTasks = groups.reduce((sum, group) => sum + group.tasks.filter(task => task.completed).length, 0);
-    const hasTasks = totalTasks > 0;
-    const shouldMarkIncomplete = completedTasks >= totalTasks / 2;
+    const {
+        hasTasks,
+        completedTasks,
+        shouldMarkIncomplete,
+        nonEmptyTasksCount,
+        emptyTasksCount
+    } = getShouldMarkIncomplete(groups);
+
+    const mainLabel = shouldMarkIncomplete
+        ? 'Mark All Tasks Incomplete'
+        : 'Mark All Tasks Complete';
+
+    const subLabel = !hasTasks
+        ? 'No tasks available'
+        : shouldMarkIncomplete
+            ? `${completedTasks} of ${nonEmptyTasksCount} tasks will be marked incomplete`
+            : `${nonEmptyTasksCount - completedTasks} of ${nonEmptyTasksCount} tasks will be marked complete`;
+
+    const tooltip = !hasTasks
+        ? 'No tasks to toggle'
+        : shouldMarkIncomplete
+            ? `Mark ${nonEmptyTasksCount} tasks as incomplete`
+            : `Mark ${nonEmptyTasksCount} tasks as complete`;
 
     return (
         <button
-            onClick={onToggle}
+            onClick={() => onToggle(shouldMarkIncomplete)}
             disabled={!hasTasks}
             className={`w-full p-3 rounded-lg border flex items-center gap-3 transition-all duration-200 ${hasTasks
-                    ? 'hover:bg-green-50 dark:hover:bg-green-900/20 cursor-pointer hover:border-green-200 dark:hover:border-green-800'
-                    : 'opacity-50 cursor-not-allowed'
+                ? 'hover:bg-green-50 dark:hover:bg-green-900/20 cursor-pointer hover:border-green-200 dark:hover:border-green-800'
+                : 'opacity-50 cursor-not-allowed'
                 }`}
             style={{
                 backgroundColor: 'var(--color-background)',
                 borderColor: 'var(--color-border)',
                 color: hasTasks ? 'var(--color-foreground)' : 'var(--color-muted-foreground)'
             }}
-            title={hasTasks
-                ? shouldMarkIncomplete
-                    ? `Mark ${totalTasks} tasks as incomplete`
-                    : `Mark ${totalTasks} tasks as completed`
-                : 'No tasks to toggle'
+            title={tooltip}
+        >
+            <CheckCircle2
+                className={`w-4 h-4 flex-shrink-0 ${hasTasks ? 'text-green-500' : ''}`}
+            />
+            <div className="flex-1 text-left">
+                <div className="text-sm font-medium">{mainLabel}</div>
+                <div
+                    className="text-xs"
+                    style={{ color: 'var(--color-muted-foreground)' }}
+                >
+                    {subLabel}
+                    {emptyTasksCount > 0 && ` • ${emptyTasksCount} empty task${emptyTasksCount > 1 ? 's' : ''} ignored`}
+                </div>
+            </div>
+        </button>
+    );
+};
+
+const RemoveEmptyTasksButton: React.FC<{
+    groups: Array<{ id: string; title: string; collapsed: boolean; tasks: Array<{ id: string; title: string; completed: boolean }> }>;
+    onRemove: () => void;
+}> = ({ groups, onRemove }) => {
+    const { hasEmptyTasks, emptyTasksCount, totalTasks } = getEmptyTasksInfo(groups);
+
+    return (
+        <button
+            onClick={onRemove}
+            disabled={!hasEmptyTasks}
+            className={`w-full p-3 rounded-lg border flex items-center gap-3 transition-all duration-200 ${hasEmptyTasks
+                ? 'hover:bg-orange-50 dark:hover:bg-orange-900/20 cursor-pointer hover:border-orange-200 dark:hover:border-orange-800'
+                : 'opacity-50 cursor-not-allowed'
+                }`}
+            style={{
+                backgroundColor: 'var(--color-background)',
+                borderColor: 'var(--color-border)',
+                color: hasEmptyTasks ? 'var(--color-foreground)' : 'var(--color-muted-foreground)'
+            }}
+            title={hasEmptyTasks
+                ? `Remove ${emptyTasksCount} empty task${emptyTasksCount > 1 ? 's' : ''}`
+                : 'No empty tasks to remove'
             }
         >
-            <CheckCircle2 className={`w-4 h-4 flex-shrink-0 ${hasTasks ? 'text-green-500' : ''}`} />
+            <Filter className={`w-4 h-4 flex-shrink-0 ${hasEmptyTasks ? 'text-orange-500' : ''}`} />
             <div className="flex-1 text-left">
-                <div className="text-sm font-medium">
-                    {shouldMarkIncomplete ? 'Mark All Tasks Incomplete' : 'Mark All Tasks Completed'}
-                </div>
+                <div className="text-sm font-medium">Remove Empty Tasks</div>
                 <div className="text-xs" style={{ color: 'var(--color-muted-foreground)' }}>
-                    {hasTasks
-                        ? shouldMarkIncomplete
-                            ? `${completedTasks} completed tasks will be marked incomplete`
-                            : `${totalTasks - completedTasks} incomplete tasks will be marked completed`
-                        : 'No tasks available'
+                    {hasEmptyTasks
+                        ? `Remove ${emptyTasksCount} empty task${emptyTasksCount > 1 ? 's' : ''} of ${totalTasks} tasks`
+                        : 'No empty tasks to remove'
                     }
                 </div>
             </div>
@@ -149,8 +247,8 @@ const DeleteAllButton: React.FC<{
             onClick={onDelete}
             disabled={!hasGroups}
             className={`w-full p-3 rounded-lg border flex items-center gap-3 transition-all duration-200 ${hasGroups
-                    ? 'hover:bg-red-50 dark:hover:bg-red-900/20 cursor-pointer hover:border-red-200 dark:hover:border-red-800'
-                    : 'opacity-50 cursor-not-allowed'
+                ? 'hover:bg-red-50 dark:hover:bg-red-900/20 cursor-pointer hover:border-red-200 dark:hover:border-red-800'
+                : 'opacity-50 cursor-not-allowed'
                 }`}
             style={{
                 backgroundColor: 'var(--color-background)',
@@ -219,6 +317,7 @@ export const TodoTool: React.FC<TodoToolProps> = ({
     onExpandAllGroups,
     onDeleteAllGroups,
     onToggleAllTasks,
+    onRemoveEmptyTasks,
 }) => {
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -233,9 +332,15 @@ export const TodoTool: React.FC<TodoToolProps> = ({
         }
     };
 
-    const handleToggleTasks = () => {
+    const handleToggleTasks = (shouldMarkIncomplete: boolean) => {
         if (onToggleAllTasks) {
-            onToggleAllTasks();
+            onToggleAllTasks(shouldMarkIncomplete);
+        }
+    };
+
+    const handleRemoveEmptyTasks = () => {
+        if (onRemoveEmptyTasks) {
+            onRemoveEmptyTasks();
         }
     };
 
@@ -262,8 +367,9 @@ export const TodoTool: React.FC<TodoToolProps> = ({
                 <div className="space-y-3">
                     <TodoGroupInfo groups={groups} />
                     <div className="space-y-2">
+                        <ToggleTasksButton groups={groups as any} onToggle={handleToggleTasks} />
                         <ToggleCollapseButton groups={groups} onToggle={handleToggleCollapse} />
-                        <ToggleTasksButton groups={groups} onToggle={handleToggleTasks} />
+                        <RemoveEmptyTasksButton groups={groups as any} onRemove={handleRemoveEmptyTasks} />
                         <DeleteAllButton groups={groups} onDelete={handleDeleteAll} />
                     </div>
                 </div>

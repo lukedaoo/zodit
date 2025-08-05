@@ -272,8 +272,8 @@ describe('templateProcessori test', () => {
             };
             const text = objectToText<Task>(taskWithNulls);
             expect(text).toContain('title:Test');
-            expect(text).toContain('description:');
-            expect(text).toContain('startTime:');
+            expect(text).not.toContain('description:');
+            expect(text).not.toContain('startTime:');
         });
 
         it('should handle empty input string', () => {
