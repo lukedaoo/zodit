@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Note } from '@components/notes/types';
 
-const SHARED_NOTES_KEY = 'app-shared-notes';
+const SHARED_NOTES_KEY = 'notes';
 
 export const useSharedNotes = () => {
     const [allNotes, setAllNotes] = useState<Note[]>([]);

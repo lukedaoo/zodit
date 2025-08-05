@@ -15,9 +15,9 @@ const HomePage: React.FC = () => {
         setActiveTab(tab);
     };
 
-    // const handleNavigateToNotes = () => {
-    //     setActiveTab('notes');
-    // };
+    const handleNavigateToNotes = () => {
+        setActiveTab('notes');
+    };
 
     const renderContent = () => {
         switch (activeTab) {
@@ -25,7 +25,7 @@ const HomePage: React.FC = () => {
                 if (!TodoComponent) {
                     return null;
                 }
-                return <TodoComponent />;
+                return <TodoComponent onNavigateToNotes={handleNavigateToNotes} />;
             case 'notes':
                 if (!NotesComponent) {
                     return null;

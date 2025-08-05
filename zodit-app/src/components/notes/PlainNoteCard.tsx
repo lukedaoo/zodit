@@ -48,15 +48,8 @@ export const PlainNoteCard = ({
                 </div>
             )}
 
-            {/* Note ID indicator (optional, can be removed if not needed) */}
-            <div className="absolute -top-1 right-2 min-w-8 h-4 px-1 bg-black/10 border border-black/20 rounded-sm shadow-sm flex items-center justify-center">
-                <span className="text-xs font-mono text-black/60 leading-none">
-                    {note.id.length > 6 ? `${note.id.slice(0, 6)}...` : note.id}
-                </span>
-            </div>
-
             {/* Note content */}
-            <div className="w-full h-full overflow-hidden">
+            <div className="w-full h-full overflow-auto">
                 <p className="text-sm font-medium whitespace-pre-wrap break-words leading-relaxed">
                     {note.text || 'Empty note...'}
                 </p>

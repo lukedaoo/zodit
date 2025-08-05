@@ -5,7 +5,7 @@ import { ArrangeButton } from './ArrangeButton';
 import { EmptyState } from './EmptyState';
 import { OverlappingDisplay } from './OverlappingDisplay';
 import { useNotes } from './useNotes';
-// import { useSharedNotes } from '../../hooks/useSharedNotes';
+// import { useSharedNotes } from '@hooks/useSharedNotes';
 // import { useEffect } from 'react';
 
 const Notes = () => {
@@ -35,7 +35,7 @@ const Notes = () => {
     // const { updateNotes: updateSharedNotes } = useSharedNotes();
     //
     // useEffect(() => {
-    //     updateSharedNotes(notes);
+    //     // updateSharedNotes(notes);
     // }, [notes]);
 
     return (

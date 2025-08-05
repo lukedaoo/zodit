@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { AddGroupButton } from './AddButtonComponents';
 import { DraggableGroupList } from './draggable/DraggableGroupList';
 import { useTodo } from './useTodo';
@@ -13,17 +13,16 @@ import { DndContext, DragOverlay, rectIntersection } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
 interface TodoProps {
-    // onNavigateToNotes?: () => void;
+    onNavigateToNotes?: () => void;
 }
 
+import { Pin } from 'lucide-react';
+import { ToolboxBar } from '@components/gadget/ToolBoxBar';
+import type { Toolbox } from '@components/gadget/ToolBoxBar';
+import { PinnedNotesTool } from './tools/PinnedNotesTools';
+import { useSharedNotes } from '@hooks/useSharedNotes';
 
-// import { Pin } from 'lucide-react';
-// import { ToolboxBar } from '@components/gadget/ToolBoxBar';
-// import type { Toolbox } from '@components/gadget/ToolBoxBar';
-// import { PinnedNotesTool } from './tools/PinnedNotesTools';
-// import { useSharedNotes } from '@hooks/useSharedNotes';
-
-const Todo: React.FC<TodoProps> = () => {
+const Todo: React.FC<TodoProps> = ({ onNavigateToNotes }) => {
     const {
         error,
         createTodo,
@@ -71,7 +70,7 @@ const Todo: React.FC<TodoProps> = () => {
         moveTaskBetweenGroups
     });
 
-    /* const { pinnedNotes } = useSharedNotes();
+    const { pinnedNotes } = useSharedNotes();
 
     const toolboxTools = useMemo((): Toolbox[] => {
         const tools: Toolbox[] = [];
@@ -96,36 +95,13 @@ const Todo: React.FC<TodoProps> = () => {
             });
         }
 
-        for (let i = 0; i < 5; i++) {
-            tools.push({
-                id: `tool-${i}`,
-                icon: Pin,
-                label: `Tool ${i}`,
-                available: true,
-                component: PinnedNotesTool,
-                componentProps: {
-                    notes: pinnedNotes.map(note => ({
-                        id: note.id,
-                        text: note.text,
-                        createdAt: new Date().toISOString(), // Notes don't have createdAt, using current time
-                        isPinned: note.isPinned
-                    })),
-                    onNavigateToNotes
-                }
-            });
-        }
-
         return tools;
-    }, [pinnedNotes, onNavigateToNotes]); */
+    }, [pinnedNotes, onNavigateToNotes]);
 
-    // const handleToolAction = (toolId: string, action: string, data?: any) => {
-    //     console.log(`Tool ${toolId} ${action}`, data);
-    //     // Handle tool actions here
-    // };
-    // <ToolboxBar
-    //     tools={toolboxTools}
-    //     onToolAction={handleToolAction}
-    // />
+    const handleToolAction = (toolId: string, action: string, data?: any) => {
+        console.log(`Tool ${toolId} ${action}`, data);
+        // Handle tool actions here
+    };
 
     const handleAddGroup = () => {
         if (isInitialized && !isLoading) {
@@ -145,6 +121,10 @@ const Todo: React.FC<TodoProps> = () => {
 
             {/* Toolbox Bar */}
 
+            <ToolboxBar
+                tools={toolboxTools}
+                onToolAction={handleToolAction}
+            />
             <div className="space-y-6">
                 <div className="max-w-3xl mx-auto space-y-8">
                     <GreetingNav

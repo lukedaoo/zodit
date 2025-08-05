@@ -1,9 +1,11 @@
-import { Pin, X, ExternalLink } from 'lucide-react';
+import { PlainNoteCard } from '@components/notes/PlainNoteCard';
+import type { Note } from '@components/notes/types';
+import { X, ExternalLink } from 'lucide-react';
 
 interface QuickNote {
     id: string;
     text: string;
-    createdAt: string;
+    createdAt?: string;
     isPinned?: boolean;
 }
 
@@ -28,7 +30,7 @@ export const PinnedNotesTool = ({
     };
 
     return (
-        <div className="p-4 min-w-80 max-w-96 max-h-96 overflow-y-auto">
+        <div className="p-4 max-w-96 max-h-96 overflow-y-auto">
             <div className="mb-3 flex items-center justify-between">
                 <h3 className="font-semibold text-sm" style={{ color: 'var(--color-foreground)' }}>
                     Pinned Notes ({pinnedNotes.length})
@@ -57,39 +59,7 @@ export const PinnedNotesTool = ({
             {pinnedNotes.length > 0 ? (
                 <div className="space-y-3">
                     {pinnedNotes.map((note) => (
-                        <div
-                            key={note.id}
-                            className="group cursor-pointer hover:opacity-80 transition-opacity border rounded-lg p-3"
-                            style={{
-                                backgroundColor: 'var(--color-muted)',
-                                borderColor: 'var(--color-border)',
-                            }}
-                            onClick={handleNavigateToNotes}
-                        >
-                            <div className="space-y-2">
-                                <div className="flex items-center gap-2">
-                                    <Pin className="w-3 h-3 text-amber-500 rotate-45" />
-                                    <span className="text-xs font-mono text-gray-500">
-                                        {note.id.length > 8 ? `${note.id.slice(0, 8)}...` : note.id}
-                                    </span>
-                                </div>
-
-                                <div className="text-sm font-medium line-clamp-2" style={{ color: 'var(--color-foreground)' }}>
-                                    {note.text || 'Empty note...'}
-                                </div>
-
-                                {note.text && note.text.length > 50 && (
-                                    <div className="text-xs" style={{ color: 'var(--color-muted-foreground)' }}>
-                                        {note.text.length} characters
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs flex items-center gap-1" style={{ color: 'var(--color-muted-foreground)' }}>
-                                <ExternalLink className="w-3 h-3" />
-                                Click to go to Notes tab
-                            </div>
-                        </div>
+                        <PlainNoteCard key={note.id} note={note as Note} />
                     ))}
                 </div>
             ) : (
