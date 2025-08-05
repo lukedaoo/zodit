@@ -7,8 +7,8 @@ import { useTodo } from './useTodo';
 import { useTodoDate } from './hooks/useTodoDate';
 import { useTodoDragAndDrop } from './hooks/useTodoDragAndDrop';
 import { useSharedNotes } from '@hooks/useSharedNotes';
-import { useTodoToolActions } from './hooks/useTodoToolActions';
-import { useTodoToolBar } from './hooks/useTodoToolBar';
+import { useTodoToolActions } from './tools/todo-tool/useTodoToolActions';
+import { useTodoToolBar } from './tools/useToolBar_Todo';
 
 import { GreetingNav } from '@components/gadget/GreetingNav';
 import { StatusMessage } from '@components/gadget/StatusMessage';

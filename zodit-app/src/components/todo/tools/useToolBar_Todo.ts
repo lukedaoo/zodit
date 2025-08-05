@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import type { Toolbox } from '@components/gadget/ToolBoxBar';
 import { Pin, CheckSquare } from 'lucide-react';
 import { PinnedNotesTool } from '../tools/PinnedNotesTools';
-import { TodoTool } from '../tools/TodoTool';
+import { TodoTool } from '../tools/todo-tool/TodoTool';
 import type { Group } from '../types';
 
 interface UseTodoToolsOptions {

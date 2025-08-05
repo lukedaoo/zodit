@@ -25,6 +25,7 @@
     /* alias */
     "baseUrl": ".", // Required for "paths" to work
     "paths": {
+      "@analytics/*": ["src/analytics/*"],
       "@common/*": ["src/common/*"],
       "@common/*": ["src/common/*"],
       "@components/*": ["src/components/*"],

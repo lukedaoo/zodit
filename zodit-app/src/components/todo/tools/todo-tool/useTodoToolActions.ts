@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
-import { TYPE_UTILS as tu, presets } from '../types';
-import type { Group } from '../types';
+import { TYPE_UTILS as tu, presets } from '@components/todo/types';
+import type { Group } from '@components/todo/types';
 
 interface TodoToolActionsOptions {
     groups: Group[];
