@@ -2,8 +2,8 @@ import React, { useCallback, useMemo } from 'react';
 import { AddGroupButton } from './AddButtonComponents';
 import { DraggableGroupList } from './draggable/DraggableGroupList';
 import { useTodo } from './useTodo';
-import { useTodoDate } from './draggable/hooks/useTodoDate';
-import { useTodoDragAndDrop } from './draggable/hooks/useTodoDragAndDrop';
+import { useTodoDate } from './hooks/useTodoDate';
+import { useTodoDragAndDrop } from './hooks/useTodoDragAndDrop';
 import { TodoDragOverlay } from './draggable/TodoDragOverlay';
 
 import { GreetingNav } from '@components/gadget/GreetingNav';
@@ -11,15 +11,17 @@ import { StatusMessage } from '@components/gadget/StatusMessage';
 
 import { DndContext, DragOverlay, rectIntersection } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { convert } from '@common/utils';
 
 interface TodoProps {
     onNavigateToNotes?: () => void;
 }
 
-import { Pin } from 'lucide-react';
+import { Pin, CheckSquare } from 'lucide-react';
 import { ToolboxBar } from '@components/gadget/ToolBoxBar';
 import type { Toolbox } from '@components/gadget/ToolBoxBar';
 import { PinnedNotesTool } from './tools/PinnedNotesTools';
+import { TodoTool } from './tools/TodoTool';
 import { useSharedNotes } from '@hooks/useSharedNotes';
 
 const Todo: React.FC<TodoProps> = ({ onNavigateToNotes }) => {
@@ -32,7 +34,9 @@ const Todo: React.FC<TodoProps> = ({ onNavigateToNotes }) => {
         addGroup,
         updateGroupName,
         updateGroupCollapseStatus,
+        bulkUpdateGroupCollapse,
         deleteGroup,
+        bulkDeleteGroups,
         addTask,
         updateTask,
         deleteTask,
@@ -40,6 +44,7 @@ const Todo: React.FC<TodoProps> = ({ onNavigateToNotes }) => {
         reorderGroup,
         moveTaskBetweenGroups,
         buildHeatMapFromTaskDates,
+        bulkToggleTasks,
         todos,
         isInitialized,
         isLoading
@@ -72,9 +77,45 @@ const Todo: React.FC<TodoProps> = ({ onNavigateToNotes }) => {
 
     const { pinnedNotes } = useSharedNotes();
 
+    // Todo tool handlers
+    const handleCollapseAllGroups = useCallback(() => {
+        bulkUpdateGroupCollapse(true);
+    }, [bulkUpdateGroupCollapse]);
+
+    const handleExpandAllGroups = useCallback(() => {
+        bulkUpdateGroupCollapse(false);
+    }, [bulkUpdateGroupCollapse]);
+
+    const handleDeleteAllGroups = useCallback(() => {
+        bulkDeleteGroups();
+    }, [groups, bulkDeleteGroups]);
+
+    const handleToggleAllTasks = useCallback(() => {
+        const totalTasks = groups.reduce((sum, group) => sum + group.tasks.length, 0);
+        const completedTasks = groups.reduce((sum, group) => sum + group.tasks.filter(task => task.completed).length, 0);
+        const shouldMarkIncomplete = completedTasks >= totalTasks / 2;
+        bulkToggleTasks(!shouldMarkIncomplete);
+    }, [groups, bulkToggleTasks]);
+
     const toolboxTools = useMemo((): Toolbox[] => {
         const tools: Toolbox[] = [];
-
+        if (groups.length > 0) {
+            tools.push({
+                id: 'todo-actions',
+                icon: CheckSquare,
+                label: 'Todo Actions',
+                count: groups.length,
+                available: true,
+                component: TodoTool,
+                componentProps: {
+                    groups,
+                    onCollapseAllGroups: handleCollapseAllGroups,
+                    onExpandAllGroups: handleExpandAllGroups,
+                    onDeleteAllGroups: handleDeleteAllGroups,
+                    onToggleAllTasks: handleToggleAllTasks,
+                },
+            });
+        }
         if (pinnedNotes.length > 0) {
             tools.push({
                 id: 'pinned-notes',
@@ -87,25 +128,41 @@ const Todo: React.FC<TodoProps> = ({ onNavigateToNotes }) => {
                     notes: pinnedNotes.map(note => ({
                         id: note.id,
                         text: note.text,
-                        createdAt: new Date().toISOString(), // Notes don't have createdAt, using current time
+                        createdAt: new Date().toISOString(),
                         isPinned: note.isPinned
                     })),
                     onNavigateToNotes
                 }
             });
         }
-
         return tools;
-    }, [pinnedNotes, onNavigateToNotes]);
+    }, [
+        groups, // Simplify dependency
+        pinnedNotes,
+        onNavigateToNotes,
+        handleCollapseAllGroups,
+        handleDeleteAllGroups
+    ]);
 
     const handleToolAction = (toolId: string, action: string, data?: any) => {
         console.log(`Tool ${toolId} ${action}`, data);
-        // Handle tool actions here
+        // Handle tool actions here if needed
+        // For example, you could track analytics or perform additional operations
     };
 
     const handleAddGroup = () => {
         if (isInitialized && !isLoading) {
-            addGroup();
+            const dateAsString = convert(currentDate);
+            let todo = getTodoByDate(dateAsString);
+            if (!todo) {
+                todo = createTodo(dateAsString);
+                if (todo) {
+                    loadTodo(todo);
+                }
+            }
+            if (todo) {
+                addGroup();
+            }
         }
     };
 
@@ -119,12 +176,14 @@ const Todo: React.FC<TodoProps> = ({ onNavigateToNotes }) => {
         <>
             <StatusMessage isLoading={isLoading} error={error} />
 
-            {/* Toolbox Bar */}
-
-            <ToolboxBar
-                tools={toolboxTools}
-                onToolAction={handleToolAction}
-            />
+            {/* Toolbox Bar - only show when there are tools available */}
+            {toolboxTools.length > 0 && (
+                <ToolboxBar
+                    key={`toolbox-${groups.length}-${groups.filter(g => !g.collapsed).length}`}
+                    tools={toolboxTools}
+                    onToolAction={handleToolAction}
+                />
+            )}
             <div className="space-y-6">
                 <div className="max-w-3xl mx-auto space-y-8">
                     <GreetingNav
@@ -147,6 +206,7 @@ const Todo: React.FC<TodoProps> = ({ onNavigateToNotes }) => {
                             strategy={verticalListSortingStrategy}
                         >
                             <DraggableGroupList
+                                key={`draggable-group-list-${groups.map(g => g.collapsed).join(',')}`}
                                 groups={groups}
                                 onUpdateGroupName={updateGroupName}
                                 onUpdateTask={updateTask}

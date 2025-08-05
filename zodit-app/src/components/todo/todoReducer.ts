@@ -7,7 +7,7 @@ export type State = {
 
 export type TodoAction =
     | { type: 'SET_TODOS'; payload: DisplayTodo[] }
-    | { type: 'SET_ACTIVE_TODO'; payload: string }
+    | { type: 'SET_ACTIVE_TODO'; payload: string | null }
     | { type: 'SYNC_GROUPS'; payload: { update: (groups: DisplayGroup[]) => DisplayGroup[] } }
     | { type: 'ADD_GROUP'; payload: { generateId: (prefix: string) => string } }
     | { type: 'UPDATE_GROUP_NAME'; payload: { id: string; title: string } }
@@ -18,7 +18,13 @@ export type TodoAction =
     | { type: 'DELETE_TASK'; payload: { groupId: string; taskId: string } }
     | { type: 'REORDER_TASKS'; payload: { groupId: string; newOrder: string[] } }
     | { type: 'REORDER_GROUPS'; payload: { newOrder: string[] } }
-    | { type: 'MOVE_TASK_BETWEEN_GROUPS'; payload: { sourceGroupId: string; targetGroupId: string; taskId: string; targetIndex: number } };
+    | { type: 'MOVE_TASK_BETWEEN_GROUPS'; payload: { sourceGroupId: string; targetGroupId: string; taskId: string; targetIndex: number } }
+
+    | { type: 'BULK_UPDATE_GROUP_COLLAPSE'; payload: { collapsed: boolean } }
+    | { type: 'BULK_DELETE_GROUPS' }
+    // Toggle task completeness in bulk for active todo
+    | { type: 'BULK_TOGGLE_TASKS'; payload: { completed: boolean } };
+
 
 export function todoReducer(state: State, action: TodoAction): State {
     switch (action.type) {
@@ -61,11 +67,24 @@ export function todoReducer(state: State, action: TodoAction): State {
                     update: g => g.map(gr => gr.id === action.payload.id ? { ...gr, collapsed: action.payload.collapsed } : gr)
                 }
             });
+        case 'BULK_UPDATE_GROUP_COLLAPSE':
+            return todoReducer(state, {
+                type: 'SYNC_GROUPS',
+                payload: {
+                    update: g => g.map(gr => ({ ...gr, collapsed: action.payload.collapsed }))
+                }
+            });
 
         case 'DELETE_GROUP':
             return todoReducer(state, {
                 type: 'SYNC_GROUPS',
                 payload: { update: g => g.filter(gr => gr.id !== action.payload.id) }
+            });
+
+        case 'BULK_DELETE_GROUPS':
+            return todoReducer(state, {
+                type: 'SYNC_GROUPS',
+                payload: { update: () => [] }
             });
 
         case 'ADD_TASK':
@@ -159,6 +178,17 @@ export function todoReducer(state: State, action: TodoAction): State {
                         }
                         return gr;
                     })
+                }
+            });
+
+        case 'BULK_TOGGLE_TASKS':
+            return todoReducer(state, {
+                type: 'SYNC_GROUPS',
+                payload: {
+                    update: g => g.map(gr => ({
+                        ...gr,
+                        tasks: gr.tasks.map(t => ({ ...t, completed: action.payload.completed }))
+                    }))
                 }
             });
 

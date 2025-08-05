@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import type { DragStartEvent, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
-import type { Group } from '../../types';
+import type { Group } from '../types';
 
 interface DragItem {
     id: string;

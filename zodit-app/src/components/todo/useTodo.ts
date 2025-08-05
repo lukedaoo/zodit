@@ -1,5 +1,5 @@
 import { useReducer, useCallback, useEffect, useMemo, useState } from 'react';
-import { getToday, convert, toDate, generateId } from '@common/utils';
+import { convert, toDate, generateId } from '@common/utils';
 import { useDataProvider } from '@context/DataProviderContext';
 import { ModelFactory } from '@database/models';
 import { toDisplayTodo, mergeTodos, toDataTodo } from './todoUtils';
@@ -45,7 +45,10 @@ export const useTodo = () => {
     const [error, setError] = useState<string | null>(null);
     const [isInitialized, setIsInitialized] = useState(false);
 
-    const groups = state.todos.find(t => t.id === state.activeTodoId)?.groups || [];
+    const groups = useMemo(() => {
+        const activeTodo = state.todos.find(t => t.id === state.activeTodoId);
+        return activeTodo?.groups || [];
+    }, [state.todos, state.activeTodoId]);
 
     // Debounced updater
     const debouncedUpdateTodo = useMemo(
@@ -76,21 +79,6 @@ export const useTodo = () => {
                 const allTodos = dataProvider.getTodos();
                 const displayTodos = mergeTodos(allTodos.map(toDisplayTodo));
                 dispatch({ type: 'SET_TODOS', payload: displayTodos });
-
-                const todayStr = getToday();
-                let targetTodo = displayTodos.find(t => t.date === todayStr);
-
-                if (!targetTodo) {
-                    const newTodo = dataProvider.createTodo(
-                        ModelFactory.createTodo({ date: todayStr })
-                    );
-                    targetTodo = toDisplayTodo(newTodo);
-                    dispatch({
-                        type: 'SET_TODOS',
-                        payload: mergeTodos([...displayTodos, targetTodo]),
-                    });
-                }
-
                 setError(null);
             } catch (err) {
                 setError(
@@ -130,8 +118,7 @@ export const useTodo = () => {
     );
 
     const loadTodo = useCallback((todo: DisplayTodo | undefined): void => {
-        if (!todo) return;
-        dispatch({ type: 'SET_ACTIVE_TODO', payload: todo.id });
+        dispatch({ type: 'SET_ACTIVE_TODO', payload: todo?.id ?? null });
     }, []);
 
     const buildHeatMapFromTaskDates = useCallback((month: string) => {
@@ -152,7 +139,9 @@ export const useTodo = () => {
     const addGroup = () => dispatch({ type: 'ADD_GROUP', payload: { generateId } });
     const updateGroupName = (id: string, title: string) => dispatch({ type: 'UPDATE_GROUP_NAME', payload: { id, title } });
     const updateGroupCollapseStatus = (id: string, collapsed: boolean) => dispatch({ type: 'UPDATE_GROUP_COLLAPSE', payload: { id, collapsed } });
+    const bulkUpdateGroupCollapse = (collapsed: boolean) => dispatch({ type: 'BULK_UPDATE_GROUP_COLLAPSE', payload: { collapsed } });
     const deleteGroup = (id: string) => dispatch({ type: 'DELETE_GROUP', payload: { id } });
+    const bulkDeleteGroups = () => dispatch({ type: 'BULK_DELETE_GROUPS' });
 
     // === Tasks ===
     const addTask = (groupId: string) =>
@@ -178,6 +167,8 @@ export const useTodo = () => {
         dispatch({ type: 'MOVE_TASK_BETWEEN_GROUPS', payload: { sourceGroupId, targetGroupId, taskId, targetIndex } });
         dataProvider.moveTaskBetweenGroups(state.activeTodoId!, taskId, targetGroupId, targetIndex);
     };
+    const bulkToggleTasks = (completed: boolean) => dispatch({ type: 'BULK_TOGGLE_TASKS', payload: { completed } });
+
 
     return {
         todos: state.todos,
@@ -189,13 +180,16 @@ export const useTodo = () => {
         addGroup,
         updateGroupName,
         updateGroupCollapseStatus,
+        bulkUpdateGroupCollapse,
         deleteGroup,
+        bulkDeleteGroups,
         addTask,
         updateTask,
         deleteTask,
         reorderTask,
         reorderGroup,
         moveTaskBetweenGroups,
+        bulkToggleTasks,
         action,
         error,
         isInitialized,

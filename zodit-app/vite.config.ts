@@ -17,6 +17,9 @@ export default defineConfig({
         },
         outDir: 'dist', // Output directory for all builds
     },
+    server: {
+        host: '0.0.0.0',
+    },
     resolve: {
         alias: {
             '@common': path.resolve(__dirname, 'src/common'),

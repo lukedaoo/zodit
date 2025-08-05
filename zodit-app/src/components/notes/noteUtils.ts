@@ -77,7 +77,7 @@ export const generateSampleNotes = (): DisplayNote[] => {
 
 export const arrangeNotesInGrid = (notes: DisplayNote[]): DisplayNote[] => {
     const GRID_SPACING_X = DEFAULT_DIMENSIONS.width + 28; // default width + 28 margin
-    const GRID_SPACING_Y = DEFAULT_DIMENSIONS.height + 20; // 160 height + 20 margin
+    const GRID_SPACING_Y = DEFAULT_DIMENSIONS.height + 20; // default height + 20 margin
     const NOTES_PER_ROW = 6;
     const START_X = 50;
     const START_Y = 50;

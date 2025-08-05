@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { now, convert } from '@common/utils';
-import type { Todo } from '../../types';
+import type { Todo } from '../types';
 
 interface UseTodoDateProps {
     getTodoByDate: (date: string) => Todo | undefined;
@@ -36,8 +36,7 @@ export const useTodoDate = ({
         if (existingTodo) {
             loadTodo(existingTodo);
         } else {
-            const todo = createTodo(dateAsString);
-            loadTodo(todo);
+            loadTodo(undefined);
         }
     }, [createTodo, getTodoByDate, loadTodo]);
 
