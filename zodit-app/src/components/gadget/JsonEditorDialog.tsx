@@ -19,7 +19,7 @@ interface JsonEditorDialogProps {
     // Editor configuration
     theme?: any[];
     restrictTypeSelection?: boolean;
-    lockNodes?: (props: { path: string[]; key: string; value: any }) => boolean;
+    lockNodes?: (props: { path: any; key: any; value: any }) => boolean;
 
     // Action buttons configuration
     actions?: Array<{
@@ -180,14 +180,14 @@ export const JsonEditorDialog: React.FC<JsonEditorDialogProps> = ({
                         <button
                             key={index}
                             onClick={() => action.onClick(jsonData)}
-                            className={getButtonClasses(action.variant)}
+                            className={getButtonClasses(action.variant, buttonSize)}
                         >
                             {action.label}
                         </button>
                     ))}
                     <button
                         onClick={onCancel}
-                        className="btn btn-md btn-outline"
+                        className={`btn btn-${buttonSize} btn-outline`}
                     >
                         Cancel
                     </button>

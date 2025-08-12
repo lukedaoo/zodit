@@ -1,7 +1,6 @@
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
-import { v4 as uuidv4 } from 'uuid';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -122,7 +121,8 @@ export const formatTime = (timeString?: string): string => {
     });
 };
 
-export const generateId = (prefix: string): string => {
-    const uuid = uuidv4().replace(/-/g, '');
-    return `${prefix}:id#${uuid.slice(0, 6)}`;
+export const generateId = (prefix = '') => {
+    const time = Date.now().toString(36);
+    const random = Math.random().toString(36).slice(2, 6);
+    return `${prefix}:id#${time}${random}`.slice(0, prefix.length + 10);
 };

@@ -1,8 +1,6 @@
 import { generateId } from '@common/utils';
-import type { Note as DisplayNote } from './types';
-import { NOTE_COLORS } from './types';
-
-import { Note } from '@database/models';
+import { type Note as DisplayNote, NOTE_COLORS } from './types';
+import { Note } from '@database/models/Note';
 
 export const DEFAULT_DIMENSIONS = {
     width: 220,
