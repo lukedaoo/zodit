@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { Group } from '@components/todo/types';
 import { TodoAnalytics } from './todoAnalytics';
 import { TodoGroupInfo } from './TodoGroupInfo';
-import { TodoActionButton } from './TodoActionButton';
+import { TodoActionButton } from '../common/TodoActionButton';
 import { X, FoldVertical, UnfoldVertical, Trash2, AlertTriangle, CheckCircle2, Filter } from 'lucide-react';
 
 interface TodoToolProps {
@@ -155,68 +155,68 @@ export const TodoTool: React.FC<TodoToolProps> = ({
     };
 
     return (
-        <div className="p-4 min-w-80 max-w-96">
-            <TodoToolHeader onClose={onClose} />
-            {!showDeleteConfirm ? (
-                <div className="space-y-3">
-                    <TodoGroupInfo groups={groups} />
-                    <div className="space-y-2">
-                        <TodoActionButton
-                            onClick={handleToggleTasks}
-                            disabled={!taskAnalytics.hasTasks}
-                            icon={CheckCircle2}
-                            title={toggleTasksConfig.title}
-                            subtitle={toggleTasksConfig.subtitle}
-                            tooltip={toggleTasksConfig.tooltip}
-                            variant="success"
-                        />
+            <div className="p-4 min-w-80 max-w-96">
+                <TodoToolHeader onClose={onClose} />
+                {!showDeleteConfirm ? (
+                    <div className="space-y-3">
+                        <TodoGroupInfo groups={groups} />
+                        <div className="space-y-2">
+                            <TodoActionButton
+                                onClick={handleToggleTasks}
+                                disabled={!taskAnalytics.hasTasks}
+                                icon={CheckCircle2}
+                                title={toggleTasksConfig.title}
+                                subtitle={toggleTasksConfig.subtitle}
+                                tooltip={toggleTasksConfig.tooltip}
+                                variant="success"
+                            />
 
-                        <TodoActionButton
-                            onClick={handleToggleCollapse}
-                            disabled={groups.length === 0}
-                            icon={shouldCollapseAll ? FoldVertical : UnfoldVertical}
-                            title={collapseConfig.title}
-                            subtitle={collapseConfig.subtitle}
-                            tooltip={collapseConfig.tooltip}
-                        />
+                            <TodoActionButton
+                                onClick={handleToggleCollapse}
+                                disabled={groups.length === 0}
+                                icon={shouldCollapseAll ? FoldVertical : UnfoldVertical}
+                                title={collapseConfig.title}
+                                subtitle={collapseConfig.subtitle}
+                                tooltip={collapseConfig.tooltip}
+                            />
 
-                        <TodoActionButton
-                            onClick={handleRemoveEmptyTasks}
-                            disabled={!emptyTasksInfo.hasEmptyTasks}
-                            icon={Filter}
-                            title="Remove Empty Tasks"
-                            subtitle={emptyTasksInfo.hasEmptyTasks
-                                ? `Remove ${emptyTasksInfo.emptyTasksCount} empty task${emptyTasksInfo.emptyTasksCount > 1 ? 's' : ''} of ${emptyTasksInfo.totalTasks} tasks`
-                                : 'No empty tasks to remove'
-                            }
-                            tooltip={emptyTasksInfo.hasEmptyTasks
-                                ? `Remove ${emptyTasksInfo.emptyTasksCount} empty task${emptyTasksInfo.emptyTasksCount > 1 ? 's' : ''}`
-                                : 'No empty tasks to remove'
-                            }
-                            variant="warning"
-                        />
+                            <TodoActionButton
+                                onClick={handleRemoveEmptyTasks}
+                                disabled={!emptyTasksInfo.hasEmptyTasks}
+                                icon={Filter}
+                                title="Remove Empty Tasks"
+                                subtitle={emptyTasksInfo.hasEmptyTasks
+                                    ? `Remove ${emptyTasksInfo.emptyTasksCount} empty task${emptyTasksInfo.emptyTasksCount > 1 ? 's' : ''} of ${emptyTasksInfo.totalTasks} tasks`
+                                    : 'No empty tasks to remove'
+                                }
+                                tooltip={emptyTasksInfo.hasEmptyTasks
+                                    ? `Remove ${emptyTasksInfo.emptyTasksCount} empty task${emptyTasksInfo.emptyTasksCount > 1 ? 's' : ''}`
+                                    : 'No empty tasks to remove'
+                                }
+                                variant="warning"
+                            />
 
-                        <TodoActionButton
-                            onClick={handleDeleteAll}
-                            disabled={groups.length === 0}
-                            icon={Trash2}
-                            title="Delete All Groups"
-                            subtitle={groups.length > 0
-                                ? `Permanently remove ${groups.length} groups and all tasks`
-                                : 'No groups to delete'
-                            }
-                            tooltip={groups.length > 0 ? `Delete all ${groups.length} groups` : 'No groups to delete'}
-                            variant="danger"
-                        />
+                            <TodoActionButton
+                                onClick={handleDeleteAll}
+                                disabled={groups.length === 0}
+                                icon={Trash2}
+                                title="Delete All Groups"
+                                subtitle={groups.length > 0
+                                    ? `Permanently remove ${groups.length} groups and all tasks`
+                                    : 'No groups to delete'
+                                }
+                                tooltip={groups.length > 0 ? `Delete all ${groups.length} groups` : 'No groups to delete'}
+                                variant="danger"
+                            />
+                        </div>
                     </div>
-                </div>
-            ) : (
-                <DeleteConfirmDialog
-                    groups={groups}
-                    onConfirm={confirmDeleteAll}
-                    onCancel={cancelDelete}
-                />
-            )}
-        </div>
+                ) : (
+                    <DeleteConfirmDialog
+                        groups={groups}
+                        onConfirm={confirmDeleteAll}
+                        onCancel={cancelDelete}
+                    />
+                )}
+            </div>
     );
 };

@@ -1,11 +1,13 @@
 import { useMemo } from 'react';
 import type { Toolbox } from '@components/gadget/ToolBoxBar';
-import { Pin, CheckSquare } from 'lucide-react';
+import { Pin, CheckSquare, ListTodo } from 'lucide-react';
 import { PinnedNotesTool } from '../tools/PinnedNotesTools';
 import { TodoTool } from '../tools/todo-tool/TodoTool';
-import type { Group } from '../types';
+import { TemplateTool } from '../tools/template-tool/TemplateTool';
+import type { Group, Todo } from '../types';
 
 interface UseTodoToolsOptions {
+    activeTodo?: Todo;
     groups: Group[];
     pinnedNotes: any[];
     onNavigateToNotes?: () => void;
@@ -19,6 +21,7 @@ interface UseTodoToolsOptions {
 }
 
 export const useTodoToolBar = ({
+    activeTodo: todo,
     groups,
     pinnedNotes,
     onNavigateToNotes,
@@ -26,6 +29,22 @@ export const useTodoToolBar = ({
 }: UseTodoToolsOptions): Toolbox[] => {
     return useMemo(() => {
         const tools: Toolbox[] = [];
+
+        tools.push({
+            id: 'todo-template-actions',
+            icon: ListTodo,
+            label: 'Template actions',
+            available: true,
+            component: TemplateTool,
+            componentProps: {
+                todo: todo,
+                onClose: () => { },
+                onCopyFromYesterday: () => { },
+                onCreateJsonFile: (jsonContent: any, action: 'overwrite' | 'merge') => {
+                    console.log(jsonContent, action);
+                }
+            }
+        });
 
         if (groups.length > 0) {
             tools.push({

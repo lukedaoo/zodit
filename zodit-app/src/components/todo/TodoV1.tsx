@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { AddGroupButton } from './AddButtonComponents';
 import { DraggableGroupList } from './draggable/DraggableGroupList';
 import { TodoDragOverlay } from './draggable/TodoDragOverlay';
@@ -54,15 +54,12 @@ const Todo: React.FC<TodoProps> = ({ onNavigateToNotes }) => {
     });
 
     const toolboxTools = useTodoToolBar({
+        activeTodo: todo.todos.find(t => t.id === todo.activeTodoId),
         groups: todo.groups,
         pinnedNotes,
         onNavigateToNotes,
         actions
     });
-
-    useEffect(() => {
-        console.log('isCollapsed', isCollapsed);
-    }, [isCollapsed]);
 
     const handleToolAction = (toolId: string, action: string, data?: unknown) => {
         console.log(`Tool ${toolId} ${action}`, data);

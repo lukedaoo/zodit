@@ -135,6 +135,24 @@ export const useTodo = () => {
         return heatMap;
     }, [state.todos, isInitialized]);
 
+    const getTodoById = useCallback(
+        (id: string) => {
+            const todo = state.todos.find(t => t.id === id);
+            setAction('get_todo_by_id');
+            return todo;
+        },
+        [state.todos]
+    );
+
+    const getActiveTodo = useCallback(
+        () => {
+            const todo = state.todos.find(t => t.id === state.activeTodoId);
+            setAction('get_active_todo');
+            return todo;
+        },
+        [state.todos]
+    );
+
     // === Groups ===
     const addGroup = () => dispatch({ type: 'ADD_GROUP', payload: { generateId } });
     const updateGroupName = (id: string, title: string) => dispatch({ type: 'UPDATE_GROUP_NAME', payload: { id, title } });
@@ -179,6 +197,8 @@ export const useTodo = () => {
         getTodoByDate,
         loadTodo,
         buildHeatMapFromTaskDates,
+        getTodoById,
+        getActiveTodo,
         addGroup,
         updateGroupName,
         updateGroupCollapseStatus,

@@ -15,13 +15,13 @@
 - Drag json file to create groups/tasks
 
 - limit number of toolbar items
-- collapse toolbar 
-- support mobile view for toolbar
+- (x) collapse toolbar 
+- (x) support mobile view for toolbar
 
-- clean up code
+- (x) clean up code
 
 
 - (x) use localStorage as database
 - create todo/group from template/json
 - centralize user settings
-
+- analytics data

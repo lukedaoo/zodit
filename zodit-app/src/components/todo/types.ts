@@ -7,6 +7,7 @@ export interface Todo {
     createdAt?: Date;
     updatedAt?: Date;
 }
+
 export interface Group {
     id: string;
     title: string;
@@ -82,8 +83,37 @@ const trim = (task: Task): Task => {
             .filter(([_, value]) => value !== null && value !== undefined)
         ) as Task;
 };
+
+
+function trimTodoMetadata(todo: Todo): Todo {
+    return {
+        id: todo.id,
+        date: todo.date,
+        title: todo.title,
+        groups: todo.groups.map(group => ({
+            id: group.id,
+            title: group.title,
+            priority: group.priority,
+            collapsed: group.collapsed,
+            tasks: group.tasks.map(task => ({
+                id: task.id,
+                title: task.title,
+                priority: task.priority,
+                completed: task.completed,
+                description: task.description,
+                startTime: task.startTime,
+                startDate: task.startDate,
+                endDate: task.endDate,
+                tags: task.tags,
+                customFields: task.customFields
+            }))
+        }))
+    };
+}
+
 export const TYPE_UTILS = {
     isEmpty,
+    trimTodoMetadata,
     trim,
 }
 
