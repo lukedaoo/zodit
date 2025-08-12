@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { githubDarkTheme, JsonEditor } from 'json-edit-react';
+import React, { useState } from 'react';
 import { TodoActionButton } from '../common/TodoActionButton';
 import { X, Copy, FileDown } from 'lucide-react';
 import { TYPE_UTILS as tu, type Todo } from '../../types';
+import { JsonEditorDialog } from '@components/gadget/JsonEditorDialog';
 
 interface TemplateToolProps {
-    todo: Todo | undefined;
+    todo?: Todo | undefined;
     onClose: () => void;
     onCopyFromYesterday?: () => void;
     onCreateJsonFile?: (jsonContent: any, action: 'overwrite' | 'merge') => void;
@@ -25,133 +25,6 @@ const TemplateToolHeader: React.FC<{ onClose: () => void }> = ({ onClose }) => (
         </button>
     </div>
 );
-
-const JsonEditorDialog: React.FC<{
-    todo: Todo | undefined;
-    onConfirm: (jsonContent: any, action: 'overwrite' | 'merge') => void;
-    onCancel: () => void;
-}> = ({ todo, onConfirm, onCancel }) => {
-    const [jsonData, setJsonData] = useState<any>(todo ? tu.trimTodoMetadata(todo) : {});
-
-    useEffect(() => {
-        console.log('JSON Data:', jsonData);
-    }, []);
-
-    const handleOverwrite = () => {
-        onConfirm(jsonData, 'overwrite');
-    };
-
-    const handleMerge = () => {
-        onConfirm(jsonData, 'merge');
-    };
-
-    const customGithubDarkTheme = [
-        githubDarkTheme,
-        {
-            input: {
-                color: '#ffffff',
-                backgroundColor: '#21262d',
-                border: '1px solid #30363d',
-                borderRadius: '3px',
-                padding: '2px 6px'
-            },
-            inputHighlight: '#264f78'
-        }
-    ]
-
-    const lockNodes = ({ path, key, value }: any) => {
-        if (value === undefined) return false;
-
-        if (key === 'id' || key === 'date') return true;
-
-        if (path.join('.') === 'date') return true;
-
-        return false;
-    };
-
-    return (
-        <div className="fixed inset-0 z-[100] flex items-start justify-center bg-black bg-opacity-50 pt-16">
-            <div
-                className="w-4/5 h-[calc(100vh-8rem)] max-w-4xl mx-4 rounded-lg shadow-2xl flex flex-col border"
-                style={{
-                    backgroundColor: 'var(--color-background)',
-                    borderColor: 'var(--color-border)'
-                }}
-            >
-                <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: 'var(--color-border)' }}>
-                    <div className="flex items-center gap-3">
-                        <FileDown className="w-5 h-5" style={{ color: 'var(--color-muted-foreground)' }} />
-                        <h2 className="text-lg font-semibold" style={{ color: 'var(--color-foreground)' }}>
-                            Edit your todo as JSON
-                        </h2>
-                    </div>
-                    <button
-                        onClick={onCancel}
-                        className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                        style={{ color: 'var(--color-muted-foreground)' }}
-                    >
-                        <X className="w-5 h-5" />
-                    </button>
-                </div>
-
-                <div className="flex-1 p-4 overflow-hidden">
-                    <div className="h-full flex flex-col space-y-4">
-                        <div className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>
-                            Edit your todo below. You can add, remove, or modify groups and tasks.
-                        </div>
-
-                        <div className="flex-1 min-h-0">
-                            <div
-                                className="border rounded-md p-4 h-full overflow-auto"
-                                style={{
-                                    backgroundColor: 'var(--color-muted)',
-                                    borderColor: 'var(--color-border)'
-                                }}
-                            >
-                                <JsonEditor
-                                    data={jsonData}
-                                    rootName="todo"
-                                    theme={customGithubDarkTheme}
-                                    setData={setJsonData}
-                                    restrictEdit={lockNodes}
-                                    restrictAdd={lockNodes}
-                                    restrictDelete={lockNodes}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Footer */}
-                <div className="p-4 border-t flex justify-end gap-3" style={{ borderColor: 'var(--color-border)' }}>
-                    <button
-                        onClick={handleMerge}
-                        className="px-4 py-2 text-sm rounded-md bg-blue-500 hover:bg-blue-600 text-white transition-colors"
-                    >
-                        Merge
-                    </button>
-                    <button
-                        onClick={handleOverwrite}
-                        className="px-4 py-2 text-sm rounded-md bg-orange-500 hover:bg-orange-600 text-white transition-colors"
-                    >
-                        Overwrite
-                    </button>
-                    <button
-                        onClick={onCancel}
-                        className="px-4 py-2 text-sm rounded-md border transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
-                        style={{
-                            backgroundColor: 'var(--color-background)',
-                            borderColor: 'var(--color-border)',
-                            color: 'var(--color-foreground)'
-                        }}
-                    >
-                        Cancel
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
-};
 
 export const TemplateTool: React.FC<TemplateToolProps> = ({
     todo,
@@ -181,6 +54,14 @@ export const TemplateTool: React.FC<TemplateToolProps> = ({
 
     const handleJsonCancel = () => {
         setShowJsonEditor(false);
+    };
+
+    // Custom lock nodes function for this use case
+    const customLockNodes = ({ path, key, value }: any) => {
+        if (value === undefined) return false;
+        if (key === 'id' || key === 'date') return true;
+        if (path.join('.') === 'date') return true;
+        return false;
     };
 
     const hasYesterdayTodos = true;
@@ -233,8 +114,24 @@ export const TemplateTool: React.FC<TemplateToolProps> = ({
 
             {showJsonEditor && (
                 <JsonEditorDialog
-                    todo={todo}
-                    onConfirm={handleJsonConfirm}
+                    initialData={todo ? tu.trimTodoMetadata(todo) : {}}
+                    title="Edit your todo as JSON"
+                    description="Edit your todo below. You can add, remove, or modify groups and tasks."
+                    rootName="todo"
+                    lockNodes={customLockNodes}
+                    buttonSize="lg"
+                    actions={[
+                        {
+                            label: "Merge",
+                            variant: "primary",
+                            onClick: (data) => handleJsonConfirm(data, 'merge')
+                        },
+                        {
+                            label: "Overwrite",
+                            variant: "danger",
+                            onClick: (data) => handleJsonConfirm(data, 'overwrite')
+                        }
+                    ]}
                     onCancel={handleJsonCancel}
                 />
             )}

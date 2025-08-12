@@ -21,7 +21,7 @@ interface UseTodoToolsOptions {
 }
 
 export const useTodoToolBar = ({
-    activeTodo: todo,
+    activeTodo,
     groups,
     pinnedNotes,
     onNavigateToNotes,
@@ -37,7 +37,7 @@ export const useTodoToolBar = ({
             available: true,
             component: TemplateTool,
             componentProps: {
-                todo: todo,
+                todo: activeTodo,
                 onClose: () => { },
                 onCopyFromYesterday: () => { },
                 onCreateJsonFile: (jsonContent: any, action: 'overwrite' | 'merge') => {

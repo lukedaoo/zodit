@@ -173,31 +173,26 @@ export const ToolboxBar = ({ tools = [], onToolAction }: ToolboxBarProps) => {
             {shouldUseSlider ? (
                 // Slider mode
                 <>
-                    <div className="fixed right-0 top-1/2 transform -translate-y-1/2 z-50">
-                        <button
-                            onClick={() => {
-                                setIsSliderOpen(!isSliderOpen);
-                                if (openTool) setOpenTool(null);
-                            }}
-                            className={`w-8 h-16 rounded-l-lg shadow-lg border-l border-t border-b flex items-center justify-center transition-all duration-300 ${isSliderOpen ? '-translate-x-80' : 'translate-x-0'}`}
-                            style={{
-                                backgroundColor: 'var(--color-background)',
-                                borderColor: 'var(--color-border)',
-                                color: 'var(--color-foreground)',
-                            }}
-                        >
-                            <ChevronRight className={`w-4 h-4 transition-transform duration-300 ${isSliderOpen ? '' : 'rotate-180'}`} />
-                            {
-                                // tools.some(tool => (tool.count || 0) > 0) && (
-                                //     <span className="absolute -top-1 -left-1 w-4 h-4 bg-amber-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
-                                //         {tools.reduce((sum, t) => sum + (t.count || 0), 0) > 9 ? '9+' : tools.reduce((sum, t) => sum + (t.count || 0), 0)}
-                                //     </span>
-                                // )
-                            }
-                        </button>
-                    </div>
+                    {!isSliderOpen && (
+                        <div className="fixed right-0 top-1/2 transform -translate-y-1/2 z-50">
+                            <button
+                                onClick={() => {
+                                    setIsSliderOpen(!isSliderOpen);
+                                    if (openTool) setOpenTool(null);
+                                }}
+                                className={`w-8 h-16 rounded-l-lg shadow-lg border-l border-t border-b flex items-center justify-center transition-all duration-300 ${isSliderOpen ? '-translate-x-80' : 'translate-x-0'}`}
+                                style={{
+                                    backgroundColor: 'var(--color-background)',
+                                    borderColor: 'var(--color-border)',
+                                    color: 'var(--color-foreground)',
+                                }}
+                            >
+                                <ChevronRight className="w-4 h-4 transition-transform duration-300 rotate-180" />
+                            </button>
+                        </div>
+                    )}
                     <div
-                        className={`fixed right-0 top-0 h-full w-80 shadow-lg border-l z-40 transition-transform duration-300 overflow-y-auto ${isSliderOpen ? 'translate-x-0' : 'translate-x-full'}`}
+                        className={`fixed right-0 top-0 h-full w-90 shadow-lg border-l z-40 transition-transform duration-300 overflow-y-auto ${isSliderOpen ? 'translate-x-0' : 'translate-x-full'}`}
                         style={{
                             backgroundColor: 'var(--color-background)',
                             borderColor: 'var(--color-border)',

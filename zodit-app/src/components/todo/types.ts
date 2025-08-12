@@ -19,6 +19,7 @@ export interface Group {
     updatedAt?: Date;
 }
 
+
 // update the metadatas if any
 export interface Task {
     id: string;
@@ -85,17 +86,32 @@ const trim = (task: Task): Task => {
 };
 
 
+function removeNullish<T>(obj: T): T {
+    if (Array.isArray(obj)) {
+        return obj
+            .map(item => removeNullish(item))
+            .filter(item => item !== undefined && item !== null) as T;
+    } else if (obj && typeof obj === "object") {
+        return Object.fromEntries(
+            Object.entries(obj)
+                .filter(([_, value]) => value !== null && value !== undefined)
+                .map(([key, value]) => [key, removeNullish(value)])
+        ) as T;
+    }
+    return obj;
+}
+
 function trimTodoMetadata(todo: Todo): Todo {
-    return {
+    const trimmed: Todo = {
         id: todo.id,
         date: todo.date,
         title: todo.title,
-        groups: todo.groups.map(group => ({
+        groups: todo.groups?.map(group => ({
             id: group.id,
             title: group.title,
             priority: group.priority,
             collapsed: group.collapsed,
-            tasks: group.tasks.map(task => ({
+            tasks: group.tasks?.map(task => ({
                 id: task.id,
                 title: task.title,
                 priority: task.priority,
@@ -106,9 +122,11 @@ function trimTodoMetadata(todo: Todo): Todo {
                 endDate: task.endDate,
                 tags: task.tags,
                 customFields: task.customFields
-            }))
-        }))
+            })) || []
+        })) || []
     };
+
+    return removeNullish(trimmed);
 }
 
 export const TYPE_UTILS = {
