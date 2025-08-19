@@ -2,7 +2,7 @@ import { useReducer, useCallback, useEffect, useMemo, useState } from 'react';
 import { convert, toDate, generateId } from '@common/utils';
 import { useDataProvider } from '@context/DataProviderContext';
 import { ModelFactory } from '@database/models';
-import { toDisplayTodo, mergeTodos, toDataTodo } from './todoUtils';
+import { toDisplayTodo, mergeTodos, toDataTodo, merge2Todo } from './todoUtils';
 import { todoReducer } from './todoReducer';
 import type { State, TodoAction as Action } from './todoReducer';
 import type { Todo as DisplayTodo } from './types';
@@ -153,6 +153,18 @@ export const useTodo = () => {
         [state.todos]
     );
 
+    const copyTodoAndLoad = useCallback(
+        (date: string) => {
+            const todo = state.todos.find(t => t.date === date);
+            const activeTodo = state.todos.find(t => t.id === state.activeTodoId);
+            setAction('copy_todo_and_load');
+            const targetTodo = merge2Todo(activeTodo!, todo!);
+            console.log(targetTodo);
+            loadTodo(targetTodo);
+        },
+        [state.todos]
+    )
+
     // === Groups ===
     const addGroup = () => dispatch({ type: 'ADD_GROUP', payload: { generateId } });
     const updateGroupName = (id: string, title: string) => dispatch({ type: 'UPDATE_GROUP_NAME', payload: { id, title } });
@@ -199,6 +211,7 @@ export const useTodo = () => {
         buildHeatMapFromTaskDates,
         getTodoById,
         getActiveTodo,
+        copyTodoAndLoad,
         addGroup,
         updateGroupName,
         updateGroupCollapseStatus,

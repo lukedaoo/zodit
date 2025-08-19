@@ -36,6 +36,10 @@ export const getToday = (): string => {
     return dayjs().format('YYYY-MM-DD');
 }
 
+export const getYesterday = (): string => {
+    return dayjs().subtract(1, 'day').format('YYYY-MM-DD');
+}
+
 export const now = (): Date => {
     return dayjs().toDate();
 }

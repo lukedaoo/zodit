@@ -77,3 +77,15 @@ export const mergeTodos = (todos: DisplayTodo[]): DisplayTodo[] => {
     return Array.from(dateMap.values());
 };
 
+// merge second todo into first
+export const merge2Todo = (first: DisplayTodo, second: DisplayTodo): DisplayTodo => {
+    return {
+        ...first,
+        date: first.date,
+        groups: [
+            ...first.groups,
+            ...second.groups.filter(g => !first.groups.some(eg => eg.id === g.id))
+        ]
+    };
+}
+

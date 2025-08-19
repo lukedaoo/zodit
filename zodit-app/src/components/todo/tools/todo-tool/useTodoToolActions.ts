@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { getYesterday } from '@common/utils';
 import { TYPE_UTILS as tu, presets } from '@components/todo/types';
 import type { Group } from '@components/todo/types';
 
@@ -9,6 +10,8 @@ interface TodoToolActionsOptions {
     bulkDeleteGroups: () => void;
     bulkDeleteTasks: (task: any) => void;
     bulkToggleTasks: (complete: boolean) => void;
+
+    copyTodoAndLoad: (date: string) => void;
 }
 
 export const useTodoToolActions = ({
@@ -17,7 +20,8 @@ export const useTodoToolActions = ({
     bulkUpdateGroupCollapse,
     bulkDeleteGroups,
     bulkDeleteTasks,
-    bulkToggleTasks
+    bulkToggleTasks,
+    copyTodoAndLoad
 }: TodoToolActionsOptions) => {
     const collapseAll = useCallback(() => {
         bulkUpdateGroupCollapse(true);
@@ -41,5 +45,13 @@ export const useTodoToolActions = ({
         bulkDeleteTasks((task: any) => tu.isEmpty(task, presets.minimal));
     }, [groups]);
 
-    return { collapseAll, expandAll, deleteAll, toggleAllTasks, deleteEmptyTasks };
+    const copyTodoFromYesterday = useCallback(() => {
+        const yesterday = getYesterday();
+        copyTodoAndLoad(yesterday);
+    }, [copyTodoAndLoad]);
+
+    return {
+        collapseAll, expandAll, deleteAll,
+        toggleAllTasks, deleteEmptyTasks, copyTodoFromYesterday
+    };
 };
