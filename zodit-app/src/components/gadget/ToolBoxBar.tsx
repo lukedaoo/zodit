@@ -235,8 +235,8 @@ export const ToolboxBar = ({ tools = [], onToolAction }: ToolboxBarProps) => {
                 </>
             ) : (
                 // Toolbar mode
-                <div className="fixed top-20 right-0 left-0 z-40 pb-4">
-                    <div className="flex justify-end pr-6">
+                <div className="fixed top-20 right-0 z-40 pb-4">
+                    <div className="flex justify-end pr-6 w-full">
                         <div
                             className="relative flex items-center justify-center px-3 py-2 rounded-lg shadow-lg border max-w-full overflow-visible"
                             style={{

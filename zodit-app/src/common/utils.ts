@@ -128,5 +128,5 @@ export const formatTime = (timeString?: string): string => {
 export const generateId = (prefix = '') => {
     const time = Date.now().toString(36);
     const random = Math.random().toString(36).slice(2, 6);
-    return `${prefix}:id#${time}${random}`.slice(0, prefix.length + 10);
+    return `${prefix}:id#${time}${random}`.slice(0, prefix.length + 16);
 };
