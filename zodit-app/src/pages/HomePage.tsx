@@ -9,7 +9,7 @@ const HomePage: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'dashboard' | 'todo' | 'notes'>('dashboard');
 
     const TodoComponent = version === 'v1' ? TodoV1 : TodoV2;
-    const NotesComponent = version === 'v1' ? NotesV1 : null;
+    const NotesComponent = NotesV1;
 
     const handleNavigation = (tab: 'dashboard' | 'todo' | 'notes') => {
         setActiveTab(tab);
