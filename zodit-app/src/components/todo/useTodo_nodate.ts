@@ -1,11 +1,10 @@
 import { useReducer, useCallback, useEffect, useMemo, useState } from 'react';
-import { convert, toDate, generateId } from '@common/utils';
+import { convert, generateId } from '@common/utils';
 import { useDataProvider } from '@context/DataProviderContext';
 import { ModelFactory } from '@database/models';
-import { toDisplayTodo, mergeTodos, toDataTodo, merge2Todo } from './todoUtils';
+import { toDisplayTodo, toDataTodo } from './todoUtils';
 import { todoReducer } from './todoReducer';
 import type { State, TodoAction as Action } from './todoReducer';
-import type { Todo as DisplayTodo } from './types';
 
 import { useUserSettings } from '@hooks/useUserSettings';
 import { DEBOUNCE_TIME } from '@user-prefs/const';
@@ -46,24 +45,22 @@ export const useTodo = () => {
     const [isInitialized, setIsInitialized] = useState(false);
 
     const groups = useMemo(() => {
-        const activeTodo = state.todos.find(t => t.id === state.activeTodoId);
-        return activeTodo?.groups || [];
-    }, [state.todos, state.activeTodoId]);
+        if (state.todos[0]?.groups) return state.todos[0].groups;
+        return [];
+    }, [state.todos]);
 
     // Debounced updater
     const debouncedUpdateTodo = useMemo(
-        () => debounce((todoId: string, todoData: any) => {
-            dataProvider.updateTodo(todoId, todoData);
+        () => debounce((activeTodoId: string, todoData: any) => {
+            dataProvider.updateTodo(activeTodoId, todoData);
         }, delay || 500),
         [dataProvider]
     );
 
-    // Auto-sync to data provider when todos change
+    // Auto-sync to data provider when todoechanges
     useEffect(() => {
-        if (!state.activeTodoId) return;
-        const activeTodo = state.todos.find(t => t.id === state.activeTodoId);
-        if (activeTodo) {
-            debouncedUpdateTodo(state.activeTodoId, toDataTodo(activeTodo));
+        if (state.todos && state.activeTodoId) {
+            debouncedUpdateTodo(state.activeTodoId, toDataTodo(state.todos[0]));
         }
     }, [state.todos, state.activeTodoId, debouncedUpdateTodo]);
 
@@ -76,13 +73,24 @@ export const useTodo = () => {
                     dataProvider.connect();
                 }
 
+                // Try to get existing todo or create a new one
+                let existingTodo = null;
                 const allTodos = dataProvider.getTodos();
-                const displayTodos = mergeTodos(allTodos.map(toDisplayTodo));
-                dispatch({ type: 'SET_TODOS', payload: displayTodos });
+
+                if (allTodos.length > 0) {
+                    // Use the first todo if exists
+                    existingTodo = allTodos[0];
+                } else {
+                    // Create a new todo if none exists
+                    existingTodo = dataProvider.createTodo(ModelFactory.createTodo({ date: "" }));
+                }
+                const displayTodo = toDisplayTodo(existingTodo);
+                dispatch({ type: 'SET_TODOS', payload: [displayTodo] });
+                loadTodo(displayTodo.id);
                 setError(null);
             } catch (err) {
                 setError(
-                    'Failed to load todos: ' +
+                    'Failed to load todo: ' +
                     (err instanceof Error ? err.message : 'Unknown error')
                 );
             } finally {
@@ -97,73 +105,10 @@ export const useTodo = () => {
     }, [dataProvider, isInitialized]);
 
     // === Public API ===
-    const createTodo = (date: string): DisplayTodo | undefined => {
-        try {
-            setIsLoading(true);
-            if (!dataProvider.isConnected()) dataProvider.connect();
-            const newTodo = toDisplayTodo(dataProvider.createTodo(ModelFactory.createTodo({ date })));
-            dispatch({ type: 'SET_TODOS', payload: [...state.todos, newTodo] });
-            setAction('create_todo');
-            return newTodo;
-        } catch (err) {
-            setError(`Failed to create todo: ${err instanceof Error ? err.message : 'Unknown error'}`);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const getTodoByDate = useCallback(
-        (date: string) => state.todos.find(t => t.date === date),
-        [state.todos]
-    );
-
-    const loadTodo = useCallback((todo: DisplayTodo | undefined): void => {
-        dispatch({ type: 'SET_ACTIVE_TODO', payload: todo?.id ?? null });
-    }, []);
-
-    const buildHeatMapFromTaskDates = useCallback((month: string) => {
-        if (!isInitialized) return {};
-        const [year, monthNum] = month.split('-').map(Number);
-        const heatMap: Record<string, number> = {};
-        state.todos.forEach(todo => {
-            if (toDate(todo.date).getFullYear() === year && toDate(todo.date).getMonth() + 1 === monthNum) {
-                const count = todo.groups.reduce((sum, g) => sum + g.tasks.length, 0);
-                if (count > 0) heatMap[todo.date] = (heatMap[todo.date] || 0) + count;
-            }
-        });
-        setAction('load_heatmap');
-        return heatMap;
-    }, [state.todos, isInitialized]);
-
-    const getTodoById = useCallback(
-        (id: string) => {
-            const todo = state.todos.find(t => t.id === id);
-            setAction('get_todo_by_id');
-            return todo;
-        },
-        [state.todos]
-    );
-
-    const getActiveTodo = useCallback(
-        () => {
-            const todo = state.todos.find(t => t.id === state.activeTodoId);
-            setAction('get_active_todo');
-            return todo;
-        },
-        [state.todos]
-    );
-
-    const copyTodoAndLoad = useCallback(
-        (date: string) => {
-            const todo = state.todos.find(t => t.date === date);
-            const activeTodo = state.todos.find(t => t.id === state.activeTodoId);
-            setAction('copy_todo_and_load');
-            const targetTodo = merge2Todo(activeTodo!, todo!);
-            console.log(targetTodo);
-            loadTodo(targetTodo);
-        },
-        [state.todos]
-    )
+    const getTodo = useCallback(() => {
+        setAction('get_todo');
+        return state.todos[0];
+    }, [state.todos]);
 
     // === Groups ===
     const addGroup = () => dispatch({ type: 'ADD_GROUP', payload: { generateId } });
@@ -172,6 +117,21 @@ export const useTodo = () => {
     const bulkUpdateGroupCollapse = (collapsed: boolean) => dispatch({ type: 'BULK_UPDATE_GROUP_COLLAPSE', payload: { collapsed } });
     const deleteGroup = (id: string) => dispatch({ type: 'DELETE_GROUP', payload: { id } });
     const bulkDeleteGroups = () => dispatch({ type: 'BULK_DELETE_GROUPS' });
+
+    const copyTodoAndLoad = useCallback(
+        () => {
+            dispatch({ type: 'SET_ACTIVE_TODO', payload: state.todos[0].id ?? null });
+        },
+        [state.todos]
+    )
+
+    const loadTodo = useCallback(
+        (todoId: string) => {
+            dispatch({ type: 'SET_ACTIVE_TODO', payload: todoId });
+        },
+        [state.todos]
+    )
+
 
     // === Tasks ===
     const addTask = (groupId: string) =>
@@ -182,11 +142,15 @@ export const useTodo = () => {
         dispatch({ type: 'DELETE_TASK', payload: { groupId, taskId } });
     const reorderTask = (groupId: string, newOrder: string[]) => {
         dispatch({ type: 'REORDER_TASKS', payload: { groupId, newOrder } });
-        dataProvider.reorderTasksInGroup(state.activeTodoId!, groupId, newOrder);
+        if (state.activeTodoId) {
+            dataProvider.reorderTasksInGroup(state.activeTodoId, groupId, newOrder);
+        }
     };
     const reorderGroup = (newOrder: string[]) => {
         dispatch({ type: 'REORDER_GROUPS', payload: { newOrder } });
-        dataProvider.reorderGroupsInTodo(state.activeTodoId!, newOrder);
+        if (state.activeTodoId) {
+            dataProvider.reorderGroupsInTodo(state.activeTodoId, newOrder);
+        }
     };
     const moveTaskBetweenGroups = (sourceGroupId: string, targetGroupId: string, taskId: string, targetTaskId: string | null) => {
         let targetIndex = groups.length;
@@ -195,7 +159,9 @@ export const useTodo = () => {
             if (idx !== -1) targetIndex = idx;
         }
         dispatch({ type: 'MOVE_TASK_BETWEEN_GROUPS', payload: { sourceGroupId, targetGroupId, taskId, targetIndex } });
-        dataProvider.moveTaskBetweenGroups(state.activeTodoId!, taskId, targetGroupId, targetIndex);
+        if (state.activeTodoId) {
+            dataProvider.moveTaskBetweenGroups(state.activeTodoId, taskId, targetGroupId, targetIndex);
+        }
     };
     const bulkToggleTasks = (completed: boolean) => dispatch({ type: 'BULK_TOGGLE_TASKS', payload: { completed } });
     const bulkDeleteTasksByIds = (ids: string[]) => dispatch({ type: 'BULK_DELETE_TASKS', payload: { taskIds: ids } });
@@ -203,21 +169,17 @@ export const useTodo = () => {
 
     return {
         todos: state.todos,
+        todo: state.todos[0],
         activeTodoId: state.activeTodoId,
         groups,
-        createTodo,
-        getTodoByDate,
-        loadTodo,
-        buildHeatMapFromTaskDates,
-        getTodoById,
-        getActiveTodo,
-        copyTodoAndLoad,
+        getTodo,
         addGroup,
         updateGroupName,
         updateGroupCollapseStatus,
         bulkUpdateGroupCollapse,
         deleteGroup,
         bulkDeleteGroups,
+        copyTodoAndLoad,
         addTask,
         updateTask,
         deleteTask,
@@ -230,6 +192,6 @@ export const useTodo = () => {
         action,
         error,
         isInitialized,
-        isLoading
+        isLoading,
     };
 };

@@ -17,6 +17,8 @@ interface UseTodoToolsOptions {
         deleteAll: () => void;
         deleteEmptyTasks: () => void;
         toggleAllTasks: (shouldMarkIncomplete: boolean) => void;
+
+        copyTodoFromYesterday: () => void;
     };
 }
 
@@ -39,7 +41,7 @@ export const useTodoToolBar = ({
             componentProps: {
                 todo: activeTodo,
                 onClose: () => { },
-                onCopyFromYesterday: () => { },
+                onCopyFromYesterday: actions.copyTodoFromYesterday,
                 onCreateJsonFile: (jsonContent: any, action: 'overwrite' | 'merge') => {
                     console.log(jsonContent, action);
                 }

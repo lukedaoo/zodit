@@ -36,6 +36,10 @@ export const getToday = (): string => {
     return dayjs().format('YYYY-MM-DD');
 }
 
+export const getYesterday = (): string => {
+    return dayjs().subtract(1, 'day').format('YYYY-MM-DD');
+}
+
 export const now = (): Date => {
     return dayjs().toDate();
 }
@@ -124,5 +128,5 @@ export const formatTime = (timeString?: string): string => {
 export const generateId = (prefix = '') => {
     const time = Date.now().toString(36);
     const random = Math.random().toString(36).slice(2, 6);
-    return `${prefix}:id#${time}${random}`.slice(0, prefix.length + 10);
+    return `${prefix}:id#${time}${random}`.slice(0, prefix.length + 16);
 };

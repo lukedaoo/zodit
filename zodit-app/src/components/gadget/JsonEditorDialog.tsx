@@ -120,7 +120,7 @@ export const JsonEditorDialog: React.FC<JsonEditorDialogProps> = ({
             onClick={handleBackdropClick}
         >
             <div
-                className={`w-${width} h-[${height}] max-w-${maxWidth} mx-4 rounded-lg shadow-2xl flex flex-col border`}
+                className={`w-${width} h-[${height}] max-w-${maxWidth} max-h-[90vh]  mx-4 rounded-lg shadow-2xl flex flex-col border`}
                 style={{
                     backgroundColor: 'var(--color-background)',
                     borderColor: 'var(--color-border)'
@@ -159,16 +159,25 @@ export const JsonEditorDialog: React.FC<JsonEditorDialogProps> = ({
                                     borderColor: 'var(--color-border)'
                                 }}
                             >
-                                <JsonEditor
-                                    data={jsonData}
-                                    rootName={rootName}
-                                    theme={customGithubDarkTheme}
-                                    restrictTypeSelection={restrictTypeSelection}
-                                    setData={setJsonData}
-                                    restrictEdit={lockNodes || defaultLockNodes}
-                                    restrictAdd={lockNodes || defaultLockNodes}
-                                    restrictDelete={lockNodes || defaultLockNodes}
-                                />
+                                <div
+                                    className="p-4"
+                                    style={{
+                                        maxHeight: '500px',
+                                        overflowY: 'auto',
+                                        overflowX: 'auto'
+                                    }}
+                                >
+                                    <JsonEditor
+                                        data={jsonData}
+                                        rootName={rootName}
+                                        theme={customGithubDarkTheme}
+                                        restrictTypeSelection={restrictTypeSelection}
+                                        setData={setJsonData}
+                                        restrictEdit={lockNodes || defaultLockNodes}
+                                        restrictAdd={lockNodes || defaultLockNodes}
+                                        restrictDelete={lockNodes || defaultLockNodes}
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>

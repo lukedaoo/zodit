@@ -1,4 +1,4 @@
-import { now, getToday } from '@common/utils';
+import { now, getToday, getYesterday } from '@common/utils';
 interface Alias {
     id: string;
     alias: string;
@@ -15,6 +15,7 @@ export const DEFAULT_ALIASES: Alias[] = [
     { id: '5', alias: 'eod', value: 'EOD', type: 'time', description: 'End of day' },
     { id: '6', alias: 'midnight', value: '00:00', type: 'time', description: 'Midnight' },
     { id: '7', alias: 'noon', value: '12:00', type: 'time', description: 'Noon' },
+    { id: '8', alias: 'yesterday', value: 'YESTERDAY', type: 'date', description: 'Yesterday date' },
 ];
 
 export const resolveAlias = (input: string, aliases: Alias[] = DEFAULT_ALIASES): { alias: string; resolved: any; } | string | undefined => {
@@ -47,6 +48,10 @@ export const resolveAlias = (input: string, aliases: Alias[] = DEFAULT_ALIASES):
         case 'EOD': {
             const today = getToday();
             resolved = { at: '23:59', date: today };
+            break;
+        }
+        case 'YESTERDAY': {
+            resolved = getYesterday();
             break;
         }
         default:
