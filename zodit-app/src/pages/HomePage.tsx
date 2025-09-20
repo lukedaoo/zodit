@@ -6,7 +6,7 @@ import { ScrollButton } from "@components/gadget/ScrollButton";
 
 const HomePage: React.FC = () => {
     const [version, _] = useState<'v1' | 'v2'>('v2');
-    const [activeTab, setActiveTab] = useState<'dashboard' | 'todo' | 'notes'>('dashboard');
+    const [activeTab, setActiveTab] = useState<'dashboard' | 'todo' | 'notes'>('todo');
 
     const TodoComponent = version === 'v1' ? TodoV1 : TodoV2;
     const NotesComponent = NotesV1;
