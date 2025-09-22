@@ -51,8 +51,8 @@ const Todo: React.FC<TodoProps> = ({ onNavigateToNotes }) => {
         bulkDeleteGroups: todo.bulkDeleteGroups,
         bulkDeleteTasks: todo.bulkDeleteTasksWithFilter,
         bulkToggleTasks: todo.bulkToggleTasks,
-        copyTodoAndLoad: todo.copyTodoAndLoad
-
+        copyTodoAndLoad: todo.copyTodoAndLoad,
+        importTodoData: todo.importTodoData
     });
 
     const toolboxTools = useTodoToolBar({

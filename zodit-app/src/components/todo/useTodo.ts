@@ -201,6 +201,25 @@ export const useTodo = () => {
     const bulkDeleteTasksByIds = (ids: string[]) => dispatch({ type: 'BULK_DELETE_TASKS', payload: { taskIds: ids } });
     const bulkDeleteTasksWithFilter = (filter: (task: any) => boolean) => dispatch({ type: 'BULK_DELETE_TASKS', payload: { filter } });
 
+    const importTodoData = useCallback((importData: any, mergeMode: boolean = false) => {
+        try {
+            if (mergeMode) {
+                // Merge imported todos with existing ones
+                // dispatch({ type: 'MERGE_TODOS_V2', payload: { importedTodos: importData.todos } });
+            } else {
+                // Replace existing todos with imported ones
+                dispatch({ type: 'SET_TODOS', payload: importData.todos });
+                if (importData.todos.length > 0) {
+                    loadTodo(importData.todos[0].id);
+                }
+            }
+        } catch (error) {
+            setError('Failed to import todo data');
+            throw error;
+        }
+    }, []);
+
+
     return {
         todos: state.todos,
         activeTodoId: state.activeTodoId,
@@ -230,6 +249,7 @@ export const useTodo = () => {
         action,
         error,
         isInitialized,
-        isLoading
+        isLoading,
+        importTodoData,
     };
 };

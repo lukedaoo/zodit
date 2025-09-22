@@ -60,6 +60,18 @@ export const TemplateTool: React.FC<TemplateToolProps> = ({
         setShowJsonEditor(false);
     };
 
+    const handleDownloadData = () => {
+        if (onDownloadData) {
+            onDownloadData();
+        }
+    };
+
+    const handleUploadData = () => {
+        if (onUploadData) {
+            onUploadData();
+        }
+    };
+
     // Custom lock nodes function for this use case
     const customLockNodes = ({ path, key, value }: any) => {
         if (value === undefined) return false;
@@ -114,7 +126,7 @@ export const TemplateTool: React.FC<TemplateToolProps> = ({
                         */}
 
                         <TodoActionButton
-                            onClick={onDownloadData}
+                            onClick={handleDownloadData}
                             disabled={false}
                             icon={Download}
                             title="Export data"
@@ -127,7 +139,7 @@ export const TemplateTool: React.FC<TemplateToolProps> = ({
                             variant="default"
                         />
                         <TodoActionButton
-                            onClick={onUploadData}
+                            onClick={handleUploadData}
                             disabled={false}
                             icon={Upload}
                             title="Import data"
