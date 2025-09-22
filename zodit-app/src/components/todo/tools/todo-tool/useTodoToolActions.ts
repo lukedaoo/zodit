@@ -60,12 +60,18 @@ export const useTodoToolActions = ({
                 const currentTodos = JSON.parse(localStorage.getItem('todos') || '[]');
 
                 let newTodos;
-                if (mergeMode && currentTodos.length > 0) {
+
+                if (!mergeMode || currentTodos.length === 0) {
+                    // Overwrite mode - replace with first imported todo only
+                    newTodos = importData.todos.length > 0 ? [importData.todos[0]] : [];
+                } else {
                     // Merge into current todo (keep only 1 todo)
                     const currentTodo = currentTodos[0];
                     const importedTodo = importData.todos[0]; // Take first imported todo
 
-                    if (importedTodo) {
+                    if (!importedTodo) {
+                        newTodos = currentTodos; // No change if no imported todo
+                    } else {
                         // Merge groups from imported todo into current todo
                         const existingGroupIds = new Set(currentTodo.groups?.map((g: any) => g.id) || []);
                         const newGroups = importedTodo.groups?.filter((group: any) => !existingGroupIds.has(group.id)) || [];
@@ -93,23 +99,18 @@ export const useTodoToolActions = ({
                         };
 
                         newTodos = [mergedTodo]; // Keep only 1 todo
-                    } else {
-                        newTodos = currentTodos; // No change if no imported todo
                     }
-                } else {
-                    // Overwrite mode - replace with first imported todo only
-                    newTodos = importData.todos.length > 0 ? [importData.todos[0]] : [];
                 }
 
                 localStorage.setItem('todos', JSON.stringify(newTodos));
             }
 
-            if (importData.pinnedNotes) {
+            if (importData.notes) {
                 const currentNotes = JSON.parse(localStorage.getItem('notes') || '[]');
                 const newNotes = mergeMode
-                    ? [...currentNotes, ...importData.pinnedNotes.filter((note: any) =>
+                    ? [...currentNotes, ...importData.notes.filter((note: any) =>
                         !currentNotes.find((existing: any) => existing.id === note.id))]
-                    : importData.pinnedNotes;
+                    : importData.notes;
 
                 localStorage.setItem('notes', JSON.stringify(newNotes));
             }
