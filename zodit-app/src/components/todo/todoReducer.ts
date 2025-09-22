@@ -24,7 +24,8 @@ export type TodoAction =
     | { type: 'BULK_DELETE_GROUPS' }
     // Toggle task completeness in bulk for active todo
     | { type: 'BULK_TOGGLE_TASKS'; payload: { completed: boolean } }
-    | { type: 'BULK_DELETE_TASKS'; payload: { filter?: (task: DisplayTask) => boolean; taskIds?: string[]; } };
+    | { type: 'BULK_DELETE_TASKS'; payload: { filter?: (task: DisplayTask) => boolean; taskIds?: string[]; } }
+    | { type: 'MERGE_TODOS_V2'; payload: { importedTodos: any[] } };
 
 
 export function todoReducer(state: State, action: TodoAction): State {
@@ -216,6 +217,48 @@ export function todoReducer(state: State, action: TodoAction): State {
                     }
                 }
             });
+        case 'MERGE_TODOS_V2': {
+            const { importedTodos } = action.payload;
+
+            // Since we only have 1 active todo, merge imported content into the current todo
+            if (state.todos.length === 0 || importedTodos.length === 0) {
+                return state;
+            }
+
+            const currentTodo = state.todos[0];
+            const importedTodo = importedTodos[0]; // Take the first imported todo
+
+            // Merge groups from imported todo into current todo
+            const existingGroupIds = new Set(currentTodo.groups?.map(g => g.id) || []);
+            const newGroups = importedTodo.groups?.filter((group: any) => !existingGroupIds.has(group.id)) || [];
+
+            // Merge tasks within existing groups
+            const mergedGroups = (currentTodo.groups || []).map(existingGroup => {
+                const matchingImportedGroup = importedTodo.groups?.find((imported: any) => imported.id === existingGroup.id);
+
+                if (matchingImportedGroup) {
+                    const existingTaskIds = new Set(existingGroup.tasks?.map(t => t.id) || []);
+                    const newTasks = matchingImportedGroup.tasks?.filter((task: any) => !existingTaskIds.has(task.id)) || [];
+
+                    return {
+                        ...existingGroup,
+                        tasks: [...(existingGroup.tasks || []), ...newTasks]
+                    };
+                }
+
+                return existingGroup;
+            });
+
+            const mergedTodo = {
+                ...currentTodo,
+                groups: [...mergedGroups, ...newGroups]
+            };
+
+            return {
+                ...state,
+                todos: [mergedTodo] // Keep only 1 todo
+            };
+        }
 
         default:
             return state;

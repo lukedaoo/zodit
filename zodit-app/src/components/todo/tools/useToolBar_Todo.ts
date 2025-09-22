@@ -19,6 +19,8 @@ interface UseTodoToolsOptions {
         toggleAllTasks: (shouldMarkIncomplete: boolean) => void;
 
         copyTodoFromYesterday: () => void;
+        exportData: () => void;
+        importData: () => void;
     };
 }
 
@@ -40,11 +42,12 @@ export const useTodoToolBar = ({
             component: TemplateTool,
             componentProps: {
                 todo: activeTodo,
-                onClose: () => { },
                 onCopyFromYesterday: actions.copyTodoFromYesterday,
                 onCreateJsonFile: (jsonContent: any, action: 'overwrite' | 'merge') => {
                     console.log(jsonContent, action);
-                }
+                },
+                onDownloadData: actions.exportData,
+                onUploadData: actions.importData
             }
         });
 

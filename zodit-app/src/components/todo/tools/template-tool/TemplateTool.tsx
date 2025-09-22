@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { TodoActionButton } from '../common/TodoActionButton';
-import { X, Copy, FileDown } from 'lucide-react';
+import { X, Copy, FileDown, Download, Upload } from 'lucide-react';
 import { TYPE_UTILS as tu, type Todo } from '../../types';
 import { JsonEditorDialog } from '@components/gadget/JsonEditorDialog';
 
@@ -9,6 +9,8 @@ interface TemplateToolProps {
     onClose: () => void;
     onCopyFromYesterday?: () => void;
     onCreateJsonFile?: (jsonContent: any, action: 'overwrite' | 'merge') => void;
+    onDownloadData?: () => void;
+    onUploadData?: () => void;
 }
 
 const TemplateToolHeader: React.FC<{ onClose: () => void }> = ({ onClose }) => (
@@ -31,6 +33,8 @@ export const TemplateTool: React.FC<TemplateToolProps> = ({
     onClose,
     onCopyFromYesterday,
     onCreateJsonFile,
+    onDownloadData,
+    onUploadData
 }) => {
     const [showJsonEditor, setShowJsonEditor] = useState(false);
 
@@ -108,6 +112,33 @@ export const TemplateTool: React.FC<TemplateToolProps> = ({
                             variant="default"
                         />
                         */}
+
+                        <TodoActionButton
+                            onClick={onDownloadData}
+                            disabled={false}
+                            icon={Download}
+                            title="Export data"
+                            subtitle={
+                                "Export your todo + notes as JSON. You can use this to import your todo into another todo app."
+                            }
+                            tooltip={
+                                "Export your todo + notes as JSON. You can use this to import your todo into another todo app."
+                            }
+                            variant="default"
+                        />
+                        <TodoActionButton
+                            onClick={onUploadData}
+                            disabled={false}
+                            icon={Upload}
+                            title="Import data"
+                            subtitle={
+                                "Import your todo + notes as JSON"
+                            }
+                            tooltip={
+                                "Import your todo + notes as JSON"
+                            }
+                            variant="default"
+                        />
                     </div>
                 </div>
             ) : null}
