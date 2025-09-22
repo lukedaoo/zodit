@@ -20,12 +20,12 @@ export const USER_THEME = {
 
 export const GROUP_COLLAPSE_THRESHOLD: ConstPref = {
     key: 'group_collapse_threshold',
-    defaultValue: 3
+    defaultValue: 10
 }
 
 export const TASK_COLLAPSE_THRESHOLD: ConstPref = {
     key: 'task_collapse_threshold',
-    defaultValue: 3
+    defaultValue: 10
 }
 
 export const DEBOUNCE_TIME: ConstPref = {

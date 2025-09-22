@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AddGroupButton } from './AddButtonComponents';
 import { DraggableGroupList } from './draggable/DraggableGroupList';
 import { TodoDragOverlay } from './draggable/TodoDragOverlay';
@@ -21,6 +21,16 @@ export interface TodoProps {
 
 const Todo: React.FC<TodoProps> = ({ onNavigateToNotes }) => {
     const [isCollapsed, setIsCollapsed] = useState<boolean | null>(null);
+    const [showFixedButton, setShowFixedButton] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            setShowFixedButton(window.scrollY > 200);
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     const todo = useTodo();
 
@@ -42,7 +52,8 @@ const Todo: React.FC<TodoProps> = ({ onNavigateToNotes }) => {
         bulkDeleteTasks: todo.bulkDeleteTasksWithFilter,
         bulkToggleTasks: todo.bulkToggleTasks,
         copyTodoAndLoad: todo.copyTodoAndLoad,
-        importTodoData: todo.importTodoData
+        importTodoData: todo.importTodoData,
+        bulkDeleteEmptyGroups: todo.bulkDeleteEmptyGroups
     });
     // //
     const toolboxTools = useTodoToolBar({
@@ -61,6 +72,9 @@ const Todo: React.FC<TodoProps> = ({ onNavigateToNotes }) => {
         if (!todo.isInitialized || todo.isLoading) return;
         if (todo.todo) {
             todo.addGroup();
+            setTimeout(() => {
+                window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+            }, 100);
         }
     };
 
@@ -74,6 +88,13 @@ const Todo: React.FC<TodoProps> = ({ onNavigateToNotes }) => {
                     onToolAction={handleToolAction}
                 />
             )}
+
+            {showFixedButton && (
+                <div className="fixed left-4 top-1/2 transform -translate-y-1/2 z-50">
+                    <AddGroupButton onClick={handleAddGroup} />
+                </div>
+            )}
+
             <div className="space-y-6">
                 <div className="max-w-3xl mx-auto space-y-20">
 

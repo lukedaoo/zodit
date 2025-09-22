@@ -15,12 +15,14 @@ interface UseTodoToolsOptions {
         collapseAll: () => void;
         expandAll: () => void;
         deleteAll: () => void;
+        deleteEmptyGroups: () => void;
         deleteEmptyTasks: () => void;
         toggleAllTasks: (shouldMarkIncomplete: boolean) => void;
 
         copyTodoFromYesterday: () => void;
         exportData: () => void;
         importData: () => void;
+
     };
 }
 
@@ -64,6 +66,7 @@ export const useTodoToolBar = ({
                     onCollapseAllGroups: actions.collapseAll,
                     onExpandAllGroups: actions.expandAll,
                     onDeleteAllGroups: actions.deleteAll,
+                    onDeleteEmptyGroups: actions.deleteEmptyGroups,
                     onRemoveEmptyTasks: actions.deleteEmptyTasks,
                     onToggleAllTasks: actions.toggleAllTasks
                 }

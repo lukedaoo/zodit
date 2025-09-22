@@ -172,7 +172,7 @@ export const useTodo = () => {
     const bulkUpdateGroupCollapse = (collapsed: boolean) => dispatch({ type: 'BULK_UPDATE_GROUP_COLLAPSE', payload: { collapsed } });
     const deleteGroup = (id: string) => dispatch({ type: 'DELETE_GROUP', payload: { id } });
     const bulkDeleteGroups = () => dispatch({ type: 'BULK_DELETE_GROUPS' });
-
+    const bulkDeleteEmptyGroups = () => dispatch({ type: 'BULK_DELETE_EMPTY_GROUPS' });
     // === Tasks ===
     const addTask = (groupId: string) =>
         dispatch({ type: 'ADD_TASK', payload: { groupId, generateId, now: convert(new Date()) } });
@@ -237,6 +237,7 @@ export const useTodo = () => {
         bulkUpdateGroupCollapse,
         deleteGroup,
         bulkDeleteGroups,
+        bulkDeleteEmptyGroups,
         addTask,
         updateTask,
         deleteTask,

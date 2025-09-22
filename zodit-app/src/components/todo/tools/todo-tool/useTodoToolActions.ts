@@ -12,6 +12,7 @@ interface TodoToolActionsOptions {
     bulkDeleteGroups: () => void;
     bulkDeleteTasks: (task: any) => void;
     bulkToggleTasks: (complete: boolean) => void;
+    bulkDeleteEmptyGroups: () => void;
 
     copyTodoAndLoad: (date: string) => void;
     importTodoData: (data: any, mergeMode?: boolean) => void;
@@ -34,6 +35,7 @@ export const useTodoToolActions = ({
     setIsCollapsed,
     bulkUpdateGroupCollapse,
     bulkDeleteGroups,
+    bulkDeleteEmptyGroups,
     bulkDeleteTasks,
     bulkToggleTasks,
     copyTodoAndLoad,
@@ -173,10 +175,15 @@ export const useTodoToolActions = ({
         copyTodoAndLoad(yesterday);
     }, [copyTodoAndLoad]);
 
+    const deleteEmptyGroups = useCallback(() => {
+        bulkDeleteEmptyGroups();
+    }, [bulkDeleteEmptyGroups]);
+
     return {
         collapseAll, expandAll, deleteAll,
         toggleAllTasks, deleteEmptyTasks, copyTodoFromYesterday,
 
-        exportData, importData
+        exportData, importData,
+        deleteEmptyGroups
     };
 };

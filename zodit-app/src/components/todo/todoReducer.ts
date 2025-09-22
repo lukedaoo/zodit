@@ -22,6 +22,7 @@ export type TodoAction =
 
     | { type: 'BULK_UPDATE_GROUP_COLLAPSE'; payload: { collapsed: boolean } }
     | { type: 'BULK_DELETE_GROUPS' }
+    | { type: 'BULK_DELETE_EMPTY_GROUPS' }
     // Toggle task completeness in bulk for active todo
     | { type: 'BULK_TOGGLE_TASKS'; payload: { completed: boolean } }
     | { type: 'BULK_DELETE_TASKS'; payload: { filter?: (task: DisplayTask) => boolean; taskIds?: string[]; } }
@@ -87,6 +88,14 @@ export function todoReducer(state: State, action: TodoAction): State {
             return todoReducer(state, {
                 type: 'SYNC_GROUPS',
                 payload: { update: () => [] }
+            });
+
+        case 'BULK_DELETE_EMPTY_GROUPS':
+            return todoReducer(state, {
+                type: 'SYNC_GROUPS',
+                payload: {
+                    update: g => g.filter(gr => gr.tasks.length > 0)
+                }
             });
 
         case 'ADD_TASK':
