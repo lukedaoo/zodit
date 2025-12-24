@@ -40,7 +40,7 @@ export const useTodoToolActions = ({
     bulkToggleTasks,
     copyTodoAndLoad,
 
-    importTodoData
+    importTodoData,
 }: TodoToolActionsOptions) => {
 
     const exportData = useCallback(() => {
@@ -148,6 +148,16 @@ export const useTodoToolActions = ({
         }
     }, [importTodoData]);
 
+    const updateData = useCallback(async (jsonContent: any) => {
+        try {
+            const data = { todos: [jsonContent] };
+            handleImportData(data, false);
+        } catch (error) {
+            console.error('Update failed:', error);
+            throw new Error(error instanceof Error ? error.message : 'Failed to update data');
+        }
+    }, [importTodoData]);
+
     const collapseAll = useCallback(() => {
         bulkUpdateGroupCollapse(true);
         setIsCollapsed(true);
@@ -183,7 +193,7 @@ export const useTodoToolActions = ({
         collapseAll, expandAll, deleteAll,
         toggleAllTasks, deleteEmptyTasks, copyTodoFromYesterday,
 
-        exportData, importData,
+        exportData, importData, updateData,
         deleteEmptyGroups
     };
 };

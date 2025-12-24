@@ -219,7 +219,6 @@ export const useTodo = () => {
         }
     }, []);
 
-
     return {
         todos: state.todos,
         activeTodoId: state.activeTodoId,

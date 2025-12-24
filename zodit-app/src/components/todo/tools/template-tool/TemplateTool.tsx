@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { TodoActionButton } from '../common/TodoActionButton';
-import { X, Copy, FileDown, Download, Upload } from 'lucide-react';
+import { X, FileDown, Download, Upload } from 'lucide-react';
 import { TYPE_UTILS as tu, type Todo } from '../../types';
 import { JsonEditorDialog } from '@components/gadget/JsonEditorDialog';
 
 interface TemplateToolProps {
     todo?: Todo | undefined;
     onClose: () => void;
-    onCopyFromYesterday?: () => void;
-    onCreateJsonFile?: (jsonContent: any, action: 'overwrite' | 'merge') => void;
+    // onCopyFromYesterday?: () => void;
+    // onCreateJsonFile?: (jsonContent: any, action: 'overwrite' | 'merge') => void;
+    onCreateJsonFile?: (jsonContent: any) => void;
     onDownloadData?: () => void;
     onUploadData?: () => void;
 }
@@ -31,26 +32,26 @@ const TemplateToolHeader: React.FC<{ onClose: () => void }> = ({ onClose }) => (
 export const TemplateTool: React.FC<TemplateToolProps> = ({
     todo,
     onClose,
-    onCopyFromYesterday,
+    // onCopyFromYesterday,
     onCreateJsonFile,
     onDownloadData,
     onUploadData
 }) => {
     const [showJsonEditor, setShowJsonEditor] = useState(false);
 
-    const handleCopyFromYesterday = () => {
-        if (onCopyFromYesterday) {
-            onCopyFromYesterday();
-        }
-    };
+    // const handleCopyFromYesterday = () => {
+    //     if (onCopyFromYesterday) {
+    //         onCopyFromYesterday();
+    //     }
+    // };
 
     const handleCreateJsonFile = () => {
         setShowJsonEditor(true);
     };
 
-    const handleJsonConfirm = (jsonContent: any, action: 'overwrite' | 'merge') => {
+    const handleJsonConfirm = (jsonContent: any) => {
         if (onCreateJsonFile) {
-            onCreateJsonFile(jsonContent, action);
+            onCreateJsonFile(jsonContent);
         }
         setShowJsonEditor(false);
         onClose();
@@ -80,7 +81,7 @@ export const TemplateTool: React.FC<TemplateToolProps> = ({
         return false;
     };
 
-    const hasYesterdayTodos = true;
+    // const hasYesterdayTodos = true;
 
     return (
         <div className="p-4 min-w-80 max-w-96">
@@ -88,6 +89,7 @@ export const TemplateTool: React.FC<TemplateToolProps> = ({
             {!showJsonEditor ? (
                 <div className="space-y-3">
                     <div className="space-y-2">
+                        {/*
                         <TodoActionButton
                             onClick={handleCopyFromYesterday}
                             disabled={!hasYesterdayTodos}
@@ -103,6 +105,7 @@ export const TemplateTool: React.FC<TemplateToolProps> = ({
                             }
                             variant="default"
                         />
+                        */}
 
                         <TodoActionButton
                             onClick={handleCreateJsonFile}
@@ -165,15 +168,15 @@ export const TemplateTool: React.FC<TemplateToolProps> = ({
                     buttonSize="lg"
                     actions={[
                         {
-                            label: "Merge",
+                            label: "Save",
                             variant: "primary",
-                            onClick: (data) => handleJsonConfirm(data, 'merge')
+                            onClick: (data) => handleJsonConfirm(data)
                         },
-                        {
-                            label: "Overwrite",
-                            variant: "danger",
-                            onClick: (data) => handleJsonConfirm(data, 'overwrite')
-                        }
+                        // {
+                        //     label: "Overwrite",
+                        //     variant: "danger",
+                        //     onClick: (data) => handleJsonConfirm(data, 'overwrite')
+                        // }
                     ]}
                     onCancel={handleJsonCancel}
                 />
